@@ -4,7 +4,7 @@ Donate link: http://aquoid.com/news/plugins/photonic/
 Tags: gallery, flickr, picasa, fancybox, colorbox, slideshow, jquery, shortcode
 Requires at least: WP 3.1
 Tested up to: WP 3.2.1
-Stable tag: 1.00
+Stable tag: 1.01
 
 A plugin that enhances the capabilities of the native gallery shortcode in WordPress by letting you show Flickr and Picasa photos.
 
@@ -17,11 +17,8 @@ several new parameters to enhance your galleries.
 Your existing gallery insertions are left intact. However you can add a <code>style</code> parameter to it for special effects. The permitted values for <code>style</code> are:
 
 1. <code>strip-below</code>: Displays a thumbnail strip with a running slideshow above.
-
 2. <code>strip-above</code>: Displays a thumbnail strip with a running slideshow below.
-
 3. <code>no-strip</code>: Displays running slideshow with no thumbnails.
-
 4. <code>launch</code>: Doesn't display a running slideshow, but shows all thumbnails. On clicking a thumbnail a popup slideshow is shown.
 
 You can also specify a parameter called <code>fx</code> to add special effects. This parameter can take any of these values: <code>fade</code>
@@ -36,11 +33,22 @@ the thumbnails.
 
 = Flickr Support =
 
-For demos of Flickr support visit the <a href='http://aquoid.com/news/plugins/photonic/'>plugin page</a>.
+The following Flickr concepts are supported in Photonic:
+
+*	<a href='http://aquoid.com/news/plugins/photonic/flickr/flickr-photos/'>Photos</a>
+*	<a href='http://aquoid.com/news/plugins/photonic/flickr/flickr-photosets/'>PhotoSets</a>
+*	<a href='http://aquoid.com/news/plugins/photonic/flickr/flickr-collections/'>Collections</a>
+
+For demos of Flickr support visit the <a href='http://aquoid.com/news/plugins/photonic/flickr/'>Flickr page</a>.
 
 = Picasa Support =
 
-For demos of Picasa support visit the <a href='http://aquoid.com/news/plugins/photonic/'>plugin page</a>.
+The following Picasa concepts are supported in Photonic:
+
+*	<a href='http://aquoid.com/news/plugins/photonic/picasa/picasa-photos/'>Photos</a>
+*	<a href='http://aquoid.com/news/plugins/photonic/picasa/picasa-albums/'>Albums</a>
+
+For demos of Picasa support visit the <a href='http://aquoid.com/news/plugins/photonic/picasa/'>Picasa page</a>.
 
 == Installation ==
 
@@ -90,8 +98,14 @@ Not at this point. Though this is planned, it is low priority at the moment.
 
 == Changelog ==
 
+= 1.01 =
+
+*	Included a PO file for translation support
+*	Fixed a bug to prevent appearance of Photonic stylesheets on other admin pages.
+
 = 1.00 =
-New version created
+
+*	New version created
 
 == Upgrade Notice ==
 
