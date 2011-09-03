@@ -1,5 +1,10 @@
-Version 1.0 - 02nd Sep 2011
-===========================
+Version 1.01 - 03rd Sep 2011
+============================
+1. Added translation file, photonic.po
+2. Fixed a bug to prevent Photonic stylesheets being loaded on all admin pages.
+
+Version 1.00 - 02nd Sep 2011
+============================
 1. Native gallery extension
 	a. Slideshow - consider Gallerific instead of JQuery Cycle
 	b. Library plugin - i.e. whichever library is used for the rest of the stuff, like Fancybox etc.

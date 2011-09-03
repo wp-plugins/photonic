@@ -3,7 +3,7 @@
  * Plugin Name: Photonic
  * Plugin URI: http://aquoid.com/news/plugins/photonic/
  * Description: Extends the native gallery shortcode to support Flickr and Picasa. JS libraries like Fancybox and Colorbox are supported. The plugin also helps convert a regular WP gallery into a slideshow.
- * Version: 1.00
+ * Version: 1.01
  * Author: Sayontan Sinha
  * Author URI: http://mynethome.net/blog
  * License: GNU General Public License (GPL), v2 (or newer)
@@ -16,7 +16,7 @@
  */
 
 class Photonic {
-	var $version, $registered_extensions, $defaults, $plugin_name;
+	var $version, $registered_extensions, $defaults, $plugin_name, $options_page_name;
 	function Photonic() {
 		global $photonic_options, $photonic_setup_options, $photonic_is_ie6;
 		require_once(plugin_dir_path(__FILE__)."/options/photonic-options.php");
@@ -55,9 +55,6 @@ class Photonic {
 		add_action('wp_enqueue_scripts', array(&$this, 'add_scripts'), 20);
 		add_action('wp_head', array(&$this, 'print_scripts'), 20);
 
-//		add_action('wp_ajax_photonic_flickr_display_set', array(&$this, 'flickr_display_set'));
-//		add_action('wp_ajax_nopriv_photonic_flickr_display_set', array(&$this, 'flickr_display_set'));
-
 		add_action('wp_ajax_photonic_picasa_display_album', array(&$this, 'picasa_display_album'));
 		add_action('wp_ajax_nopriv_photonic_picasa_display_album', array(&$this, 'picasa_display_album'));
 
@@ -66,6 +63,9 @@ class Photonic {
 
 		//WP provides a global $is_IE, but we specifically need to find IE6x (or, heaven forbid, IE5x). Note that older versions of Opera used to identify themselves as IE6, so we exclude Opera.
 		$photonic_is_ie6 = preg_match('/\bmsie [56]/i', $_SERVER['HTTP_USER_AGENT']) && !preg_match('/\bopera/i', $_SERVER['HTTP_USER_AGENT']);
+
+		$locale = get_locale();
+		load_textdomain('photonic', locate_template(array("languages/{$locale}.mo", "{$locale}.mo")));
 	}
 
 	/**
@@ -75,33 +75,36 @@ class Photonic {
 	 */
 	function add_admin_menu() {
 		global $photonic_options_manager;
-		add_options_page('Photonic', 'Photonic', 'edit_theme_options', 'photonic-options-manager', array(&$photonic_options_manager, 'render_options_page'));
+		$this->options_page_name = add_options_page('Photonic', 'Photonic', 'edit_theme_options', 'photonic-options-manager', array(&$photonic_options_manager, 'render_options_page'));
 		$this->set_version();
 	}
 
 	/**
 	 * Adds all scripts and their dependencies to the <head> of the Photonic administration page. This takes care to not add scripts on other admin pages.
 	 *
+	 * @param $hook
 	 * @return void
 	 */
-	function add_admin_scripts() {
-		wp_enqueue_script('jquery');
-		wp_enqueue_script('jquery-ui-draggable');
-		wp_enqueue_script('jquery-ui-tabs');
+	function add_admin_scripts($hook) {
+		if ($this->options_page_name == $hook) {
+			wp_enqueue_script('jquery');
+			wp_enqueue_script('jquery-ui-draggable');
+			wp_enqueue_script('jquery-ui-tabs');
 
-		wp_enqueue_script('photonic-jquery-ui-custom', plugins_url('include/scripts/jquery-ui/jquery-ui-1.8.12.custom.js', __FILE__), array('jquery-ui-core', 'jquery-ui-widget', 'jquery-ui-mouse', 'jquery-ui-position'));
-		wp_enqueue_script('photonic-jscolor', plugins_url('include/scripts/jscolor/jscolor.js', __FILE__));
+			wp_enqueue_script('photonic-jquery-ui-custom', plugins_url('include/scripts/jquery-ui/jquery-ui-1.8.12.custom.js', __FILE__), array('jquery-ui-core', 'jquery-ui-widget', 'jquery-ui-mouse', 'jquery-ui-position'));
+			wp_enqueue_script('photonic-jscolor', plugins_url('include/scripts/jscolor/jscolor.js', __FILE__));
 
-		wp_enqueue_script('photonic-admin-js', plugins_url('include/scripts/admin.js', __FILE__), array('jquery'), $this->version);
+			wp_enqueue_script('photonic-admin-js', plugins_url('include/scripts/admin.js', __FILE__), array('jquery'), $this->version);
 
-		wp_enqueue_style('photonic-admin-jq', plugins_url('include/scripts/jquery-ui/css/jquery-ui-1.7.3.custom.css', __FILE__), array(), $this->version);
-		wp_enqueue_style('photonic-admin-css', plugins_url('include/css/admin.css', __FILE__), array('photonic-admin-jq'), $this->version);
+			wp_enqueue_style('photonic-admin-jq', plugins_url('include/scripts/jquery-ui/css/jquery-ui-1.7.3.custom.css', __FILE__), array(), $this->version);
+			wp_enqueue_style('photonic-admin-css', plugins_url('include/css/admin.css', __FILE__), array('photonic-admin-jq'), $this->version);
 
-		global $photonic_options;
-		$js_array = array(
-			'category' => isset($photonic_options) && isset($photonic_options['last-set-section']) ? $photonic_options['last-set-section'] : 'generic-settings',
-		);
-		wp_localize_script('photonic-admin-js', 'Photonic_Admin_JS', $js_array);
+			global $photonic_options;
+			$js_array = array(
+				'category' => isset($photonic_options) && isset($photonic_options['last-set-section']) ? $photonic_options['last-set-section'] : 'generic-settings',
+			);
+			wp_localize_script('photonic-admin-js', 'Photonic_Admin_JS', $js_array);
+		}
 	}
 
 	/**
