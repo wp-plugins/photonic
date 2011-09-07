@@ -1,35 +1,17 @@
-=== Photonic ===
+=== Photonic Flickr+Picasa Gallery ===
 Contributors: sayontan
 Donate link: http://aquoid.com/news/plugins/photonic/
 Tags: gallery, flickr, picasa, fancybox, colorbox, slideshow, jquery, shortcode
 Requires at least: WP 3.1
 Tested up to: WP 3.2.1
-Stable tag: 1.01
+Stable tag: 1.02
 
 A plugin that enhances the capabilities of the native gallery shortcode in WordPress by letting you show Flickr and Picasa photos.
 
 == Description ==
 
 Photonic lets you use the WordPress <code>gallery</code> shortcode and ramps it up with a lot of added functionality. It adds support for
-several new parameters to enhance your galleries.
-
-= Enhanced Native Galleries =
-Your existing gallery insertions are left intact. However you can add a <code>style</code> parameter to it for special effects. The permitted values for <code>style</code> are:
-
-1. <code>strip-below</code>: Displays a thumbnail strip with a running slideshow above.
-2. <code>strip-above</code>: Displays a thumbnail strip with a running slideshow below.
-3. <code>no-strip</code>: Displays running slideshow with no thumbnails.
-4. <code>launch</code>: Doesn't display a running slideshow, but shows all thumbnails. On clicking a thumbnail a popup slideshow is shown.
-
-You can also specify a parameter called <code>fx</code> to add special effects. This parameter can take any of these values: <code>fade</code>
-, <code>scrollUp</code>, <code>scrollDown</code>, <code>scrollLeft</code>, <code>scrollRight</code>, <code>scrollHorz</code>, <code>scrollVert</code>
-, <code>slideX</code>, <code>slideY</code>, <code>turnUp</code>, <code>turnDown</code>, <code>turnLeft</code>, <code>turnRight</code>, <code>zoom</code>
-, <code>fadeZoom</code>, <code>blindX</code>, <code>blindY</code>, <code>blindZ</code>, <code>growX</code>, <code>growY</code>, <code>curtainX</code>
-, <code>curtainY</code>, <code>uncover</code>, <code>wipe</code>. See the <a href='http://jquery.malsup.com/cycle/'>JQuery Cycle site</a>
-for demos of the effects.
-
-Parameters such as <code>speed</code> can control the slide transition speed, and <code>thumbnail_size</code> can control the size of
-the thumbnails.
+several new parameters to enhance your galleries. It supports Flickr photos, Photosets and Collections, along with Picasa photos and albums.
 
 = Flickr Support =
 
@@ -50,6 +32,24 @@ The following Picasa concepts are supported in Photonic:
 
 For demos of Picasa support visit the <a href='http://aquoid.com/news/plugins/photonic/picasa/'>Picasa page</a>.
 
+= Enhanced Native Galleries =
+Your existing gallery insertions are left intact. However you can add a <code>style</code> parameter to it for special effects. The permitted values for <code>style</code> are:
+
+1. <code>strip-below</code>: Displays a thumbnail strip with a running slideshow above.
+2. <code>strip-above</code>: Displays a thumbnail strip with a running slideshow below.
+3. <code>no-strip</code>: Displays running slideshow with no thumbnails.
+4. <code>launch</code>: Doesn't display a running slideshow, but shows all thumbnails. On clicking a thumbnail a popup slideshow is shown.
+
+You can also specify a parameter called <code>fx</code> to add special effects. This parameter can take any of these values: <code>fade</code>
+, <code>scrollUp</code>, <code>scrollDown</code>, <code>scrollLeft</code>, <code>scrollRight</code>, <code>scrollHorz</code>, <code>scrollVert</code>
+, <code>slideX</code>, <code>slideY</code>, <code>turnUp</code>, <code>turnDown</code>, <code>turnLeft</code>, <code>turnRight</code>, <code>zoom</code>
+, <code>fadeZoom</code>, <code>blindX</code>, <code>blindY</code>, <code>blindZ</code>, <code>growX</code>, <code>growY</code>, <code>curtainX</code>
+, <code>curtainY</code>, <code>uncover</code>, <code>wipe</code>. See the <a href='http://jquery.malsup.com/cycle/'>JQuery Cycle site</a>
+for demos of the effects.
+
+Parameters such as <code>speed</code> can control the slide transition speed, and <code>thumbnail_size</code> can control the size of
+the thumbnails.
+
 == Installation ==
 
 You can install the plugin through the WordPress installer under <strong>Plugins &rarr; Add New</strong> by searching for it,
@@ -59,6 +59,10 @@ contents to the <code>wp-content/plugins</code> folder of your WordPress install
 == Screenshots ==
 
 For the plugin in action see the <a href='http://aquoid.com/news/plugins/photonic/'>plugin page</a>.
+
+1.	To insert the shortcode for Photonic through the "Add Media" options click on "Add an Image".
+2.	You will see a new tab for "Photonic".
+3.	Clicking on the "Photonic" tab will show you three new tabs, one for native WP Galleries, one for Flickr and one for Picasa. Fill out what you need and click "Insert into post"
 
 == Frequently Asked Questions ==
 
@@ -98,14 +102,20 @@ Not at this point. Though this is planned, it is low priority at the moment.
 
 == Changelog ==
 
+= 1.02 =
+
+*	Added a UI panel for insertion of Photonic galleries through the Add Media screen.
+*	Restructured code for better extensibility.
+*	Updated translation file.
+
 = 1.01 =
 
-*	Included a PO file for translation support
+*	Included a PO file for translation support.
 *	Fixed a bug to prevent appearance of Photonic stylesheets on other admin pages.
 
 = 1.00 =
 
-*	New version created
+*	New version created.
 
 == Upgrade Notice ==
 
