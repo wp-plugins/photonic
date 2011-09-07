@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: Photonic
+ * Plugin Name: Photonic Flickr+Picasa Gallery
  * Plugin URI: http://aquoid.com/news/plugins/photonic/
  * Description: Extends the native gallery shortcode to support Flickr and Picasa. JS libraries like Fancybox and Colorbox are supported. The plugin also helps convert a regular WP gallery into a slideshow.
- * Version: 1.01
+ * Version: 1.02
  * Author: Sayontan Sinha
  * Author URI: http://mynethome.net/blog
  * License: GNU General Public License (GPL), v2 (or newer)
@@ -58,6 +58,9 @@ class Photonic {
 		add_action('wp_ajax_photonic_picasa_display_album', array(&$this, 'picasa_display_album'));
 		add_action('wp_ajax_nopriv_photonic_picasa_display_album', array(&$this, 'picasa_display_album'));
 
+		add_filter('media_upload_tabs', array(&$this, 'media_upload_tabs'));
+		add_action('media_upload_photonic', array(&$this, 'media_upload_photonic'));
+
 		$this->registered_extensions = array();
 		$this->add_extensions();
 
@@ -104,6 +107,10 @@ class Photonic {
 				'category' => isset($photonic_options) && isset($photonic_options['last-set-section']) ? $photonic_options['last-set-section'] : 'generic-settings',
 			);
 			wp_localize_script('photonic-admin-js', 'Photonic_Admin_JS', $js_array);
+		}
+		else if ('media-upload-popup' == $hook) {
+			wp_enqueue_script('jquery');
+			wp_enqueue_style('photonic-upload', plugins_url('include/css/admin-form.css', __FILE__), array(), $this->version);
 		}
 	}
 
@@ -257,6 +264,8 @@ class Photonic {
 	function add_extensions() {
 		require_once(plugin_dir_path(__FILE__)."/extensions/Photonic_Processor.php");
 		$this->register_extension('Photonic_Flickr_Processor', plugin_dir_path(__FILE__)."/extensions/Photonic_Flickr_Processor.php");
+		$this->register_extension('Photonic_Picasa_Processor', plugin_dir_path(__FILE__)."/extensions/Photonic_Picasa_Processor.php");
+		$this->register_extension('Photonic_Native_Processor', plugin_dir_path(__FILE__)."/extensions/Photonic_Native_Processor.php");
 	}
 
 	public function register_extension($extension, $path) {
@@ -278,7 +287,7 @@ class Photonic {
 	 * @return string
 	 */
 	function modify_gallery($content, $attr = array()) {
-		global $post;
+		global $post, $photonic_flickr_gallery, $photonic_picasa_gallery, $photonic_native_gallery;
 		if ($attr == null) {
 			$attr = array();
 		}
@@ -294,14 +303,23 @@ class Photonic {
 
 		switch ($type) {
 			case 'flickr':
-				$images = $this->get_flickr_gallery_images($attr);
+				if (!isset($photonic_flickr_gallery)) {
+					$photonic_flickr_gallery = new Photonic_Flickr_Processor();
+				}
+				$images = $photonic_flickr_gallery->get_gallery_images($attr);
 				break;
 			case 'picasa':
-				$images = $this->get_picasa_gallery_images($attr);
+				if (!isset($photonic_picasa_gallery)) {
+					$photonic_picasa_gallery = new Photonic_Picasa_Processor();
+				}
+				$images = $photonic_picasa_gallery->get_gallery_images($attr);
 				break;
 			case 'default':
 			default:
-				$images = $this->get_gallery_images($attr);
+				if (!isset($photonic_native_gallery)) {
+					$photonic_native_gallery = new Photonic_Native_Processor();
+				}
+				$images = $photonic_native_gallery->get_gallery_images($attr);
 				break;
 		}
 
@@ -316,60 +334,6 @@ class Photonic {
 		}
 
 		return $content;
-	}
-
-	/**
-	 * Gets all images associated with the gallery. This method is lifted almost verbatim from the gallery short-code function provided by WP.
-	 * We will take the gallery images and do some fun stuff with styling them in other methods. We cannot use the WP function because
-	 * this code is nested within the gallery_shortcode function and we want to tweak that (there is no hook that executes after
-	 * the gallery has been retrieved.
-	 *
-	 * @param  $attr
-	 * @return array|bool
-	 */
-	function get_gallery_images($attr) {
-		global $post;
-		// We're trusting author input, so let's at least make sure it looks like a valid orderby statement
-		if (isset($attr['orderby'])) {
-			$attr['orderby'] = sanitize_sql_orderby($attr['orderby']);
-			if (!$attr['orderby'])
-				unset($attr['orderby']);
-		}
-
-		extract(shortcode_atts(array(
-			'order' => 'ASC',
-			'orderby' => 'menu_order ID',
-			'id' => $post->ID,
-			'itemtag' => 'dl',
-			'icontag' => 'dt',
-			'captiontag' => 'dd',
-			'columns' => 3,
-			'size' => 'thumbnail',
-			'include' => '',
-			'exclude' => ''
-		), $attr));
-
-		$id = intval($id);
-		if ('RAND' == $order)
-			$orderby = 'none';
-
-		if (!empty($include)) {
-			$include = preg_replace('/[^0-9,]+/', '', $include);
-			$_attachments = get_posts(array('include' => $include, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $order, 'orderby' => $orderby));
-
-			$attachments = array();
-			foreach ($_attachments as $key => $val) {
-				$attachments[$val->ID] = $_attachments[$key];
-			}
-		}
-		elseif (!empty($exclude)) {
-			$exclude = preg_replace('/[^0-9,]+/', '', $exclude);
-			$attachments = get_children(array('post_parent' => $id, 'exclude' => $exclude, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $order, 'orderby' => $orderby));
-		}
-		else {
-			$attachments = get_children(array('post_parent' => $id, 'post_status' => 'inherit', 'post_type' => 'attachment', 'post_mime_type' => 'image', 'order' => $order, 'orderby' => $orderby));
-		}
-		return $attachments;
 	}
 
 	/**
@@ -408,13 +372,13 @@ class Photonic {
 
 		extract($attr);
 
-		if (!isset($thumb_width) || (isset($thumb_width) && !$this->check_integer($thumb_width))) {
+		if (!isset($thumb_width) || (isset($thumb_width) && !Photonic::check_integer($thumb_width))) {
 			$thumb_width = 75;
 		}
-		if (!isset($thumb_height) || (isset($thumb_height) && !$this->check_integer($thumb_height))) {
+		if (!isset($thumb_height) || (isset($thumb_height) && !Photonic::check_integer($thumb_height))) {
 			$thumb_height = 75;
 		}
-		if (!isset($columns) || (isset($columns) && !$this->check_integer($columns))) {
+		if (!isset($columns) || (isset($columns) && !Photonic::check_integer($columns))) {
 			$columns = 3;
 		}
 
@@ -525,611 +489,24 @@ class Photonic {
 	}
 
 	/**
-	 * A very flexible function to display a user's photos from Flickr. This makes use of the Flickr API, hence it requires the user's API key.
-	 * The API key is defined in the options. The function makes use of three different APIs:
-	 *  1. <a href='http://www.flickr.com/services/api/flickr.photos.search.html'>flickr.photos.search</a> - for retrieving photos based on search critiera
-	 *  2. <a href='http://www.flickr.com/services/api/flickr.photosets.getPhotos.html'>flickr.photosets.getPhotos</a> - for retrieving photo sets
-	 *  3. <a href='http://www.flickr.com/services/api/flickr.galleries.getPhotos.html'>flickr.galleries.getPhotos</a> - for retrieving galleries
-	 *
-	 * The following short-code parameters are supported:
-	 * All
-	 * - per_page: number of photos to display
-	 * - view: photos | collections | galleries | photosets, displays hierarchically if user_id is passed
-	 * Photosets
-	 * - photoset_id
-	 * Galleries
-	 * - gallery_id
-	 * Photos
-	 * - user_id: can be obtained from http://idgettr.com
-	 * - tags: comma-separated list of tags
-	 * - tag_mode: any | all, tells whether any tag should be used or all
-	 * - text: string for text search
-	 * - sort: date-posted-desc | date-posted-asc | date-taken-asc | date-taken-desc | interestingness-desc | interestingness-asc | relevance
-	 * - group_id: group id for which photos will be displayed
-	 *
-	 * @param  $attr
-	 * @return string|void
-	 * @since 3.7.9
-	 */
-	function get_flickr_gallery_images($attr) {
-		global $photonic_flickr_api_key, $photonic_flickr_position;
-
-		$attr = array_merge(array(
-			'style' => 'default',
-	//		'view' => 'photos'  // photos | collections | galleries | photosets: if only a user id is passed, what should be displayed?
-			// Defaults from WP ...
-			'columns'    => 'auto',
-			'size'       => 's',
-		), $attr);
-		extract($attr);
-
-		if (!isset($photonic_flickr_api_key) || trim($photonic_flickr_api_key) == '') {
-			return __("Flickr API Key not defined", 'photonic');
-		}
-
-		$format = 'format=json&';
-		$json_api = 'jsoncallback=photonicJsonFlickrStreamApi&';
-
-		$query_urls = array();
-		$query = '&api_key='.$photonic_flickr_api_key;
-
-		$ret = "";
-		if (isset($view) && isset($user_id)) {
-			switch ($view) {
-				case 'collections':
-					$collections = $this->get_collection_list($user_id);
-					foreach ($collections as $collection) {
-						$query_urls[] = 'http://api.flickr.com/services/rest/?'.$format.$json_api.'method=flickr.collections.getTree&collection_id='.$collection['id'];
-						$nested = array();
-						foreach ($collection['sets'] as $set) {
-							$nested[] = 'http://api.flickr.com/services/rest/?'.$format.$json_api.'method=flickr.photosets.getInfo&photoset_id='.$set['id'];
-						}
-						$query_urls[] = $nested;
-					}
-					break;
-
-				case 'galleries':
-					$query_urls[] = 'http://api.flickr.com/services/rest/?'.$format.$json_api.'method=flickr.galleries.getList';
-					break;
-
-				case 'photosets':
-					$query_urls[] = 'http://api.flickr.com/services/rest/?'.$format.$json_api.'method=flickr.photosets.getList';
-					break;
-
-				case 'photos':
-				default:
-					$query_urls[] = 'http://api.flickr.com/services/rest/?'.$format.$json_api.'method=flickr.photos.search';
-					break;
-			}
-		}
-		else {
-			// Collection > galleries > photosets
-			if (isset($collection_id)) {
-				$collections = $this->get_collection_list($user_id, $collection_id);
-				foreach ($collections as $collection) {
-					$query_urls[] = 'http://api.flickr.com/services/rest/?'.$format.$json_api.'method=flickr.collections.getTree&collection_id='.$collection['id'];
-					$nested = array();
-					foreach ($collection['sets'] as $set) {
-						$nested[] = 'http://api.flickr.com/services/rest/?'.$format.$json_api.'method=flickr.photosets.getInfo&photoset_id='.$set['id'];
-					}
-					$query_urls[] = $nested;
-				}
-			}
-			else if (isset($gallery_id)) {
-				$query_urls[] = 'http://api.flickr.com/services/rest/?'.$format.$json_api.'method=flickr.galleries.getPhotos';
-			}
-			else if (isset($photoset_id)) {
-				$query_urls[] = 'http://api.flickr.com/services/rest/?'.$format.'jsoncallback=photonicJsonFlickrHeaderApi&'.'method=flickr.photosets.getInfo';
-				$query_urls[] = 'http://api.flickr.com/services/rest/?'.$format.$json_api.'method=flickr.photosets.getPhotos';
-			}
-		}
-
-		if (isset($user_id)) {
-			$query .= '&user_id='.$user_id;
-		}
-
-		if (isset($collection_id)) {
-			$query .= '&collection_id='.$collection_id;
-		}
-		else if (isset($gallery_id)) {
-			$query .= '&gallery_id='.$gallery_id;
-		}
-		else if (isset($photoset_id)) {
-			$query .= '&photoset_id='.$photoset_id;
-		}
-
-		if (isset($tags)) {
-			$query .= '&tags='.$tags;
-		}
-
-		if (isset($tag_mode)) {
-			$query .= '&tag_mode='.$tag_mode;
-		}
-
-		if (isset($text)) {
-			$query .= '&text='.$text;
-		}
-
-		if (isset($sort)) {
-			$query .= '&sort='.$sort;
-		}
-
-		if (isset($group_id)) {
-			$query .= '&group_id='.$group_id;
-		}
-
-		if (isset($per_page)) {
-			$query .= '&per_page='.$per_page;
-		}
-
-		// Allow users to define additional query parameters
-		//$query_url = apply_filters('photonic_flickr_query_url', $query_url, $attr);
-		$query_urls = apply_filters('photonic_flickr_query_urls', $query_urls, $attr);
-		$query = apply_filters('photonic_flickr_query', $query, $attr);
-
-		foreach ($query_urls as $query_url) {
-			$ret .= "<div class='photonic-flickr-stream'><ul>";
-			$iterator = array();
-			if (is_array($query_url)) {
-				$iterator = $query_url;
-			}
-			else {
-				$iterator[] = $query_url;
-			}
-
-			foreach ($iterator as $nested_query_url) {
-				$photonic_flickr_position++;
-				$ret .= "<script type='text/javascript'>\n";
-				if (isset($user_id)) {
-					// Cannot use wp_localize_script() here because this is invoked while parsing content; wp_localize_script is invoked way before.
-					$ret .= "\tphotonic_flickr_user_".$photonic_flickr_position." = '$user_id';\n";
-				}
-				if (isset($columns) && $this->check_integer($columns)) {
-					$ret .= "\tphotonic_flickr_columns_".$photonic_flickr_position." = $columns;\n";
-				}
-				else {
-					$ret .= "\tphotonic_flickr_columns_".$photonic_flickr_position." = 'auto';\n";
-				}
-				$ret .= "</script>\n";
-				$ret .= "<script type='text/javascript' src='".$nested_query_url.$query."'></script>\n";
-			}
-			$ret .= "</ul></div>";
-		}
-		return $ret;
-	}
-
-	/**
-	 * Retrieves a list of collection objects for a given user. This first invokes the web-service, then iterates through the collections returned.
-	 * For each collection returned it recursively looks for nested collections and sets.
-	 *
-	 * @param $user_id
-	 * @param string $collection_id
-	 * @return array
-	 */
-	function get_collection_list($user_id, $collection_id = '') {
-		global $photonic_flickr_api_key;
-		$query = 'http://api.flickr.com/services/rest/?method=flickr.collections.getTree&user_id='.$user_id.'&api_key='.$photonic_flickr_api_key;
-		if ($collection_id != '') {
-			$query .= '&collection_id='.$collection_id;
-		}
-
-		$feed = wp_remote_request($query);
-		if (!is_wp_error($feed) && 200 == $feed['response']['code']) {
-			$feed = $feed['body'];
-			$feed = simplexml_load_string($feed);
-			if (is_a($feed, 'SimpleXMLElement')) {
-				$main_attributes = $feed->attributes();
-				if ($main_attributes['stat'] == 'ok') {
-					$children = $feed->children();
-					if (count($children) != 0) {
-						if (isset($feed->collections)) {
-							$collections = $feed->collections;
-							$collections = $collections->collection;
-							$ret = array();
-							foreach ($collections as $collection) {
-								$iterative = $this->get_nested_collections($collection);
-								$ret = array_merge($ret, $iterative);
-							}
-							return $ret;
-						}
-					}
-				}
-			}
-		}
-		return array();
-	}
-
-	/**
-	 * Goes through a Flickr collection and recursively fetches all sets and other collections within it. This is returned as
-	 * a flattened array.
-	 *
-	 * @param $collection
-	 * @return array
-	 */
-	function get_nested_collections($collection) {
-		$attributes = $collection->attributes();
-		$id = isset($attributes['id']) ? (string)$attributes['id'] : '';
-		$id = substr($id, strpos($id, '-') + 1);
-		$title = isset($attributes['title']) ? (string)$attributes['title'] : '';
-		$description = isset($attributes['description']) ? (string)$attributes['description'] : '';
-		$thumb = isset($attributes['iconsmall']) ? (string)$attributes['iconsmall'] : (isset($attributes['iconlarge']) ? (string)$attributes['iconlarge'] : '');
-
-		$ret = array();
-
-		$inner_sets = $collection->set;
-		$sets = array();
-		if (count($inner_sets) > 0) {
-			foreach ($inner_sets as $inner_set) {
-				$set_attributes = $inner_set->attributes();
-				$sets[] = array(
-					'id' => (string)$set_attributes['id'],
-					'title' => (string)$set_attributes['title'],
-					'description' => (string)$set_attributes['description'],
-				);
-			}
-		}
-		$ret[] = array(
-			'id' => $id,
-			'title' => $title,
-			'description' => $description,
-			'thumb' => $thumb,
-			'sets' => $sets,
-		);
-
-		$inner_collections = $collection->collection;
-		if (count($inner_collections) > 0) {
-			foreach ($inner_collections as $inner_collection) {
-				$inner = $this->get_nested_collections($inner_collection);
-				$ret = array_merge($ret, $inner);
-			}
-		}
-		return $ret;
-	}
-
-	/**
-	 *
-	 *
-	 * user_id
-	 * kind
-	 * album
-	 * max_results
-	 *
-	 * thumb_size
-	 * columns
-	 * shorten caption
-	 * show caption
-	 *
-	 * @param  $attr
-	 * @return string
-	 */
-	function get_picasa_gallery_images($attr) {
-		global $photonic_flickr_position;
-		$attr = array_merge(array(
-			'style' => 'default',
-			'show_captions' => false,
-			'crop' => true,
-			'display' => 'page',
-		), $attr);
-		extract($attr);
-
-		if (!isset($user_id) || (isset($user_id) && trim($user_id) == '')) {
-			return '';
-		}
-
-		$crop_str = 'c';
-		if (isset($crop) && trim($crop) != '') {
-			$crop = $this->string_to_bool($crop);
-			if (!$crop) {
-				$crop_str = 'u';
-			}
-		}
-		else {
-			$crop = true;
-		}
-
-		if (!isset($view)) {
-			$view = null;
-		}
-
-		$query_url = 'http://picasaweb.google.com/data/feed/api/user/'.$user_id;
-		if (isset($album) && trim($album) != '') {
-			$query_url .= '/album/'.urlencode($album);
-		}
-
-		if (isset($albumid) && trim($albumid) != '') {
-			$query_url .= '/albumid/'.urlencode($albumid);
-		}
-
-		if (isset($kind) && trim($kind) != '' && in_array(trim($kind), array('album', 'photo', 'tag'))) {
-			$kind = trim($kind);
-			$query_url .= "?kind=".$kind."&";
-		}
-		else {
-			$kind = '';
-			$query_url .= "?".$kind;
-		}
-
-		if (!isset($view) || $view == null) {
-			if ($kind == 'album') {
-				$view = 'album';
-			}
-			else if ($kind == '') {
-				if (!isset($album) && !isset($albumid)) {
-					$view = 'album';
-				}
-			}
-		}
-
-		if (isset($max_results) && trim($max_results) != '') {
-			$query_url .= 'max-results='.trim($max_results).'&';
-		}
-
-		if (isset($thumbsize) && trim($thumbsize) != '') {
-			$query_url .= 'thumbsize='.trim($thumbsize).'&';
-		}
-		else {
-			$query_url .= 'thumbsize=75&';
-		}
-		
-		$query_url .= $crop_str;
-
-		$response = wp_remote_request($query_url);
-		if (is_wp_error($response)) {
-			$rss = '';
-		}
-		else if (200 != $response['response']['code']) {
-			$rss = '';
-		}
-		else {
-			$rss = $response['body'];
-		}
-/*
-		if ($kind == '') {
-			echo "<!-- picasapicasa ";print_r($rss); echo "-->";
-		}
-*/
-
-		$photonic_flickr_position++;
-		if ($display != 'popup') {
-			$out = "<div class='photonic-picasa-stream' id='photonic-picasa-stream-$photonic_flickr_position'>";
-		}
-		else {
-			$out = "<div class='photonic-picasa-panel photonic-panel'>";
-		}
-		if (!isset($columns)) {
-			$columns = null;
-		}
-		$out .= $this->picasa_parse_feed($rss, $view, $display, $columns);
-		$out .= "</div>";
-		return $out;
-	}
-
-	/**
-	 * Reads the output from Picasa and parses it to generate the front-end output.
-	 * In a later release this will be streamlined to use DOM-based parsing instead of event-based parsing.
-	 *
-	 * @param $rss
-	 * @param null $view
-	 * @param string $display
-	 * @param null $columns
-	 * @return string
-	 */
-	function picasa_parse_feed($rss, $view = null, $display = 'page', $columns = null) {
-		global $photonic_flickr_position, $photonic_slideshow_library, $photonic_picasa_photo_title_display, $photonic_gallery_panel_items, $photonic_picasa_photo_pop_title_display;
-		global $photonic_picasa_photos_per_row_constraint, $photonic_picasa_photos_constrain_by_count, $photonic_picasa_photos_pop_per_row_constraint, $photonic_picasa_photos_pop_constrain_by_count;
-
-		$p = xml_parser_create();
-		xml_parse_into_struct($p, $rss, $vals, $index);
-		xml_parser_free($p);
-
-		$opened = false;
-		$picasa_title = "NULL";
-		$count=0;
-
-		$ul_class = '';
-		$out = '';
-		if ($display == 'popup') {
-			$ul_class = "class='slideshow-grid-panel lib-$photonic_slideshow_library'";
-			$out .= "<div class='photonic-picasa-panel-content photonic-panel-content fix'>";
-		}
-		$out .= "<ul $ul_class>";
-
-		foreach ($vals as $val) {
-			if (!$opened) {
-				switch ($val["tag"]) {
-					case "ENTRY":
-						if ($val["type"] == "open") {
-							$opened = true;
-						}
-						break;
-
-					case "TITLE":
-						if ($picasa_title == "NULL") {
-							$picasa_title = $val["value"];
-						}
-
-					case "GPHOTO:NUMPHOTOS":
-						if (!isset($numphotos) || (isset($numphotos) && !is_numeric($numphotos))) {
-							$numphotos = $val["value"];
-						}
-						break;
-
-					case "GPHOTO:ID":
-						$albumid = $val["value"];
-						break;
-
-					case "OPENSEARCH:TOTALRESULTS":
-						$result_count = $val["value"];
-						break;
-
-					case "GPHOTO:USER":
-						$gphotouser = trim($val["value"]);
-						break;
-				}
-			}
-			else {
-				switch ($val["tag"]) {
-					case "ENTRY":
-						if ($val["type"] == "close") {
-							$opened = false;
-						}
-						break;
-
-					case "MEDIA:THUMBNAIL":
-						$thumb = trim($val["attributes"]["URL"] . "\n");
-						break;
-
-					case "MEDIA:CONTENT":
-						$href = $val["attributes"]["URL"];
-						$filename = basename($href);
-						break;
-
-					case "SUMMARY":
-						$caption = isset($val["value"]) ? $val["value"] : '';
-						break;
-
-					case "GPHOTO:ID":
-						$gphotoid = trim($val["value"]);
-						break;
-
-					case "GPHOTO:USER":
-						$gphotouser = trim($val["value"]);
-						break;
-				}
-			}
-
-			if (isset($thumb) && isset($href) && isset($gphotoid)) {
-				// Set image caption
-				if (!isset($caption) || (isset($caption) && trim($caption) == "")) {
-					$caption = $filename;
-				}
-
-				// Keep count of images
-				$count++;
-
-				$display_caption = apply_filters('photonic_image_display_caption', $caption);
-
-				// Hide Videos
-				$vidpos = stripos($href, "googlevideo");
-
-				if (($vidpos == "")) {
-					$li_id = $view == 'album' ? "id='photonic-picasa-album-$gphotouser-$photonic_flickr_position-$gphotoid'" : '';
-
-					if ($display == 'page') {
-						if ($columns == null) {
-							if ($photonic_picasa_photos_per_row_constraint == 'padding') {
-								$pad_class = 'photonic-pad-photos';
-							}
-							else {
-								$pad_class = 'photonic-gallery-'.$photonic_picasa_photos_constrain_by_count.'c';
-							}
-						}
-						else {
-							$pad_class = 'photonic-gallery-'.$columns.'c';
-						}
-						$out .= "<li class='photonic-picasa-image $pad_class' $li_id>";
-					}
-					else {
-						if ($count % $photonic_gallery_panel_items == 1) {
-							$out .= "<li class='photonic-picasa-image'>";
-						}
-
-						if ($photonic_picasa_photos_pop_per_row_constraint == 'padding') {
-							$pad_class = 'photonic-pad-photos';
-						}
-						else {
-							$pad_class = 'photonic-gallery-'.$photonic_picasa_photos_pop_constrain_by_count.'c';
-						}
-					}
-					$library = '';
-					$id = '';
-					if ($photonic_slideshow_library != 'none') {
-						if ($view != 'album' || $display == 'popup') {
-							$library = 'launch-gallery-'.$photonic_slideshow_library.' '.$photonic_slideshow_library;
-						}
-						else {
-							$library = 'photonic-picasa-album-thumb';
-							$id = "id='photonic-picasa-album-thumb-$gphotouser-$photonic_flickr_position-$gphotoid'";
-						}
-					}
-
-					$rel = '';
-					if ($view != 'album' || $display == 'popup') {
-						$rel = "rel='photonic-picasa-stream-$photonic_flickr_position'";
-					}
-
-					$a_pad_class = $display == 'popup' ? $pad_class : '';
-					$out .= "<a class='$library $a_pad_class' title=\"".esc_attr($display_caption)."\" href='$href' $rel $id>";
-					$out .= "<img src='$thumb' alt=\"".esc_attr($display_caption)."\"/>";
-					if ($display == 'page' && $photonic_picasa_photo_title_display == 'below') {
-						$out .= "<span class='photonic-photo-title'>$display_caption</span>";
-					}
-					else if ($display == 'popup' && $photonic_picasa_photo_pop_title_display == 'below') {
-						$out .= "<span class='photonic-photo-title'>$display_caption</span>";
-					}
-					$out .= "</a>";
-					if ($display == 'page') {
-						$out .= "</li>";
-					}
-					else {
-						if ($count % $photonic_gallery_panel_items == 0) {
-							$out .= "</li>";
-						}
-					}
-				}
-
-				//----------------------------------
-				//Reset the variables
-				//----------------------------------
-				unset($thumb);
-				unset($picasa_title);
-				unset($href);
-				unset($path);
-				unset($url);
-				unset($text);
-				unset($gphotoid);
-			}
-		}
-
-		if ($out != '<ul>') {
-			if (substr($out, -5) != "</li>") {
-				$out .= "</li>";
-			}
-			$out .= '</ul>';
-			if ($photonic_picasa_photo_pop_title_display == 'tooltip') {
-				$out .= "<script type='text/javascript'>\$j('.photonic-picasa-panel a').each(function() { \$j(this).data('title', \$j(this).attr('title')); }); \$j('.photonic-picasa-panel a').each(function() { var iTitle = \$j(this).find('img').attr('alt'); \$j(this).tooltip({ bodyHandler: function() { return iTitle; }, showURL: false });})</script>";
-			}
-
-			if ($display == 'popup') {
-				if ($photonic_slideshow_library == 'fancybox') {
-					$out .= "<script type='text/javascript'>\$j('a.launch-gallery-fancybox').each(function() { \$j(this).fancybox({ transitionIn:'elastic', transitionOut:'elastic',speedIn:600,speedOut:200,overlayShow:true,overlayOpacity:0.8,overlayColor:\"#000\",titleShow:Photonic_JS.fbox_show_title,titlePosition:Photonic_JS.fbox_title_position});});</script>";
-				}
-				else if ($photonic_slideshow_library == 'colorbox') {
-					$out .= "<script type='text/javascript'>\$j('a.launch-gallery-colorbox').each(function() { \$j(this).colorbox({ opacity: 0.8 });});</script>";
-				}
-				$out .= "</div>";
-			}
-		}
-		else {
-			$out = '';
-		}
-		return $out;
-	}
-
-	/**
 	 * If a Picasa album thumbnail is being displayed on a page, clicking on the thumbnail should launch a popup displaying all
 	 * album photos. This function handles the click event and the subsequent invocation of the popup.
 	 *
 	 * @return void
 	 */
 	function picasa_display_album() {
-		$panel = $_POST['panel'];
+		global $photonic_picasa_gallery;
+		if (!isset($photonic_picasa_gallery)) {
+			$photonic_picasa_gallery = new Photonic_Picasa_Processor();
+		}
+		$photonic_picasa_gallery->display_album();
+/*		$panel = $_POST['panel'];
 		$panel = substr($panel, 28);
 		$user = substr($panel, 0, strpos($panel, '-'));
 		$album = substr($panel, strpos($panel, '-') + 1);
 		$album = substr($album, strpos($album, '-') + 1);
 		echo $this->get_picasa_gallery_images(array('user_id' => $user, 'albumid' => $album, 'view' => 'album', 'display' => 'popup'));
-		die();
+		die();*/
 	}
 
 	/**
@@ -1138,7 +515,7 @@ class Photonic {
 	 * @param $val
 	 * @return bool
 	 */
-	function check_integer($val) {
+	static function check_integer($val) {
 		if (substr($val, 0, 1) == '-') {
 			$val = substr($val, 1);
 		}
@@ -1151,7 +528,7 @@ class Photonic {
 	 * @param $value
 	 * @return bool
 	 */
-	function string_to_bool($value) {
+	static function string_to_bool($value) {
 		if ($value == true || $value == 'true' || $value == 'TRUE' || $value == '1') {
 			return true;
 		}
@@ -1351,6 +728,36 @@ class Photonic {
 			}
 		}
 		return $edge_array;
+	}
+
+	/**
+	 * Adds a "Photonic" tab to the "Add Media" panel.
+	 *
+	 * @param $tabs
+	 * @return array
+	 */
+	function media_upload_tabs($tabs) {
+		$tabs['photonic'] = 'Photonic';
+		return $tabs;
+	}
+
+	/**
+	 * Invokes the form to display the photonic insertion screen in the "Add Media" panel. The call to wp_iframe ensures that the right CSS and JS are called.
+	 *
+	 * @return void
+	 */
+	function media_upload_photonic() {
+		wp_iframe(array(&$this, 'media_upload_photonic_form'));
+	}
+
+	/**
+	 * First prints the standard buttons for media upload, then shows the UI for Photonic.
+	 *
+	 * @return void
+	 */
+	function media_upload_photonic_form() {
+		echo media_upload_header();
+		require_once(plugin_dir_path(__FILE__)."/photonic-form.php");
 	}
 }
 

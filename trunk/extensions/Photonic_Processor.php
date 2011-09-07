@@ -1,6 +1,7 @@
 <?php
 /**
- * Class to be extended by individual processors
+ * Gallery processor class to be extended by individual processors. This class has an abstract method called <code>get_gallery_images</code>
+ * that has to be defined by each inheriting processor.
  *
  * @package Photonic
  * @subpackage Extensions
@@ -14,6 +15,6 @@ abstract class Photonic_Processor {
 		$this->library = $photonic_slideshow_library;
 	}
 
-	abstract protected function process_response($args = array());
+	abstract protected function get_gallery_images($attr = array());
 }
 ?>
