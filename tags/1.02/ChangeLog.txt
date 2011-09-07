@@ -1,0 +1,29 @@
+Version 1.02 - 06th Sep 2011
+============================
+1. Added capability to insert the shortcode through the "Upload/Insert Media" screen.
+2. Reorganized the backend PHP code to make it more extensible.
+
+Version 1.01 - 03rd Sep 2011
+============================
+1. Added translation file, photonic.po
+2. Fixed a bug to prevent Photonic stylesheets being loaded on all admin pages.
+
+Version 1.00 - 02nd Sep 2011
+============================
+1. Native gallery extension
+	a. Slideshow - consider Gallerific instead of JQuery Cycle
+	b. Library plugin - i.e. whichever library is used for the rest of the stuff, like Fancybox etc.
+2. Flickr support
+	a. Display all photos in a Photoset using photoset_id='x'
+	b. Display all Photosets for a user using user_id='x' and view='photosets'
+	c. Display all Photosets in a collection using user_id='x' and collection_id='y'
+	d. Display all Photosets grouped by Collection for a user using user_id='x' and view='collections'
+	e. Display photos using search criteria
+3. Picasa support
+	a. Display all albums for a user using user_id='x'
+	b. Display all photos in an album using user_id='x' and album='y'
+	c. Display photos filtered by tags and restrict their counts.
+4. JS library support
+	a. Fancybox
+	b. Colorbox
+5. Skinning options / Custom CSS
