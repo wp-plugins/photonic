@@ -4,17 +4,19 @@ class Photonic_Options_Manager {
 	var $option_structure, $previous_displayed_section, $file, $tab_name;
 
 	function Photonic_Options_Manager($file) {
-		global $photonic_setup_options, $photonic_generic_options, $photonic_flickr_options, $photonic_picasa_options;
+		global $photonic_setup_options, $photonic_generic_options, $photonic_flickr_options, $photonic_picasa_options, $photonic_500px_options;
 		$options_page_array = array(
 			'generic-options.php' => $photonic_generic_options,
 			'flickr-options.php' => $photonic_flickr_options,
 			'picasa-options.php' => $photonic_picasa_options,
+			'500px-options.php' => $photonic_500px_options,
 		);
 
 		$tab_name_array = array(
 			'generic-options.php' => 'Generic Options',
 			'flickr-options.php' => 'Flickr Options',
 			'picasa-options.php' => 'Picasa Options',
+//			'500px-options.php' => '500px Options',
 		);
 
 		$this->file = $file;
@@ -69,6 +71,7 @@ class Photonic_Options_Manager {
 		}
 
 		add_action('wp_ajax_photonic_admin_upload_file', array(&$this, 'admin_upload_file'));
+		add_action('wp_ajax_photonic_authenticate_oauth', array(&$this, 'authenticate_oauth'));
 	}
 
 	function render_options_page() {
@@ -285,9 +288,75 @@ class Photonic_Options_Manager {
 		return $option_structure;
 	}
 
+	function evaluate_conditions($conditions) {
+		// Operators: NOT, OR, AND, NOR, NAND. XOR is too complex
+		if (isset($conditions['operator'])) {
+			$operator = $conditions['operator'];
+		}
+		else {
+			$operator = 'OR';
+		}
+		$nested_conditions = $conditions['conditions'];
+		if (isset($nested_conditions['operator'])) {
+			return $this->evaluate_conditions($nested_conditions);
+		}
+		else {
+			$evals = array();
+			foreach ($nested_conditions as $variable => $check_value) {
+				$photonic_variable = 'photonic_'.$variable;
+				global $$photonic_variable;
+				$actual_value = $$photonic_variable;
+
+				if ($operator == 'NOT') {
+					return $actual_value != $check_value;
+				}
+				else {
+					$evals[] = $actual_value == $check_value ? 1 : 0;
+				}
+			}
+			return $this->array_join_boolean($evals, $operator);
+		}
+	}
+
+	function array_join_boolean($conditions, $operator) {
+		if (count($conditions) == 1) {
+			return $conditions[0];
+		}
+		else {
+			$first = $conditions[0];
+			$rest = array_slice($conditions, 1);
+			if ($operator == 'AND') {
+				$result =  $first * $this->array_join_boolean($rest, $operator);
+				return $result != 0;
+			}
+			else if ($operator == 'NOR') {
+				$result = $first + $this->array_join_boolean($rest, $operator);
+				return $result == 0;
+			}
+			else if ($operator == 'NAND') {
+				$result = $first * $this->array_join_boolean($rest, $operator);
+				return $result == 0;
+			}
+			else { // Everything else is treated as OR
+				$result = $first + $this->array_join_boolean($rest, $operator);
+				return $result != 0;
+			}
+		}
+	}
+
 	function add_settings_fields($section, $page) {
 		$ctr = 0;
 		foreach ($this->tab_options as $value) {
+			if (isset($value['conditional']) && true === $value['conditional']) {
+				$show = true;
+				if (isset($value['conditions'])) {
+					$conditions = $value['conditions'];
+					$show = $this->evaluate_conditions($conditions);
+				}
+				if (!$show) {
+					continue;
+				}
+			}
 			$ctr++;
 			switch ($value['type']) {
 				case "section":
@@ -335,6 +404,10 @@ class Photonic_Options_Manager {
 
 				case "padding":
 					add_settings_field($value['id'], '', array(&$this, "create_section_for_padding"), $page, $value['grouping'], $value);
+					break;
+
+				case "ajax-button":
+					add_settings_field($value['id'], '', array(&$this, "create_section_for_ajax_button"), $page, $value['grouping'], $value);
 					break;
 
 			}
@@ -912,6 +985,12 @@ class Photonic_Options_Manager {
 		$this->create_closing_tag($value);
 	}
 
+	function create_section_for_ajax_button($value) {
+		$this->create_opening_tag($value);
+		//echo "<a href='' "
+		$this->create_closing_tag($value);
+	}
+
 	/**
 	 * Creates the opening markup for each option.
 	 *
@@ -1005,6 +1084,10 @@ class Photonic_Options_Manager {
 			if (isset($this->options[$image_id])) unset($this->options[$image_id]);
 		}
 		die();
+	}
+
+	function authenticate_oauth() {
+		//
 	}
 }
 ?>

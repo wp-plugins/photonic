@@ -17,4 +17,9 @@ require_once(plugin_dir_path(__FILE__) . "/picasa-options.php");
 foreach ($photonic_picasa_options as $option) {
 	$photonic_setup_options[] = $option;
 }
+
+/*require_once(plugin_dir_path(__FILE__) . "/500px-options.php");
+foreach ($photonic_500px_options as $option) {
+	$photonic_setup_options[] = $option;
+}*/
 ?>

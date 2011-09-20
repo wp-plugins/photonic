@@ -131,6 +131,11 @@ msgstr ""
 
 #. Text in function
 #: photonic/photonic-form.php:56
+msgid "Galleries"
+msgstr ""
+
+#. Text in function
+#: photonic/photonic-form.php:56
 msgid "Gallery ID"
 msgstr ""
 
@@ -152,6 +157,11 @@ msgstr ""
 #. Text in function
 #: photonic/photonic-form.php:56
 msgid "In pixels"
+msgstr ""
+
+#. Text in function
+#: photonic/photonic-form.php:56
+msgid "In pixels. This is applicable only if you are displaying the slideshow directly on the page."
 msgstr ""
 
 #. Text in function
@@ -187,6 +197,16 @@ msgstr ""
 #. Text in function
 #: photonic/photonic-form.php:56
 msgid "Only thumbnails - click for slideshow"
+msgstr ""
+
+#. Text in function
+#: photonic/photonic.php:488
+msgid "Original height"
+msgstr ""
+
+#. Text in function
+#: photonic/photonic.php:488
+msgid "Original width"
 msgstr ""
 
 #. Text in function
@@ -251,6 +271,16 @@ msgstr ""
 
 #. Text in function
 #: photonic/photonic-form.php:56
+msgid "Sizes defined by your theme. Applies to slideshows only. Avoid loading large sizes to reduce page loads."
+msgstr ""
+
+#. Text in function
+#: photonic/photonic-form.php:56
+msgid "Sizes defined by your theme. Image picked here will be resized to the dimensions above."
+msgstr ""
+
+#. Text in function
+#: photonic/photonic-form.php:56
 msgid "Slide X"
 msgstr ""
 
@@ -261,7 +291,17 @@ msgstr ""
 
 #. Text in function
 #: photonic/photonic-form.php:56
+msgid "Slides image size"
+msgstr ""
+
+#. Text in function
+#: photonic/photonic-form.php:56
 msgid "Slideshow Effects"
+msgstr ""
+
+#. Text in function
+#: photonic/photonic-form.php:56
+msgid "Slideshow Height"
 msgstr ""
 
 #. Text in function
@@ -345,6 +385,11 @@ msgid "User ID"
 msgstr ""
 
 #. Text in function
+#: photonic/extensions/Photonic_Flickr_Processor.php:1
+msgid "User id is required for displaying a single gallery"
+msgstr ""
+
+#. Text in function
 #: photonic/photonic.php:1
 msgid "View in Flickr"
 msgstr ""
@@ -352,6 +397,11 @@ msgstr ""
 #. Text in function
 #: photonic/photonic-form.php:56
 msgid "WP Galleries"
+msgstr ""
+
+#. Text in function
+#: photonic/photonic-form.php:56
+msgid "Will show a single gallery if \"Display\" is set to \"Galleries\""
 msgstr ""
 
 #. Text in function
@@ -372,6 +422,11 @@ msgstr ""
 #. Text in function
 #: photonic/photonic-form.php:56
 msgid "With text"
+msgstr ""
+
+#. Text in function
+#: photonic/photonic-form.php:56
+msgid "You have to define your Flickr API Key under Settings &rarr; Photonic &rarr; Flickr &rarr; Flickr Settings"
 msgstr ""
 
 #. Text in function
