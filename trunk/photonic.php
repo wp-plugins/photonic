@@ -3,7 +3,7 @@
  * Plugin Name: Photonic Flickr+Picasa Gallery
  * Plugin URI: http://aquoid.com/news/plugins/photonic/
  * Description: Extends the native gallery shortcode to support Flickr and Picasa. JS libraries like Fancybox and Colorbox are supported. The plugin also helps convert a regular WP gallery into a slideshow.
- * Version: 1.02
+ * Version: 1.03
  * Author: Sayontan Sinha
  * Author URI: http://mynethome.net/blog
  * License: GNU General Public License (GPL), v2 (or newer)
@@ -120,10 +120,12 @@ class Photonic {
 	 * @return void
 	 */
 	function add_scripts() {
-		global $photonic_slideshow_library, $photonic_flickr_api_key, $photonic_flickr_thumb_size, $photonic_flickr_main_size, $photonic_fbox_title_position, $photonic_gallery_panel_width, $photonic_gallery_panel_items, $photonic_gallery_panel_items_per_row;
+		global $photonic_slideshow_library, $photonic_flickr_api_key, $photonic_flickr_thumb_size, $photonic_flickr_main_size, $photonic_fbox_title_position, $photonic_gallery_panel_width, $photonic_gallery_panel_items;
 		global $photonic_flickr_hide_collection_thumbnail, $photonic_flickr_hide_collection_title, $photonic_flickr_hide_collection_set_count, $photonic_flickr_collection_set_title_display, $photonic_flickr_hide_collection_set_photos_count_display;
 		global $photonic_flickr_photos_constrain_by_count, $photonic_flickr_collection_set_constrain_by_count, $photonic_flickr_collection_set_per_row_constraint, $photonic_flickr_photos_per_row_constraint;
 		global $photonic_flickr_hide_set_thumbnail, $photonic_flickr_hide_set_title, $photonic_flickr_hide_set_photo_count, $photonic_flickr_hide_set_pop_thumbnail, $photonic_flickr_hide_set_pop_title, $photonic_flickr_hide_set_pop_photo_count;
+		global $photonic_flickr_hide_gallery_pop_thumbnail, $photonic_flickr_hide_gallery_pop_title, $photonic_flickr_hide_gallery_pop_photo_count, $photonic_flickr_gallery_title_display, $photonic_flickr_hide_gallery_photos_count_display, $photonic_flickr_galleries_per_row_constraint, $photonic_flickr_galleries_constrain_by_count;
+		global $photonic_flickr_hide_gallery_thumbnail,$photonic_flickr_hide_gallery_title, $photonic_flickr_hide_gallery_photo_count;
 		global $photonic_flickr_photos_pop_per_row_constraint, $photonic_flickr_photos_pop_constrain_by_count, $photonic_flickr_photo_pop_title_display, $photonic_flickr_photo_title_display;
 		global $photonic_picasa_photo_title_display, $photonic_picasa_photo_pop_title_display, $photonic_wp_thumbnail_title_display;
 
@@ -154,17 +156,33 @@ class Photonic {
 			'flickr_hide_collection_thumbnail' => $photonic_flickr_hide_collection_thumbnail == 'on' ? true : false,
 			'flickr_hide_collection_title' => $photonic_flickr_hide_collection_title == 'on' ? true : false,
 			'flickr_hide_collection_set_count' => $photonic_flickr_hide_collection_set_count == 'on' ? true : false,
+
 			'flickr_hide_set_thumbnail' => $photonic_flickr_hide_set_thumbnail == 'on' ? true : false,
 			'flickr_hide_set_title' => $photonic_flickr_hide_set_title == 'on' ? true : false,
 			'flickr_hide_set_photo_count' => $photonic_flickr_hide_set_photo_count == 'on' ? true : false,
+
+			'flickr_hide_gallery_thumbnail' => $photonic_flickr_hide_gallery_thumbnail == 'on' ? true : false,
+			'flickr_hide_gallery_title' => $photonic_flickr_hide_gallery_title == 'on' ? true : false,
+			'flickr_hide_gallery_photo_count' => $photonic_flickr_hide_gallery_photo_count == 'on' ? true : false,
+
 			'flickr_hide_set_pop_thumbnail' => $photonic_flickr_hide_set_pop_thumbnail == 'on' ? true : false,
 			'flickr_hide_set_pop_title' => $photonic_flickr_hide_set_pop_title == 'on' ? true : false,
 			'flickr_hide_set_pop_photo_count' => $photonic_flickr_hide_set_pop_photo_count == 'on' ? true : false,
+
+			'flickr_hide_gallery_pop_thumbnail' => $photonic_flickr_hide_gallery_pop_thumbnail == 'on' ? true : false,
+			'flickr_hide_gallery_pop_title' => $photonic_flickr_hide_gallery_pop_title == 'on' ? true : false,
+			'flickr_hide_gallery_pop_photo_count' => $photonic_flickr_hide_gallery_pop_photo_count == 'on' ? true : false,
 
 			'flickr_collection_set_title_display' => $photonic_flickr_collection_set_title_display,
 			'flickr_hide_collection_set_photos_count_display' => $photonic_flickr_hide_collection_set_photos_count_display == 'on' ? true : false,
 			'flickr_collection_set_per_row_constraint' => $photonic_flickr_collection_set_per_row_constraint,
 			'flickr_collection_set_constrain_by_count' => $photonic_flickr_collection_set_constrain_by_count,
+
+			'flickr_gallery_title_display' => $photonic_flickr_gallery_title_display,
+			'flickr_hide_gallery_photos_count_display' => $photonic_flickr_hide_gallery_photos_count_display == 'on' ? true : false,
+			'flickr_galleries_per_row_constraint' => $photonic_flickr_galleries_per_row_constraint,
+			'flickr_galleries_constrain_by_count' => $photonic_flickr_galleries_constrain_by_count,
+
 			'flickr_photos_per_row_constraint' => $photonic_flickr_photos_per_row_constraint,
 			'flickr_photos_constrain_by_count' => $photonic_flickr_photos_constrain_by_count,
 			'flickr_photos_pop_per_row_constraint' => $photonic_flickr_photos_pop_per_row_constraint,
@@ -228,10 +246,11 @@ class Photonic {
 	 * @return void
 	 */
 	function print_scripts() {
-		global $photonic_flickr_collection_set_constrain_by_padding, $photonic_flickr_photos_constrain_by_padding, $photonic_flickr_photos_pop_constrain_by_padding;
+		global $photonic_flickr_collection_set_constrain_by_padding, $photonic_flickr_photos_constrain_by_padding, $photonic_flickr_photos_pop_constrain_by_padding, $photonic_flickr_galleries_constrain_by_padding;
 		global $photonic_picasa_photos_pop_constrain_by_padding, $photonic_picasa_photos_constrain_by_padding, $photonic_wp_slide_align;
 		$css = '<style type="text/css">'."\n";
 		$css .= ".photonic-pad-photosets { margin: {$photonic_flickr_collection_set_constrain_by_padding}px; }\n";
+		$css .= ".photonic-pad-galleries { margin: {$photonic_flickr_galleries_constrain_by_padding}px; }\n";
 		$css .= ".photonic-flickr-stream .photonic-pad-photos { margin: 0 {$photonic_flickr_photos_constrain_by_padding}px; }\n";
 		$css .= ".photonic-picasa-stream .photonic-pad-photos { margin: 0 {$photonic_picasa_photos_constrain_by_padding}px; }\n";
 		$css .= ".photonic-panel { ".$this->get_bg_css('photonic_flickr_gallery_panel_background').$this->get_border_css('photonic_flickr_set_popup_thumb_border')." }\n";
@@ -242,6 +261,7 @@ class Photonic {
 		$css .= ".photonic-flickr-set .photonic-flickr-set-solo-thumb img { ".$this->get_border_css('photonic_flickr_set_alone_thumb_border').$this->get_padding_css('photonic_flickr_set_alone_thumb_padding')." }\n";
 		$css .= ".photonic-flickr-set-thumb img { ".$this->get_border_css('photonic_flickr_sets_set_thumb_border').$this->get_padding_css('photonic_flickr_sets_set_thumb_padding')." }\n";
 		$css .= ".photonic-flickr-set-pop-thumb img { ".$this->get_border_css('photonic_flickr_set_pop_thumb_border').$this->get_padding_css('photonic_flickr_set_pop_thumb_padding')." }\n";
+		$css .= ".photonic-flickr-gallery-pop-thumb img { ".$this->get_border_css('photonic_flickr_gallery_pop_thumb_border').$this->get_padding_css('photonic_flickr_gallery_pop_thumb_padding')." }\n";
 		if (checked($photonic_wp_slide_align, 'on', false)) {
 			$css .= ".photonic-post-gallery-img img {margin: auto; display: block}\n";
 		}
@@ -363,6 +383,9 @@ class Photonic {
 			'columns' => 3,
 			'thumb_width' => 75,
 			'thumb_height' => 75,
+			'thumb_size' => 'thumbnail',
+			'slide_size' => 'large',
+			'slideshow_height' => 500,
 			'fx' => 'fade', 	// JQuery Cycle effects: fade, scrollUp, scrollDown, scrollLeft, scrollRight, scrollHorz, scrollVert, slideX, slideY, turnUp, turnDown, turnLeft,
 								// turnRight, zoom, fadeZoom, blindX, blindY, blindZ, growX, growY, curtainX, curtainY, cover, uncover, wipe
 			'timeout' => 4000, 	// Time between slides in ms
@@ -382,16 +405,20 @@ class Photonic {
 			$columns = 3;
 		}
 
+		$sources = array();
+		$thumbs = array();
 		switch ($style) {
 			case 'strip-below':
 			case 'strip-above':
 			case 'no-strip':
 				$photonic_gallery_number++;
-				$size = 'full';
-				$ret = "<div class='photonic-post-gallery $style fix'><ul id='gallery-fancy-$photonic_gallery_number' class='photonic-post-gallery-content fix'>";
+				$size = $slide_size;
+				$ret = "<div class='photonic-post-gallery $style fix'><ul id='gallery-fancy-$photonic_gallery_number' class='photonic-post-gallery-content fix' style='height: {$slideshow_height}px;'>";
 				foreach ( $images as $id => $attachment ) {
 	//				$link = isset($attr['link']) && 'file' == $attr['link'] ? wp_get_attachment_link($id, $size, false, false) : wp_get_attachment_link($id, $size, true, false);
-					$src = wp_get_attachment_image_src($id, $size, false);
+					$sources[$id] = wp_get_attachment_image_src($id, $size, false);
+					$thumbs[$id] = wp_get_attachment_image_src($id, $thumb_size);
+
 					$ret .= "<li class='photonic-post-gallery-img'>";
 					if (isset($attachment->post_title)) {
 						$title = wptexturize($attachment->post_title);
@@ -399,7 +426,8 @@ class Photonic {
 					else {
 						$title = '';
 					}
-					$ret .= "<img src='".$src[0]."' alt='$title' />";
+//					$ret .= "<img src='".$sources[$id][0]."' alt='$title' id='gallery-fancy-$photonic_gallery_number-$id' width='{$sources[$id][1]}' height='{$sources[$id][2]}'/>";
+					$ret .= "<img src='".$sources[$id][0]."' alt='$title' id='gallery-fancy-$photonic_gallery_number-$id' />";
 					$ret .= "</li>";
 				}
 				$ret .= '</ul></div>';
@@ -414,9 +442,6 @@ class Photonic {
 					var parent = $j(this).parent();
 				<?php
 					$script = '';
-					if ($photonic_wp_thumbnail_title_display == 'tooltip') {
-						//$script = "<script type='text/javascript'>\$j('.photonic-post-gallery-nav a').each(function() { \$j(this).data('title', \$j(this).attr('title')); }); \$j('.photonic-post-gallery-nav a').each(function() { var iTitle = \$j(this).find('img').attr('alt'); \$j(this).tooltip({ bodyHandler: function() { return iTitle; }, showURL: false });})</script>";
-					}
 					if ($style == 'strip-below') {
 				?>
 					 $j("<ul id='" + this.id + "-nav' class='photonic-post-gallery-nav fix'><?php echo $script; ?></ul>").insertAfter($j(this));
@@ -447,8 +472,12 @@ class Photonic {
 						pager: '#' + thisId + '-nav',
 
 						pagerAnchorBuilder: function(idx, slide) {
+							var thumbIds = <?php echo json_encode($thumbs); ?>;
 							var image = slide.children[0];
-							return '<li><a href="#" title="' + image.alt + '"><img src="' + image.src + '" width="<?php echo $thumb_width; ?>" height="<?php echo $thumb_height; ?>" alt="' + image.alt + '" /></a></li>';
+							var lastDash = image.id.lastIndexOf('-');
+							var imageId = image.id.substr(lastDash + 1);
+							var thumbDetails = thumbIds[imageId];
+							return '<li><a href="#" title="' + image.alt + '"><img src="' + thumbDetails[0] + '" width="<?php echo $thumb_width; ?>" height="<?php echo $thumb_height; ?>" alt="' + image.alt + '" /></a></li>';
 						}
 						<?php } ?>
 					});
@@ -464,10 +493,10 @@ class Photonic {
 			case 'launch':
 				$photonic_gallery_number++;
 				$slideshow_library_class = ($photonic_slideshow_library == 'none') ? "" : ($photonic_slideshow_library == 'thickbox' ? " class='thickbox' " : " class='launch-gallery-$photonic_slideshow_library' ");
-				$size = 'full';
 				$ret = "<div class='photonic-post-gallery $style fix'><ul id='gallery-fancy-$photonic_gallery_number-nav' class='photonic-post-gallery-nav fix'>";
 				foreach ( $images as $id => $attachment ) {
-					$src = wp_get_attachment_image_src($id, $size, false);
+					$src = wp_get_attachment_image_src($id, 'full');
+					$thumb = wp_get_attachment_image_src($id, $thumb_size);
 					$ret .= "<li class='photonic-gallery-{$columns}c'>";
 					if (isset($attachment->post_title)) {
 						$title = wptexturize($attachment->post_title);
@@ -475,7 +504,7 @@ class Photonic {
 					else {
 						$title = '';
 					}
-					$ret .= "<a href=\"".$src[0]."\" rel='gallery-fancy-$photonic_gallery_number-group' title='$title' $slideshow_library_class><img src='".$src[0]."' alt='$title' width='$thumb_width' height='$thumb_height' /></a>";
+					$ret .= "<a href=\"".$src[0]."\" rel='gallery-fancy-$photonic_gallery_number-group' title='$title' $slideshow_library_class><img src='".$thumb[0]."' alt='$title' width='$thumb_width' height='$thumb_height' /></a>";
 					$ret .= "</li>";
 				}
 				$ret .= '</ul></div>';
@@ -758,6 +787,30 @@ class Photonic {
 	function media_upload_photonic_form() {
 		echo media_upload_header();
 		require_once(plugin_dir_path(__FILE__)."/photonic-form.php");
+	}
+
+	static function get_image_sizes_selection($element_name, $show_full = false) {
+		global $_wp_additional_image_sizes;
+		$image_sizes = array();
+		$standard_sizes = array('thumbnail', 'medium', 'large');
+		if ($show_full) {
+			$standard_sizes[] = 'full';
+		}
+		foreach ($standard_sizes as $standard_size) {
+			if ($standard_size != 'full') {
+				$image_sizes[$standard_size] = array('width' => get_option($standard_size.'_size_w'), 'height' => get_option($standard_size.'_size_h'));
+			}
+			else {
+				$image_sizes[$standard_size] = array('width' => __('Original width', 'photonic'), 'height' => __('Original height', 'photonic'));
+			}
+		}
+		$image_sizes = array_merge($image_sizes, $_wp_additional_image_sizes);
+		$ret = "<select name='$element_name'>";
+		foreach ($image_sizes as $size_name => $size_attrs) {
+			$ret .= "<option value='$size_name'>$size_name ({$size_attrs['width']} &times; {$size_attrs['height']})</option>";
+		}
+		$ret .= '</select>';
+		return $ret;
 	}
 }
 

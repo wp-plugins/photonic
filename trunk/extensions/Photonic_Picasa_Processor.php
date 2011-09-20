@@ -23,7 +23,7 @@ class Photonic_Picasa_Processor extends Photonic_Processor {
 	 * @return string
 	 */
 	function get_gallery_images($attr = array()) {
-		global $photonic_flickr_position;
+		global $photonic_picasa_position;
 		$attr = array_merge(array(
 			'style' => 'default',
 			'show_captions' => false,
@@ -109,9 +109,9 @@ class Photonic_Picasa_Processor extends Photonic_Processor {
 		}
 */
 
-		$photonic_flickr_position++;
+		$photonic_picasa_position++;
 		if ($display != 'popup') {
-			$out = "<div class='photonic-picasa-stream' id='photonic-picasa-stream-$photonic_flickr_position'>";
+			$out = "<div class='photonic-picasa-stream' id='photonic-picasa-stream-$photonic_picasa_position'>";
 		}
 		else {
 			$out = "<div class='photonic-picasa-panel photonic-panel'>";
@@ -135,8 +135,11 @@ class Photonic_Picasa_Processor extends Photonic_Processor {
 	 * @return string
 	 */
 	function picasa_parse_feed($rss, $view = null, $display = 'page', $columns = null) {
-		global $photonic_flickr_position, $photonic_slideshow_library, $photonic_picasa_photo_title_display, $photonic_gallery_panel_items, $photonic_picasa_photo_pop_title_display;
+		global $photonic_picasa_position, $photonic_slideshow_library, $photonic_picasa_photo_title_display, $photonic_gallery_panel_items, $photonic_picasa_photo_pop_title_display;
 		global $photonic_picasa_photos_per_row_constraint, $photonic_picasa_photos_constrain_by_count, $photonic_picasa_photos_pop_per_row_constraint, $photonic_picasa_photos_pop_constrain_by_count;
+		if (!isset($photonic_gallery_panel_items) || $photonic_gallery_panel_items == '0' || $photonic_gallery_panel_items == 0) {
+			$photonic_gallery_panel_items = 20;
+		}
 
 		$p = xml_parser_create();
 		xml_parse_into_struct($p, $rss, $vals, $index);
@@ -233,7 +236,7 @@ class Photonic_Picasa_Processor extends Photonic_Processor {
 				$vidpos = stripos($href, "googlevideo");
 
 				if (($vidpos == "")) {
-					$li_id = $view == 'album' ? "id='photonic-picasa-album-$gphotouser-$photonic_flickr_position-$gphotoid'" : '';
+					$li_id = $view == 'album' ? "id='photonic-picasa-album-$gphotouser-$photonic_picasa_position-$gphotoid'" : '';
 
 					if ($display == 'page') {
 						if ($columns == null) {
@@ -269,13 +272,13 @@ class Photonic_Picasa_Processor extends Photonic_Processor {
 						}
 						else {
 							$library = 'photonic-picasa-album-thumb';
-							$id = "id='photonic-picasa-album-thumb-$gphotouser-$photonic_flickr_position-$gphotoid'";
+							$id = "id='photonic-picasa-album-thumb-$gphotouser-$photonic_picasa_position-$gphotoid'";
 						}
 					}
 
 					$rel = '';
 					if ($view != 'album' || $display == 'popup') {
-						$rel = "rel='photonic-picasa-stream-$photonic_flickr_position'";
+						$rel = "rel='photonic-picasa-stream-$photonic_picasa_position'";
 					}
 
 					$a_pad_class = $display == 'popup' ? $pad_class : '';

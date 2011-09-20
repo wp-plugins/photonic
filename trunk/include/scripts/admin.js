@@ -812,4 +812,71 @@ $j(document).ready(function() {
 			}
 		}
 	});
+
+	$j('.auth-submit-button').live('click', function() {
+		$j.post(Photonic_JS.ajaxurl, "action=photonic_authenticate_oauth", function(data) {
+			var div = $j(data);
+			//div.id = 'photonic-picasa-panel-' + panel_id;
+
+			var ul = div.find('ul');
+			var screens = ul.find('li').length;
+			var prev = document.createElement('a');
+			prev.id = 'photonic-picasa-album-' + panel_id + '-prev';
+			prev.href = '#';
+			prev.className = 'panel-previous';
+			prev.innerHTML = '&nbsp;';
+
+			var next = document.createElement('a');
+			next.id = 'photonic-picasa-album-' + panel_id + '-next';
+			next.href = '#';
+			next.className = 'panel-next';
+			next.innerHTML = '&nbsp;';
+
+			$j(ul).first('li').waitForImages(function() {
+				div.attr('id', 'photonic-picasa-panel-' + panel_id).appendTo($j('#photonic-picasa-album-' + panel_id)).show();
+				if (screens > 1) {
+					$j(ul).before(prev)
+							.after(next)
+							.cycle({
+								timeout: 0,
+								slideResize: false,
+								prev: 'a#photonic-picasa-album-' + panel_id + '-prev',
+								next: 'a#photonic-picasa-album-' + panel_id + '-next',
+								sync: false
+							});
+				}
+				else {
+					$j(this).cycle({
+						timeout: 0,
+						slideResize: false,
+						sync: false
+					});
+				}
+
+				$j(panel).modal({
+					autoPosition: false,
+					dataCss: { width: '' + Photonic_JS.gallery_panel_width + 'px' },
+					overlayCss: { background: '#000' },
+					closeClass: 'photonic-picasa-panel-' + panel_id,
+					opacity: 90,
+					close: true,
+					escClose: false,
+					containerId: 'photonic-picasa-panel-container-' + panel_id,
+					onClose: function(dialog) { $j.modal.close(); $j('#photonic-picasa-panel-' + panel_id).css({ display: 'none' }) },
+					onShow: modalOnPicasaShow,
+					onOpen: modalOpen
+				});
+
+				var viewport = [$j(window).width(), $j(window).height(), $j(document).scrollLeft(), $j(document).scrollTop()];
+				var target = {};
+
+				target.top = parseInt(Math.max(viewport[3] - 20, viewport[3] + ((viewport[1] - $j('#photonic-picasa-panel-container-' + panel_id).height() - 40) * 0.5)), 10);
+				target.left = parseInt(Math.max(viewport[2] - 20, viewport[2] + ((viewport[0] - $j('#photonic-picasa-panel-container-' + panel_id).width() - 40) * 0.5)), 10);
+
+				$j('#photonic-picasa-panel-container-' + panel_id).css({top: target.top, left: target.left });
+				$j(loading).hide();
+			});
+		});
+	});
+
 });

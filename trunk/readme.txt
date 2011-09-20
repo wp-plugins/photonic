@@ -4,14 +4,14 @@ Donate link: http://aquoid.com/news/plugins/photonic/
 Tags: gallery, flickr, picasa, fancybox, colorbox, slideshow, jquery, shortcode
 Requires at least: WP 3.1
 Tested up to: WP 3.2.1
-Stable tag: 1.02
+Stable tag: 1.03
 
 A plugin that enhances the capabilities of the native gallery shortcode in WordPress by letting you show Flickr and Picasa photos.
 
 == Description ==
 
 Photonic lets you use the WordPress <code>gallery</code> shortcode and ramps it up with a lot of added functionality. It adds support for
-several new parameters to enhance your galleries. It supports Flickr photos, Photosets and Collections, along with Picasa photos and albums.
+several new parameters to enhance your galleries. It supports Flickr photos, Photosets, Galleries and Collections, along with Picasa photos and albums.
 
 = Flickr Support =
 
@@ -19,6 +19,7 @@ The following Flickr concepts are supported in Photonic:
 
 *	<a href='http://aquoid.com/news/plugins/photonic/flickr/flickr-photos/'>Photos</a>
 *	<a href='http://aquoid.com/news/plugins/photonic/flickr/flickr-photosets/'>PhotoSets</a>
+*	<a href='http://aquoid.com/news/plugins/photonic/flickr/flickr-galleries/'>Galleries</a>
 *	<a href='http://aquoid.com/news/plugins/photonic/flickr/flickr-collections/'>Collections</a>
 
 For demos of Flickr support visit the <a href='http://aquoid.com/news/plugins/photonic/flickr/'>Flickr page</a>.
@@ -96,11 +97,14 @@ This is a bug with the thumbnail script.
 Yes, but only for the plugin front-end. The admin panel is not translated at this point. Also note that any strings included
 in the third-party JS scripts are not translated.
 
-= Is there a UI button to insert galleries using the shortcode? =
-
-Not at this point. Though this is planned, it is low priority at the moment.
-
 == Changelog ==
+
+= 1.03 =
+
+*	Added support for Gallery objects in Flickr.
+*	Fixed an issue with the Picasa galleries where under certain circumstances users were getting a "Division by zero" error.
+*	Fixed an issue where Chrome and Safari were showing an overlap of the slides over the rest of the content in native galleries.
+*	Updated translation file.
 
 = 1.02 =
 

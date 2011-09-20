@@ -37,7 +37,7 @@ else if (isset($_POST['photonic-cancel'])) {
 				var individual = values[i].split('=');
 				if (individual[0].trim() != 'photonic-shortcode' && individual[0].trim() != 'photonic-submit' &&
 						individual[0].trim() != 'photonic-cancel' && individual[1].trim() != '') {
-					newValues.push(individual[0] + "='" + photonicAdminHtmlEncode(individual[1].trim()) + "'");
+					newValues.push(individual[0] + "='" + photonicAdminHtmlEncode(decodeURIComponent(individual[1].trim())) + "'");
 				}
 			}
 
@@ -111,6 +111,15 @@ $fields = array(
 			),
 
 			array(
+				'id' => 'slideshow_height',
+				'name' => __('Slideshow Height', 'photonic'),
+				'type' => 'text',
+				'std' => 500,
+				'hint' => __('In pixels. This is applicable only if you are displaying the slideshow directly on the page.', 'photonic'),
+				'req' => true,
+			),
+
+			array(
 				'id' => 'columns',
 				'name' => __('Number of columns', 'photonic'),
 				'type' => 'text',
@@ -134,6 +143,22 @@ $fields = array(
 			),
 
 			array(
+				'id' => 'thumbnail_size',
+				'name' => __('Thumbnail size', 'photonic'),
+				'type' => 'raw',
+				'std' => Photonic::get_image_sizes_selection('thumbnail_size', false),
+				'hint' => __('Sizes defined by your theme. Image picked here will be resized to the dimensions above.', 'photonic')
+			),
+
+			array(
+				'id' => 'slide_size',
+				'name' => __('Slides image size', 'photonic'),
+				'type' => 'raw',
+				'std' => Photonic::get_image_sizes_selection('slide_size', true),
+				'hint' => __('Sizes defined by your theme. Applies to slideshows only. Avoid loading large sizes to reduce page loads.', 'photonic')
+			),
+
+			array(
 				'id' => 'timeout',
 				'name' => __('Time between slides in ms', 'photonic'),
 				'type' => 'text',
@@ -152,6 +177,7 @@ $fields = array(
 	),
 	'flickr' => array(
 		'name' => __('Flickr', 'photonic'),
+		'prelude' => __('You have to define your Flickr API Key under Settings &rarr; Photonic &rarr; Flickr &rarr; Flickr Settings', 'photonic'),
 		'fields' => array(
 			array(
 				'id' => 'user_id',
@@ -167,6 +193,7 @@ $fields = array(
 				'options' => array(
 					'photos' => __('Photos', 'photonic'),
 					'photosets' => __('Photosets', 'photonic'),
+					'galleries' => __('Galleries', 'photonic'),
 					'collections' => __('Collections', 'photonic'),
 				),
 				'req' => true,
@@ -177,6 +204,13 @@ $fields = array(
 				'name' => __('Photoset ID', 'photonic')."</a>",
 				'type' => 'text',
 				'hint' => __('Will show a single photoset if "Display" is set to "Photosets"', 'photonic')
+			),
+
+			array(
+				'id' => 'gallery_id',
+				'name' => __('Gallery ID', 'photonic')."</a>",
+				'type' => 'text',
+				'hint' => __('Will show a single gallery if "Display" is set to "Galleries"', 'photonic')
 			),
 
 			array(
@@ -303,7 +337,7 @@ echo $tab_list;
 echo "</ul>";
 
 if (!empty($prelude)) {
-	echo "<p>$prelude</p>";
+	echo "<p class='prelude'>"; print_r($prelude); echo "</p>";
 }
 
 echo "<table class='photonic-form'>";
@@ -321,6 +355,9 @@ foreach ($field_list as $field) {
 				echo "<option value='$option_name'>$option_value</option>";
 			}
 			echo "</select></td>";
+			continue;
+		case 'raw':
+			echo "<td>".$field['std']."</td>";
 			continue;
 	}
 	echo "<td class='hint'>".(isset($field['hint']) ? $field['hint'] : '')."</td>";

@@ -1,3 +1,9 @@
+Version 1.03 - 19th Sep 2011
+============================
+1. Added support for Gallery objects in Flickr.
+2. Fixed an issue with the Picasa galleries where under certain circumstances users were getting a "Division by zero" error.
+3. Fixed an issue where Chrome and Safari were showing an overlap of the slides over the rest of the content in native galleries.
+
 Version 1.02 - 06th Sep 2011
 ============================
 1. Added capability to insert the shortcode through the "Upload/Insert Media" screen.
