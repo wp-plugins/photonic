@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: Photonic Flickr+Picasa Gallery
+ * Plugin Name: Photonic Flickr+Picasa+500px Gallery
  * Plugin URI: http://aquoid.com/news/plugins/photonic/
- * Description: Extends the native gallery shortcode to support Flickr and Picasa. JS libraries like Fancybox and Colorbox are supported. The plugin also helps convert a regular WP gallery into a slideshow.
- * Version: 1.03
+ * Description: Extends the native gallery shortcode to support Flickr, Picasa and 500px. JS libraries like Fancybox and Colorbox are supported. The plugin also helps convert a regular WP gallery into a slideshow.
+ * Version: 1.04
  * Author: Sayontan Sinha
  * Author URI: http://mynethome.net/blog
  * License: GNU General Public License (GPL), v2 (or newer)
@@ -128,6 +128,7 @@ class Photonic {
 		global $photonic_flickr_hide_gallery_thumbnail,$photonic_flickr_hide_gallery_title, $photonic_flickr_hide_gallery_photo_count;
 		global $photonic_flickr_photos_pop_per_row_constraint, $photonic_flickr_photos_pop_constrain_by_count, $photonic_flickr_photo_pop_title_display, $photonic_flickr_photo_title_display;
 		global $photonic_picasa_photo_title_display, $photonic_picasa_photo_pop_title_display, $photonic_wp_thumbnail_title_display;
+		global $photonic_500px_photos_per_row_constraint, $photonic_500px_photos_constrain_by_count, $photonic_500px_photos_pop_per_row_constraint, $photonic_500px_photos_pop_constrain_by_count, $photonic_500px_photo_title_display;
 
 		wp_enqueue_script('photonic', plugins_url('include/scripts/photonic.js', __FILE__), array('jquery'), $this->version);
 		wp_deregister_script('jquery-cycle');
@@ -188,11 +189,17 @@ class Photonic {
 			'flickr_photos_pop_per_row_constraint' => $photonic_flickr_photos_pop_per_row_constraint,
 			'flickr_photos_pop_constrain_by_count' => $photonic_flickr_photos_pop_constrain_by_count,
 
+			'Dpx_photos_per_row_constraint' => $photonic_500px_photos_per_row_constraint,
+			'Dpx_photos_constrain_by_count' => $photonic_500px_photos_constrain_by_count,
+			'Dpx_photos_pop_per_row_constraint' => $photonic_500px_photos_pop_per_row_constraint,
+			'Dpx_photos_pop_constrain_by_count' => $photonic_500px_photos_pop_constrain_by_count,
+
 			'flickr_photo_pop_title_display' => $photonic_flickr_photo_pop_title_display,
 			'flickr_photo_title_display' => $photonic_flickr_photo_title_display,
 			'picasa_photo_title_display' => $photonic_picasa_photo_title_display,
 			'picasa_photo_pop_title_display' => $photonic_picasa_photo_pop_title_display,
 			'wp_thumbnail_title_display' => $photonic_wp_thumbnail_title_display,
+			'Dpx_photo_title_display' => $photonic_500px_photo_title_display,
 
 			'slideshow_library' => $photonic_slideshow_library,
 			'gallery_panel_width' => $photonic_gallery_panel_width,
@@ -247,12 +254,14 @@ class Photonic {
 	 */
 	function print_scripts() {
 		global $photonic_flickr_collection_set_constrain_by_padding, $photonic_flickr_photos_constrain_by_padding, $photonic_flickr_photos_pop_constrain_by_padding, $photonic_flickr_galleries_constrain_by_padding;
-		global $photonic_picasa_photos_pop_constrain_by_padding, $photonic_picasa_photos_constrain_by_padding, $photonic_wp_slide_align;
+		global $photonic_picasa_photos_pop_constrain_by_padding, $photonic_picasa_photos_constrain_by_padding, $photonic_wp_slide_align, $photonic_500px_photos_constrain_by_padding;
 		$css = '<style type="text/css">'."\n";
 		$css .= ".photonic-pad-photosets { margin: {$photonic_flickr_collection_set_constrain_by_padding}px; }\n";
 		$css .= ".photonic-pad-galleries { margin: {$photonic_flickr_galleries_constrain_by_padding}px; }\n";
 		$css .= ".photonic-flickr-stream .photonic-pad-photos { margin: 0 {$photonic_flickr_photos_constrain_by_padding}px; }\n";
 		$css .= ".photonic-picasa-stream .photonic-pad-photos { margin: 0 {$photonic_picasa_photos_constrain_by_padding}px; }\n";
+		$css .= ".photonic-500px-stream .photonic-pad-photos { margin: 0 {$photonic_500px_photos_constrain_by_padding}px; }\n";
+		$css .= ".photonic-500px-stream img { ".$this->get_border_css('photonic_500px_photo_thumb_border').$this->get_padding_css('photonic_500px_photo_thumb_padding')." }\n";
 		$css .= ".photonic-panel { ".$this->get_bg_css('photonic_flickr_gallery_panel_background').$this->get_border_css('photonic_flickr_set_popup_thumb_border')." }\n";
 		$css .= ".photonic-panel .photonic-flickr-image img { ".$this->get_border_css('photonic_flickr_pop_photo_thumb_border').$this->get_padding_css('photonic_flickr_pop_photo_thumb_padding')." }\n";
 		$css .= ".photonic-flickr-panel .photonic-pad-photos { margin: 0 {$photonic_flickr_photos_pop_constrain_by_padding}px; }\n";
@@ -286,6 +295,7 @@ class Photonic {
 		$this->register_extension('Photonic_Flickr_Processor', plugin_dir_path(__FILE__)."/extensions/Photonic_Flickr_Processor.php");
 		$this->register_extension('Photonic_Picasa_Processor', plugin_dir_path(__FILE__)."/extensions/Photonic_Picasa_Processor.php");
 		$this->register_extension('Photonic_Native_Processor', plugin_dir_path(__FILE__)."/extensions/Photonic_Native_Processor.php");
+		$this->register_extension('Photonic_500px_Processor', plugin_dir_path(__FILE__)."/extensions/Photonic_500px_Processor.php");
 	}
 
 	public function register_extension($extension, $path) {
@@ -307,7 +317,7 @@ class Photonic {
 	 * @return string
 	 */
 	function modify_gallery($content, $attr = array()) {
-		global $post, $photonic_flickr_gallery, $photonic_picasa_gallery, $photonic_native_gallery;
+		global $post, $photonic_flickr_gallery, $photonic_picasa_gallery, $photonic_native_gallery, $photonic_500px_gallery;
 		if ($attr == null) {
 			$attr = array();
 		}
@@ -333,6 +343,12 @@ class Photonic {
 					$photonic_picasa_gallery = new Photonic_Picasa_Processor();
 				}
 				$images = $photonic_picasa_gallery->get_gallery_images($attr);
+				break;
+			case '500px':
+				if (!isset($photonic_500px_gallery)) {
+					$photonic_500px_gallery = new Photonic_500px_Processor();
+				}
+				$images = $photonic_500px_gallery->get_gallery_images($attr);
 				break;
 			case 'default':
 			default:

@@ -1,3 +1,8 @@
+Version 1.04 - 21st Sep 2011
+============================
+1. Added support for 500px.
+2. Modified the Colorbox invocation parameters so that large images are displayed within the window.
+
 Version 1.03 - 19th Sep 2011
 ============================
 1. Added support for Gallery objects in Flickr.

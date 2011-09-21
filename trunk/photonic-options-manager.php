@@ -16,7 +16,7 @@ class Photonic_Options_Manager {
 			'generic-options.php' => 'Generic Options',
 			'flickr-options.php' => 'Flickr Options',
 			'picasa-options.php' => 'Picasa Options',
-//			'500px-options.php' => '500px Options',
+			'500px-options.php' => '500px Options',
 		);
 
 		$this->file = $file;
@@ -99,6 +99,7 @@ class Photonic_Options_Manager {
 						<li><a class='photonic-load-page <?php if ($this->tab == 'generic-options.php') echo 'current-tab'; ?>' id='photonic-options-generic' href='?page=photonic-options-manager&amp;tab=generic-options.php'>Generic Options</a></li>
 						<li><a class='photonic-load-page <?php if ($this->tab == 'flickr-options.php') echo 'current-tab'; ?>' id='photonic-options-flickr' href='?page=photonic-options-manager&amp;tab=flickr-options.php'>Flickr</a></li>
 						<li><a class='photonic-load-page <?php if ($this->tab == 'picasa-options.php') echo 'current-tab'; ?>' id='photonic-options-picasa' href='?page=photonic-options-manager&amp;tab=picasa-options.php'>Picasa</a></li>
+						<li><a class='photonic-load-page <?php if ($this->tab == '500px-options.php') echo 'current-tab'; ?>' id='photonic-options-500px' href='?page=photonic-options-manager&amp;tab=500px-options.php'>500px</a></li>
 					</ul>
 				</div>
 			</div>
