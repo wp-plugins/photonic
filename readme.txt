@@ -1,12 +1,12 @@
-=== Photonic Flickr+Picasa Gallery ===
+=== Photonic Flickr+Picasa+500px Gallery ===
 Contributors: sayontan
 Donate link: http://aquoid.com/news/plugins/photonic/
-Tags: gallery, flickr, picasa, fancybox, colorbox, slideshow, jquery, shortcode
+Tags: gallery, flickr, picasa, 500px, fancybox, colorbox, slideshow, jquery, shortcode
 Requires at least: WP 3.1
 Tested up to: WP 3.2.1
-Stable tag: 1.03
+Stable tag: 1.04
 
-A plugin that enhances the capabilities of the native gallery shortcode in WordPress by letting you show Flickr and Picasa photos.
+A plugin that enhances the capabilities of the native gallery shortcode in WordPress by letting you show Flickr, Picasa and 500px photos.
 
 == Description ==
 
@@ -32,6 +32,10 @@ The following Picasa concepts are supported in Photonic:
 *	<a href='http://aquoid.com/news/plugins/photonic/picasa/picasa-albums/'>Albums</a>
 
 For demos of Picasa support visit the <a href='http://aquoid.com/news/plugins/photonic/picasa/'>Picasa page</a>.
+
+= 500px Support =
+
+Photos on <a href='http://aquoid.com/news/plugins/photonic/500px/'>500px.com are supported in Photonic</a>.
 
 = Enhanced Native Galleries =
 Your existing gallery insertions are left intact. However you can add a <code>style</code> parameter to it for special effects. The permitted values for <code>style</code> are:
@@ -98,6 +102,11 @@ Yes, but only for the plugin front-end. The admin panel is not translated at thi
 in the third-party JS scripts are not translated.
 
 == Changelog ==
+
+= 1.04 =
+
+*	Added support for photos on 500px.
+*	Modified the Colorbox invocation to fit in the browser window.
 
 = 1.03 =
 

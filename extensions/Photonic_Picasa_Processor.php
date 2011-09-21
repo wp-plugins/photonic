@@ -103,11 +103,6 @@ class Photonic_Picasa_Processor extends Photonic_Processor {
 		else {
 			$rss = $response['body'];
 		}
-/*
-		if ($kind == '') {
-			echo "<!-- picasapicasa ";print_r($rss); echo "-->";
-		}
-*/
 
 		$photonic_picasa_position++;
 		if ($display != 'popup') {
@@ -328,7 +323,7 @@ class Photonic_Picasa_Processor extends Photonic_Processor {
 					$out .= "<script type='text/javascript'>\$j('a.launch-gallery-fancybox').each(function() { \$j(this).fancybox({ transitionIn:'elastic', transitionOut:'elastic',speedIn:600,speedOut:200,overlayShow:true,overlayOpacity:0.8,overlayColor:\"#000\",titleShow:Photonic_JS.fbox_show_title,titlePosition:Photonic_JS.fbox_title_position});});</script>";
 				}
 				else if ($photonic_slideshow_library == 'colorbox') {
-					$out .= "<script type='text/javascript'>\$j('a.launch-gallery-colorbox').each(function() { \$j(this).colorbox({ opacity: 0.8 });});</script>";
+					$out .= "<script type='text/javascript'>\$j('a.launch-gallery-colorbox').each(function() { \$j(this).colorbox({ opacity: 0.8, maxWidth: '95%', maxHeight: '95%' });});</script>";
 				}
 				$out .= "</div>";
 			}

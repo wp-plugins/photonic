@@ -8,7 +8,7 @@
  */
 
 $selected_tab = isset($_GET['photonic-tab']) ? esc_attr($_GET['photonic-tab']) : 'default';
-if (!in_array($selected_tab, array('default', 'flickr', 'picasa'))) {
+if (!in_array($selected_tab, array('default', 'flickr', 'picasa', '500px'))) {
 	$selected_tab = 'default';
 }
 
@@ -29,15 +29,14 @@ else if (isset($_POST['photonic-cancel'])) {
 
 	$j(document).ready(function() {
 		$j('#photonic-shortcode-form input[type="text"], #photonic-shortcode-form select').change(function(event) {
-			var comboValue = $j('#photonic-shortcode-form').serialize();
-			var values = comboValue.split('&');
+			var comboValues = $j('#photonic-shortcode-form').serializeArray();
 			var newValues = new Array();
-			var len = values.length;
+			var len = comboValues.length;
 			for (var i=0; i<len; i++) {
-				var individual = values[i].split('=');
-				if (individual[0].trim() != 'photonic-shortcode' && individual[0].trim() != 'photonic-submit' &&
-						individual[0].trim() != 'photonic-cancel' && individual[1].trim() != '') {
-					newValues.push(individual[0] + "='" + photonicAdminHtmlEncode(decodeURIComponent(individual[1].trim())) + "'");
+				var individual = comboValues[i];
+				if (individual['name'].trim() != 'photonic-shortcode' && individual['name'].trim() != 'photonic-submit' &&
+						individual['name'].trim() != 'photonic-cancel' && individual['value'].trim() != '') {
+					newValues.push(individual['name'] + "='" + photonicAdminHtmlEncode(decodeURIComponent(individual['value'].trim())) + "'");
 				}
 			}
 
@@ -310,6 +309,111 @@ $fields = array(
 				'type' => 'text',
 				'std' => 75,
 				'hint' => __('In pixels', 'photonic')
+			),
+
+		),
+	),
+	'500px' => array(
+		'name' => __('500px', 'photonic'),
+		'prelude' => __('You have to define your Consumer API Key under Settings &rarr; Photonic &rarr; 500px &rarr; 500px Settings', 'photonic'),
+		'fields' => array(
+			array(
+				'id' => 'feature',
+				'name' => __('Feature', 'photonic'),
+				'type' => 'select',
+				'options' => array(
+					'popular' => __('Popular photos', 'photonic'),
+					'upcoming' => __('Upcoming photos', 'photonic'),
+					'editors' => __("Editor's choices", 'photonic'),
+					'fresh_today' => __('Fresh today', 'photonic'),
+					'fresh_yesterday' => __('Fresh today', 'photonic'),
+					'fresh_week' => __('Fresh today', 'photonic'),
+					'user' => __("Specified user's photos", 'photonic'),
+					'user_friends' => __("Photos of specified user's friends", 'photonic'),
+					'user_favorites' => __("Specified user's favourite photos", 'photonic'),
+				),
+				'req' => true,
+			),
+
+			array(
+				'id' => 'user_id',
+				'name' => __('User ID', 'photonic'),
+				'type' => 'text',
+				'hint' => __('Either User ID or User Name is required if Feature is user-specific', 'photonic')
+			),
+
+			array(
+				'id' => 'username',
+				'name' => __('User Name', 'photonic'),
+				'type' => 'text',
+				'hint' => __('Either User ID or User Name is required if Feature is user-specific', 'photonic')
+			),
+
+			array(
+				'id' => 'only',
+				'name' => __('Category', 'photonic'),
+				'type' => 'select',
+				'options' => array(
+					'' => __('All Categories', 'photonic'),
+					'Abstract' => __('Abstract', 'photonic'),
+					'Animals' => __('Animals', 'photonic'),
+					'Black and White' => __("Black and White", 'photonic'),
+					'Celebrities' => __('Celebrities', 'photonic'),
+					'City and Architecture' => __('Fresh today', 'photonic'),
+					'Commercial' => __('Commercial', 'photonic'),
+					'Concert' => __("Concert", 'photonic'),
+					'Family' => __("Family", 'photonic'),
+					'Fashion' => __("Fashion", 'photonic'),
+					'Film' => __("Film", 'photonic'),
+					'Fine Art' => __("Fine Art", 'photonic'),
+					'Food' => __("Food", 'photonic'),
+					'Journalism' => __("Journalism", 'photonic'),
+					'Landscapes' => __("Landscapes", 'photonic'),
+					'Macro' => __("Macro", 'photonic'),
+					'Nature' => __("Nature", 'photonic'),
+					'Nude' => __("Nude", 'photonic'),
+					'People' => __("People", 'photonic'),
+					'Performing Arts' => __("Performing Arts", 'photonic'),
+					'Sport' => __("Sport", 'photonic'),
+					'Still Life' => __("Still Life", 'photonic'),
+					'Street' => __("Street", 'photonic'),
+					'Travel' => __("Travel", 'photonic'),
+					'Underwater' => __("Underwater", 'photonic'),
+				),
+			),
+
+			array(
+				'id' => 'rpp',
+				'name' => __('Number of photos to show', 'photonic')."</a>",
+				'type' => 'text',
+				'std' => 20,
+			),
+
+			array(
+				'id' => 'thumb_size',
+				'name' => __('Thumbnail size', 'photonic'),
+				'type' => 'select',
+				'options' => array(
+					'1' => __('75 &times; 75 px', 'photonic'),
+					'2' => __('140 &times; 140 px', 'photonic'),
+					'3' => __('280 &times; 280 px', 'photonic'),
+				),
+			),
+
+			array(
+				'id' => 'main_size',
+				'name' => __('Main image size', 'photonic'),
+				'type' => 'select',
+				'options' => array(
+					'3' => __('280 &times; 280 px', 'photonic'),
+					'4' => __('Full size', 'photonic'),
+				),
+			),
+
+			array(
+				'id' => 'columns',
+				'name' => __('Number of columns', 'photonic'),
+				'type' => 'text',
 			),
 
 		),
