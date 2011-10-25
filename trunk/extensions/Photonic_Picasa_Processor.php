@@ -114,7 +114,12 @@ class Photonic_Picasa_Processor extends Photonic_Processor {
 		if (!isset($columns)) {
 			$columns = null;
 		}
-		$out .= $this->picasa_parse_feed($rss, $view, $display, $columns);
+
+		if (!isset($panel)) {
+			$panel = null;
+		}
+
+		$out .= $this->picasa_parse_feed($rss, $view, $display, $columns, $panel);
 		$out .= "</div>";
 		return $out;
 	}
@@ -129,7 +134,7 @@ class Photonic_Picasa_Processor extends Photonic_Processor {
 	 * @param null $columns
 	 * @return string
 	 */
-	function picasa_parse_feed($rss, $view = null, $display = 'page', $columns = null) {
+	function picasa_parse_feed($rss, $view = null, $display = 'page', $columns = null, $panel = null) {
 		global $photonic_picasa_position, $photonic_slideshow_library, $photonic_picasa_photo_title_display, $photonic_gallery_panel_items, $photonic_picasa_photo_pop_title_display;
 		global $photonic_picasa_photos_per_row_constraint, $photonic_picasa_photos_constrain_by_count, $photonic_picasa_photos_pop_per_row_constraint, $photonic_picasa_photos_pop_constrain_by_count;
 		if (!isset($photonic_gallery_panel_items) || $photonic_gallery_panel_items == '0' || $photonic_gallery_panel_items == 0) {
@@ -272,8 +277,16 @@ class Photonic_Picasa_Processor extends Photonic_Processor {
 					}
 
 					$rel = '';
-					if ($view != 'album' || $display == 'popup') {
+					if (($view != 'album' || $display == 'popup') && $photonic_slideshow_library != 'prettyphoto') {
 						$rel = "rel='photonic-picasa-stream-$photonic_picasa_position'";
+					}
+					else if (($view != 'album' || $display == 'popup') && $photonic_slideshow_library == 'prettyphoto') {
+						if ($panel == null) {
+							$rel = "rel='photonic-prettyPhoto[photonic-picasa-stream-$photonic_picasa_position]'";
+						}
+						else {
+							$rel = "rel='photonic-prettyPhoto[$panel]'";
+						}
 					}
 
 					$a_pad_class = $display == 'popup' ? $pad_class : '';
@@ -323,7 +336,10 @@ class Photonic_Picasa_Processor extends Photonic_Processor {
 					$out .= "<script type='text/javascript'>\$j('a.launch-gallery-fancybox').each(function() { \$j(this).fancybox({ transitionIn:'elastic', transitionOut:'elastic',speedIn:600,speedOut:200,overlayShow:true,overlayOpacity:0.8,overlayColor:\"#000\",titleShow:Photonic_JS.fbox_show_title,titlePosition:Photonic_JS.fbox_title_position});});</script>";
 				}
 				else if ($photonic_slideshow_library == 'colorbox') {
-					$out .= "<script type='text/javascript'>\$j('a.launch-gallery-colorbox').each(function() { \$j(this).colorbox({ opacity: 0.8, maxWidth: '95%', maxHeight: '95%' });});</script>";
+					$out .= "<script type='text/javascript'>\$j('a.launch-gallery-colorbox').each(function() { \$j(this).colorbox({ opacity: 0.8, maxWidth: '95%', maxHeight: '95%', slideshow: Photonic_JS.slideshow_mode, slideshowSpeed: Photonic_JS.slideshow_interval });});</script>";
+				}
+				else if ($photonic_slideshow_library == 'prettyphoto') {
+					$out .= "<script type='text/javascript'>\$j(\"a[rel^='photonic-prettyPhoto']\").prettyPhoto({ theme: Photonic_JS.pphoto_theme, autoplay_slideshow: Photonic_JS.slideshow_mode, slideshow: parseInt(Photonic_JS.slideshow_interval), show_title: true, social_tools: '', deeplinking: false });</script>";
 				}
 				$out .= "</div>";
 			}
@@ -346,7 +362,7 @@ class Photonic_Picasa_Processor extends Photonic_Processor {
 		$user = substr($panel, 0, strpos($panel, '-'));
 		$album = substr($panel, strpos($panel, '-') + 1);
 		$album = substr($album, strpos($album, '-') + 1);
-		echo $this->get_gallery_images(array('user_id' => $user, 'albumid' => $album, 'view' => 'album', 'display' => 'popup'));
+		echo $this->get_gallery_images(array('user_id' => $user, 'albumid' => $album, 'view' => 'album', 'display' => 'popup', 'panel' => $panel));
 		die();
 	}
 }

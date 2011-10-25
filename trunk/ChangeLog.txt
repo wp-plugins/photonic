@@ -1,3 +1,11 @@
+Version 1.05 - 24th Oct 2011
+============================
+1.	Added support for the PrettyPhoto JS library.
+2.	Added check for _wp_additional_image_sizes; causing errors for some people
+3.	Fixed a bug with the thumbnail_width and thumbnail_height attribute of the plugin. The attributes should have been called thumb_width and thumb_height.
+4.	Added option to launch images in a slideshow mode.
+5.	Fixed a bug that was not accepting border settings for the thumbnails.
+
 Version 1.04 - 21st Sep 2011
 ============================
 1. Added support for 500px.
