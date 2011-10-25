@@ -126,7 +126,7 @@ $fields = array(
 			),
 
 			array(
-				'id' => 'thumbnail_width',
+				'id' => 'thumb_width',
 				'name' => __('Thumbnail width', 'photonic'),
 				'type' => 'text',
 				'std' => 75,
@@ -134,7 +134,7 @@ $fields = array(
 			),
 
 			array(
-				'id' => 'thumbnail_height',
+				'id' => 'thumb_height',
 				'name' => __('Thumbnail height', 'photonic'),
 				'type' => 'text',
 				'std' => 75,

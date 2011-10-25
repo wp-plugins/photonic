@@ -12,12 +12,39 @@ $photonic_generic_options = array(
 		"id" => "slideshow_library",
 		"grouping" => "generic-settings",
 		"type" => "radio",
-		"options" => array("fancybox" => "<a href='http://fancybox.net/'>FancyBox</a> - ~16KB, wide range of effects",
-			"colorbox" => "<a href='http://colorpowered.com/colorbox/'>Colorbox</a> - ~10KB, moderate range of effects",
+		"options" => array("fancybox" => "<a href='http://fancybox.net/'>FancyBox</a> &ndash; ~16KB: Released under MIT and GPL licenses.",
+			"colorbox" => "<a href='http://colorpowered.com/colorbox/'>Colorbox</a> &ndash; ~10KB: Released under the MIT license",
+			"prettyphoto" => "<a href='http://www.no-margin-for-errors.com/projects/prettyphoto-jquery-lightbox-clone/'>PrettyPhoto</a> &ndash; ~23KB:
+				Released under the Creative Commons Attribution 2.5 license, but the  <a href='http://twitter.com/#!/scaron/status/126614077169602560'>author permits distribution with GPL software</a>.",
 //							 "slimbox2" => "<a href='http://www.digitalia.be/software/slimbox2'>Slimbox2</a> - ~10KB, moderate range of effects",
 			"none" => "None"
 		),
 		"std" => "fancybox"),
+
+	array("name" => "Slideshow mode",
+		"desc" => "Selecting this will make your images launch in a slideshow mode automatically upon clicking",
+		"id" => "slideshow_mode",
+		"grouping" => "generic-settings",
+		"type" => "checkbox",
+		"std" => ""
+	),
+
+	array("name" => "Slideshow interval",
+		"desc" => "If slideshows are on, this will control the interval between slides.",
+		"id" => "slideshow_interval",
+		"grouping" => "generic-settings",
+		"type" => "text",
+		"std" => "5000",
+		"hint" => "Please enter a time in milliseconds",
+	),
+
+/*	array("name" => "Carousel mode",
+		"desc" => "Selecting this will make your thumbnails on the page display in a carousel. This doesn't impact thumbnails displayed in a popup.",
+		"id" => "carousel_mode",
+		"grouping" => "generic-settings",
+		"type" => "checkbox",
+		"std" => ""
+	),*/
 
 	array("name" => "Native WP Galleries",
 		"desc" => "Control settings for native WP gallieries, invoked by <code>[gallery id='abc']</code>",
@@ -60,6 +87,21 @@ $photonic_generic_options = array(
 			"over" => "Over the image in the slide box",
 		),
 		"std" => "inside"),
+
+	array("name" => "PrettyPhoto Theme",
+		"desc" => "PrettyPhoto lets you pick one of the following themes:",
+		"id" => "pphoto_theme",
+		"grouping" => "fbox-settings",
+		"type" => "radio",
+		"options" => array(
+			"pp_default" => "Default",
+			"light_rounded" => "Light Rounded",
+			"dark_rounded" => "Dark Rounded",
+			"light_square" => "Light Square",
+			"dark_square" => "Dark Square",
+			"facebook" => "Facebook",
+		),
+		"std" => "pp_default"),
 
 	array("name" => "Flickr / Picasa Popup Panel",
 		"desc" => "Control settings for popup panel",

@@ -35,7 +35,7 @@ class Photonic_Flickr_Processor extends Photonic_Processor {
 	 * @since 1.02
 	 */
 	function get_gallery_images($attr = array()) {
-		global $photonic_flickr_api_key, $photonic_flickr_position;
+		global $photonic_flickr_api_key, $photonic_flickr_position, $photonic_carousel_mode;
 
 		$attr = array_merge(array(
 			'style' => 'default',
@@ -187,8 +187,15 @@ class Photonic_Flickr_Processor extends Photonic_Processor {
 		$query_urls = apply_filters('photonic_flickr_query_urls', $query_urls, $attr);
 		$query = apply_filters('photonic_flickr_query', $query, $attr);
 
+		if (isset($photonic_carousel_mode) && $photonic_carousel_mode == 'on') {
+			$carousel = 'photonic-carousel jcarousel-skin-tango';
+		}
+		else {
+			$carousel = '';
+		}
+
 		foreach ($query_urls as $query_url) {
-			$ret .= "<div class='photonic-flickr-stream'><ul>";
+			$ret .= "<div class='photonic-flickr-stream $carousel'><ul>";
 			$iterator = array();
 			if (is_array($query_url)) {
 				$iterator = $query_url;

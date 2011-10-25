@@ -125,7 +125,13 @@ class Photonic_500px_Processor extends Photonic_Processor {
 				$ret .= "<li class='photonic-500px-image $pad_class'>";
 				$a_start = $photonic_500px_disable_title_link == 'on' ? "" : "<a href=\"http://500px.com/photo/".$photo->id."\">";
 				$a_end = $photonic_500px_disable_title_link == 'on' ? "" : "</a>";
-				$ret .= "<a href='$first/$main_size$extension' class='launch-gallery-$photonic_slideshow_library $photonic_slideshow_library' rel='photonic-500px-stream-$photonic_500px_position' title='$a_start".esc_attr($photo->name)."$a_end'>";
+				if ($photonic_slideshow_library == 'prettyphoto') {
+					$rel = "photonic-prettyPhoto[photonic-500px-stream-$photonic_500px_position]";
+				}
+				else {
+					$rel = "photonic-500px-stream-$photonic_500px_position";
+				}
+				$ret .= "<a href='$first/$main_size$extension' class='launch-gallery-$photonic_slideshow_library $photonic_slideshow_library' rel='$rel' title='$a_start".esc_attr($photo->name)."$a_end'>";
 				$ret .= "<img src='$first/$thumb_size$extension' alt='".esc_attr($photo->name)."' />";
 				$ret .= "</a>";
 

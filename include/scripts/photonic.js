@@ -123,6 +123,10 @@ $j(document).ready(function() {
 		}
 	});
 
+	if (Photonic_JS.slideshow_library == 'fancybox' && Photonic_JS.slideshow_mode) {
+		setInterval($j.fancybox.next, parseInt(Photonic_JS.slideshow_interval));
+	}
+
 	$j('a.launch-gallery-fancybox').each(function() {
 		$j(this).fancybox({
 			transitionIn	:	'elastic',
@@ -137,6 +141,17 @@ $j(document).ready(function() {
 		});
 	});
 
+	if ($j.prettyPhoto) {
+		$j("a[rel^='photonic-prettyPhoto']").prettyPhoto({
+			theme: Photonic_JS.pphoto_theme,
+			autoplay_slideshow: Photonic_JS.slideshow_mode,
+			slideshow: Photonic_JS.slideshow_interval,
+			show_title: true,
+			social_tools: '',
+			deeplinking: false
+		});
+	}
+
 	if (Photonic_JS.slideshow_library == 'slimbox2') {
 		$j('a.launch-gallery-slimbox2').slimbox({
 			overlayOpacity: 0.8
@@ -147,7 +162,9 @@ $j(document).ready(function() {
 		$j(this).colorbox({
 			opacity: 0.8,
 			maxWidth: '95%',
-			maxHeight: '95%'
+			maxHeight: '95%',
+			slideshow: Photonic_JS.slideshow_mode,
+			slideshowSpeed: Photonic_JS.slideshow_interval
 		});
 	});
 
@@ -304,6 +321,12 @@ $j(document).ready(function() {
 		});
 	}
 
+	if ($j.jcarousel) {
+		$j('.photonic-carousel').jcarousel({
+			// Configuration goes here
+		});
+	}
+
 	/**
 	 * Displays all photos in a Flickr Set. Invoked when the Set is being fetched for the first time for display in a popup.
 	 *
@@ -370,7 +393,10 @@ $j(document).ready(function() {
 					script.text = "$j('a.launch-gallery-fancybox').each(function() { $j(this).fancybox({ transitionIn:'elastic', transitionOut:'elastic',speedIn:600,speedOut:200,overlayShow:true,overlayOpacity:0.8,overlayColor:\"#000\",titleShow:Photonic_JS.fbox_show_title,titlePosition:Photonic_JS.fbox_title_position});});";
 				}
 				else if (Photonic_JS.slideshow_library == 'colorbox') {
-					script.text = "$j('a.launch-gallery-colorbox').each(function() { $j(this).colorbox({ opacity: 0.8, maxWidth: '95%', maxHeight: '95%' });});";
+					script.text = "$j('a.launch-gallery-colorbox').each(function() { $j(this).colorbox({ opacity: 0.8, maxWidth: '95%', maxHeight: '95%', slideshow: Photonic_JS.slideshow_mode, slideshowSpeed: Photonic_JS.slideshow_interval });});";
+				}
+				else if (Photonic_JS.slideshow_library == 'prettyphoto') {
+					script.text = "$j(\"a[rel^='photonic-prettyPhoto']\").prettyPhoto({ theme: Photonic_JS.pphoto_theme, autoplay_slideshow: Photonic_JS.slideshow_mode, slideshow: parseInt(Photonic_JS.slideshow_interval), show_title: true, social_tools: '', deeplinking: false }); ";
 				}
 				div_content.appendChild(script);
 			}
@@ -407,6 +433,9 @@ $j(document).ready(function() {
 
 				var a = document.createElement('a');
 				a.rel = 'lightbox-' + div_content.id;
+				if (Photonic_JS.slideshow_library == 'prettyphoto') {
+					a.rel = 'photonic-prettyPhoto[' + a.rel + ']';
+				}
 				if (Photonic_JS.slideshow_library != 'none') {
 					a.className = 'launch-gallery-' + Photonic_JS.slideshow_library + " " + Photonic_JS.slideshow_library + " " + col_class;
 					a.href = orig;
@@ -572,7 +601,10 @@ $j(document).ready(function() {
 					script.text = "$j('a.launch-gallery-fancybox').each(function() { $j(this).fancybox({ transitionIn:'elastic', transitionOut:'elastic',speedIn:600,speedOut:200,overlayShow:true,overlayOpacity:0.8,overlayColor:\"#000\",titleShow:Photonic_JS.fbox_show_title,titlePosition:Photonic_JS.fbox_title_position});});";
 				}
 				else if (Photonic_JS.slideshow_library == 'colorbox') {
-					script.text = "$j('a.launch-gallery-colorbox').each(function() { $j(this).colorbox({ opacity: 0.8, maxWidth: '95%', maxHeight: '95%' });});";
+					script.text = "$j('a.launch-gallery-colorbox').each(function() { $j(this).colorbox({ opacity: 0.8, maxWidth: '95%', maxHeight: '95%', slideshow: Photonic_JS.slideshow_mode, slideshowSpeed: Photonic_JS.slideshow_interval });});";
+				}
+				else if (Photonic_JS.slideshow_library == 'prettyphoto') {
+					script.text = "$j(\"a[rel^='photonic-prettyPhoto']\").prettyPhoto({ theme: Photonic_JS.pphoto_theme, autoplay_slideshow: Photonic_JS.slideshow_mode, slideshow: parseInt(Photonic_JS.slideshow_interval), show_title: true, social_tools: '', deeplinking: false }); ";
 				}
 				div_content.appendChild(script);
 			}
@@ -609,6 +641,9 @@ $j(document).ready(function() {
 
 				var a = document.createElement('a');
 				a.rel = 'lightbox-' + div_content.id;
+				if (Photonic_JS.slideshow_library == 'prettyphoto') {
+					a.rel = 'photonic-prettyPhoto[' + a.rel + ']';
+				}
 				if (Photonic_JS.slideshow_library != 'none') {
 					a.className = 'launch-gallery-' + Photonic_JS.slideshow_library + " " + Photonic_JS.slideshow_library + " " + col_class;
 					a.href = orig;
@@ -957,6 +992,9 @@ function photonicJsonFlickrStreamApi(rsp) {
 	Photonic_JS.flickr_position = position;
 	var main_size = Photonic_JS.flickr_main_size == 'none' ? '' : '_' + Photonic_JS.flickr_main_size;
 	var a_rel = 'lightbox-photonic-flickr-stream-' + position;
+	if (Photonic_JS.slideshow_library == 'prettyphoto') {
+		a_rel = 'photonic-prettyPhoto[' + a_rel + ']';
+	}
 
 	if (rsp.stat != "ok") {
 		return;
