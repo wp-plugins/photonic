@@ -153,7 +153,7 @@
 			pp_titles = (isSet) ? jQuery.map(matchedObjects, function(n, i){ if($(n).attr('rel').indexOf(theRel) != -1) return ($(n).find('img').attr('alt')) ? $(n).find('img').attr('alt') : ""; }) : $.makeArray($(this).find('img').attr('alt'));
 			// Change by Sayontan to support "data" in addition to "title"
 			//pp_descriptions = (isSet) ? jQuery.map(matchedObjects, function(n, i){ if($(n).attr('rel').indexOf(theRel) != -1) return ($(n).attr('title')) ? $(n).attr('title') : ""; }) : $.makeArray($(this).attr('title'));
-			pp_descriptions = (isSet) ? jQuery.map(matchedObjects, function(n, i){ if($(n).attr('rel').indexOf(theRel) != -1) return ($(n).attr('title')) ? $(n).attr('title') : ($(this).data('title') ? $(this).data('title') : ''); }) : $.makeArray($(this).attr('title') ? $(this).attr('title') : ($(this).data('title') ? $(this).data('title') : ''));
+			pp_descriptions = (isSet) ? jQuery.map(matchedObjects, function(n, i){ if($(n).attr('rel').indexOf(theRel) != -1) return ($(n).attr('title') ? $(n).attr('title') : ($(n).data('title') ? $(n).data('title') : '')); }) : $.makeArray($(this).attr('title') ? $(this).attr('title') : ($(this).data('title') ? $(this).data('title') : ''));
 			
 			if(pp_images.length > 30) settings.overlay_gallery = false;
 			

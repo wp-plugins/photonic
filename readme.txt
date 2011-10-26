@@ -4,7 +4,7 @@ Donate link: http://aquoid.com/news/plugins/photonic/
 Tags: gallery, flickr, picasa, 500px, fancybox, colorbox, prettyphoto, slideshow, jquery, shortcode
 Requires at least: WP 3.1
 Tested up to: WP 3.2.1
-Stable tag: 1.05
+Stable tag: 1.06
 
 A plugin that enhances the capabilities of the native gallery shortcode in WordPress by letting you show Flickr, Picasa and 500px photos.
 
@@ -102,6 +102,12 @@ Yes, but only for the plugin front-end. The admin panel is not translated at thi
 in the third-party JS scripts are not translated.
 
 == Changelog ==
+
+= 1.06 =
+
+*	Fixed an issue with the 500px.com extension, which had to be changed to invoke HTTPS instead of HTTP.
+*	Added support for the "sort" parameter for 500px.
+*	Fixed an issue with the PrettyPhoto library where you couldn't see the "View in Flickr" link.
 
 = 1.05 =
 
