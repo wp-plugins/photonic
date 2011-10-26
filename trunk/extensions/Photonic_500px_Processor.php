@@ -20,6 +20,7 @@ class Photonic_500px_Processor extends Photonic_Processor {
 	 * - rpp: Number of photos
 	 * - thumb_size: Size of the thumbnail. Can be 1 | 2 | 3, which correspond to 75 &times; 75 px, 140 &times; 140 px and 280 &times; 280 px respectively.
 	 * - main_size: Size of the opened main photo. Can be 3 | 4, which correspond to 280 &times; 280 px and the full size respectively.
+	 * - sort: created_at | rating | times_viewed | taken_at
 	 *
 	 * @param array $attr
 	 * @return string|void
@@ -42,7 +43,7 @@ class Photonic_500px_Processor extends Photonic_Processor {
 		}
 
 		$user_feature = false;
-		$query_url = 'http://api.500px.com/v1/photos?consumer_key='.$photonic_500px_api_key;
+		$query_url = 'https://api.500px.com/v1/photos?consumer_key='.$photonic_500px_api_key;
 		if (isset($feature) && trim($feature) != '') {
 			$feature = esc_html(trim($feature));
 			$query_url .= '&feature='.$feature;
@@ -77,6 +78,11 @@ class Photonic_500px_Processor extends Photonic_Processor {
 			$query_url .= '&rpp='.trim($rpp);
 		}
 
+		if (isset($sort) && trim($sort) != '') {
+			$sort = trim($sort);
+			$query_url .= '&sort='.trim($sort);
+		}
+
 		// Allow users to define additional query parameters
 		$query_url = apply_filters('photonic_500px_query', $query_url, $attr);
 
@@ -90,7 +96,8 @@ class Photonic_500px_Processor extends Photonic_Processor {
 	function process_response($url, $thumb_size = '1', $main_size = '4', $columns = 'auto') {
 		global $photonic_slideshow_library, $photonic_500px_position, $photonic_500px_photos_per_row_constraint, $photonic_500px_photos_constrain_by_count, $photonic_500px_disable_title_link, $photonic_500px_photo_title_display;
 
-		$response = wp_remote_request($url);
+		$response = wp_remote_request($url, array('sslverify' => false));
+
 		if (is_wp_error($response)) {
 			return "";
 		}

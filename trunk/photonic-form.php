@@ -383,6 +383,18 @@ $fields = array(
 			),
 
 			array(
+				'id' => 'sort',
+				'name' => __('Sort by', 'photonic'),
+				'type' => 'select',
+				'options' => array(
+					'created_at' => __('Created at', 'photonic'),
+					'rating' => __('Rating', 'photonic'),
+					'times_viewed' => __('Times viewed', 'photonic'),
+					'taken_at' => __('Taken at', 'photonic'),
+				),
+			),
+
+			array(
 				'id' => 'rpp',
 				'name' => __('Number of photos to show', 'photonic')."</a>",
 				'type' => 'text',

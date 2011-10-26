@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: Photonic Flickr+Picasa+500px Gallery
+ * Plugin Name: Photonic Gallery for Flickr, Picasa and 500px
  * Plugin URI: http://aquoid.com/news/plugins/photonic/
  * Description: Extends the native gallery shortcode to support Flickr, Picasa and 500px. JS libraries like Fancybox and Colorbox are supported. The plugin also helps convert a regular WP gallery into a slideshow.
- * Version: 1.05
+ * Version: 1.06
  * Author: Sayontan Sinha
  * Author URI: http://mynethome.net/blog
  * License: GNU General Public License (GPL), v2 (or newer)
@@ -20,7 +20,7 @@ class Photonic {
 	function Photonic() {
 		global $photonic_options, $photonic_setup_options, $photonic_is_ie6;
 		if (!defined('PHOTONIC_VERSION')) {
-			define('PHOTONIC_VERSION', '1.0.5');
+			define('PHOTONIC_VERSION', '1.06');
 		}
 
 		require_once(plugin_dir_path(__FILE__)."/options/photonic-options.php");
