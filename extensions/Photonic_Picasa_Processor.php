@@ -132,6 +132,7 @@ class Photonic_Picasa_Processor extends Photonic_Processor {
 	 * @param null $view
 	 * @param string $display
 	 * @param null $columns
+	 * @param null $panel
 	 * @return string
 	 */
 	function picasa_parse_feed($rss, $view = null, $display = 'page', $columns = null, $panel = null) {
@@ -223,8 +224,11 @@ class Photonic_Picasa_Processor extends Photonic_Processor {
 
 			if (isset($thumb) && isset($href) && isset($gphotoid)) {
 				// Set image caption
-				if (!isset($caption) || (isset($caption) && trim($caption) == "")) {
+/*				if (!isset($caption) || (isset($caption) && trim($caption) == "")) {
 					$caption = $filename;
+				}*/
+				if (!isset($caption)) {
+					$caption = '';
 				}
 
 				// Keep count of images
@@ -339,7 +343,7 @@ class Photonic_Picasa_Processor extends Photonic_Processor {
 					$out .= "<script type='text/javascript'>\$j('a.launch-gallery-colorbox').each(function() { \$j(this).colorbox({ opacity: 0.8, maxWidth: '95%', maxHeight: '95%', slideshow: Photonic_JS.slideshow_mode, slideshowSpeed: Photonic_JS.slideshow_interval });});</script>";
 				}
 				else if ($photonic_slideshow_library == 'prettyphoto') {
-					$out .= "<script type='text/javascript'>\$j(\"a[rel^='photonic-prettyPhoto']\").prettyPhoto({ theme: Photonic_JS.pphoto_theme, autoplay_slideshow: Photonic_JS.slideshow_mode, slideshow: parseInt(Photonic_JS.slideshow_interval), show_title: true, social_tools: '', deeplinking: false });</script>";
+					$out .= "<script type='text/javascript'>\$j(\"a[rel^='photonic-prettyPhoto']\").prettyPhoto({ theme: Photonic_JS.pphoto_theme, autoplay_slideshow: Photonic_JS.slideshow_mode, slideshow: parseInt(Photonic_JS.slideshow_interval), show_title: false, social_tools: '', deeplinking: false });</script>";
 				}
 				$out .= "</div>";
 			}

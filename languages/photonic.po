@@ -36,12 +36,22 @@ msgstr ""
 
 #. Text in function
 #: photonic/photonic-form.php:55
+msgid "Album"
+msgstr ""
+
+#. Text in function
+#: photonic/photonic-form.php:55
 msgid "Albums"
 msgstr ""
 
 #. Text in function
 #: photonic/photonic-form.php:55
 msgid "All Categories"
+msgstr ""
+
+#. Text in function
+#: photonic/photonic-form.php:55
+msgid "All albums"
 msgstr ""
 
 #. Text in function
@@ -271,6 +281,11 @@ msgstr ""
 
 #. Text in function
 #: photonic/photonic-form.php:55
+msgid "If your SmugMug URL is http://joe-sixpack.smugmug.com, this is \"joe-sixpack\". Required if the \"Display\" is \"Tree\" or \"All albums\"."
+msgstr ""
+
+#. Text in function
+#: photonic/photonic-form.php:55
 msgid "In pixels"
 msgstr ""
 
@@ -321,6 +336,11 @@ msgstr ""
 
 #. Text in function
 #: photonic/photonic-form.php:55
+msgid "Nickname"
+msgstr ""
+
+#. Text in function
+#: photonic/photonic-form.php:55
 msgid "No thumbnails - only slideshow"
 msgstr ""
 
@@ -345,12 +365,12 @@ msgid "Only thumbnails - click for slideshow"
 msgstr ""
 
 #. Text in function
-#: photonic/photonic.php:542
+#: photonic/photonic.php:571
 msgid "Original height"
 msgstr ""
 
 #. Text in function
-#: photonic/photonic.php:542
+#: photonic/photonic.php:571
 msgid "Original width"
 msgstr ""
 
@@ -406,6 +426,11 @@ msgstr ""
 
 #. Text in function
 #: photonic/photonic-form.php:55
+msgid "Required if you are showing \"Single Album\" above. If your gallery URL is http://nick-name.smugmug.com/gallery/<b>abcdefgh_123456</b>, this is <b>abcdefgh_123456</b>"
+msgstr ""
+
+#. Text in function
+#: photonic/photonic-form.php:55
 msgid "Scroll Down"
 msgstr ""
 
@@ -441,6 +466,11 @@ msgstr ""
 
 #. Text in function
 #: photonic/photonic-form.php:55
+msgid "Single Album"
+msgstr ""
+
+#. Text in function
+#: photonic/photonic-form.php:55
 msgid "Sizes defined by your theme. Applies to slideshows only. Avoid loading large sizes to reduce page loads."
 msgstr ""
 
@@ -472,6 +502,11 @@ msgstr ""
 #. Text in function
 #: photonic/photonic-form.php:55
 msgid "Slideshow Height"
+msgstr ""
+
+#. Text in function
+#: photonic/photonic-form.php:55
+msgid "SmugMug"
 msgstr ""
 
 #. Text in function
@@ -562,6 +597,11 @@ msgstr ""
 #. Text in function
 #: photonic/photonic-form.php:55
 msgid "Travel"
+msgstr ""
+
+#. Text in function
+#: photonic/photonic-form.php:55
+msgid "Tree"
 msgstr ""
 
 #. Text in function
@@ -657,6 +697,11 @@ msgstr ""
 #. Text in function
 #: photonic/photonic-form.php:55
 msgid "You have to define your Flickr API Key under Settings &rarr; Photonic &rarr; Flickr &rarr; Flickr Settings"
+msgstr ""
+
+#. Text in function
+#: photonic/photonic-form.php:55
+msgid "You have to define your SmugMug API Key under Settings &rarr; Photonic &rarr; SmugMug &rarr; SmugMug Settings"
 msgstr ""
 
 #. Text in function

@@ -4,12 +4,13 @@ class Photonic_Options_Manager {
 	var $option_structure, $previous_displayed_section, $file, $tab_name;
 
 	function Photonic_Options_Manager($file) {
-		global $photonic_setup_options, $photonic_generic_options, $photonic_flickr_options, $photonic_picasa_options, $photonic_500px_options;
+		global $photonic_setup_options, $photonic_generic_options, $photonic_flickr_options, $photonic_picasa_options, $photonic_500px_options, $photonic_smugmug_options;
 		$options_page_array = array(
 			'generic-options.php' => $photonic_generic_options,
 			'flickr-options.php' => $photonic_flickr_options,
 			'picasa-options.php' => $photonic_picasa_options,
 			'500px-options.php' => $photonic_500px_options,
+			'smugmug-options.php' => $photonic_smugmug_options,
 		);
 
 		$tab_name_array = array(
@@ -17,6 +18,7 @@ class Photonic_Options_Manager {
 			'flickr-options.php' => 'Flickr Options',
 			'picasa-options.php' => 'Picasa Options',
 			'500px-options.php' => '500px Options',
+			'smugmug-options.php' => 'SmugMug Options',
 		);
 
 		$this->file = $file;
@@ -96,10 +98,11 @@ class Photonic_Options_Manager {
 				</div>
 				<div class="photonic-options-header-bar fix">
 					<ul class='photonic-options-header-bar'>
-						<li><a class='photonic-load-page <?php if ($this->tab == 'generic-options.php') echo 'current-tab'; ?>' id='photonic-options-generic' href='?page=photonic-options-manager&amp;tab=generic-options.php'>Generic Options</a></li>
-						<li><a class='photonic-load-page <?php if ($this->tab == 'flickr-options.php') echo 'current-tab'; ?>' id='photonic-options-flickr' href='?page=photonic-options-manager&amp;tab=flickr-options.php'>Flickr</a></li>
-						<li><a class='photonic-load-page <?php if ($this->tab == 'picasa-options.php') echo 'current-tab'; ?>' id='photonic-options-picasa' href='?page=photonic-options-manager&amp;tab=picasa-options.php'>Picasa</a></li>
-						<li><a class='photonic-load-page <?php if ($this->tab == '500px-options.php') echo 'current-tab'; ?>' id='photonic-options-500px' href='?page=photonic-options-manager&amp;tab=500px-options.php'>500px</a></li>
+						<li><a class='photonic-load-page <?php if ($this->tab == 'generic-options.php') echo 'current-tab'; ?>' id='photonic-options-generic' href='?page=photonic-options-manager&amp;tab=generic-options.php'><span class="icon">&nbsp;</span> Generic Options</a></li>
+						<li><a class='photonic-load-page <?php if ($this->tab == 'flickr-options.php') echo 'current-tab'; ?>' id='photonic-options-flickr' href='?page=photonic-options-manager&amp;tab=flickr-options.php'><span class="icon">&nbsp;</span> Flickr</a></li>
+						<li><a class='photonic-load-page <?php if ($this->tab == 'picasa-options.php') echo 'current-tab'; ?>' id='photonic-options-picasa' href='?page=photonic-options-manager&amp;tab=picasa-options.php'><span class="icon">&nbsp;</span> Picasa</a></li>
+						<li><a class='photonic-load-page <?php if ($this->tab == '500px-options.php') echo 'current-tab'; ?>' id='photonic-options-500px' href='?page=photonic-options-manager&amp;tab=500px-options.php'><span class="icon">&nbsp;</span> 500px</a></li>
+						<li><a class='photonic-load-page <?php if ($this->tab == 'smugmug-options.php') echo 'current-tab'; ?>' id='photonic-options-smugmug' href='?page=photonic-options-manager&amp;tab=smugmug-options.php'><span class="icon">&nbsp;</span> SmugMug</a></li>
 					</ul>
 				</div>
 			</div>
@@ -411,6 +414,9 @@ class Photonic_Options_Manager {
 					add_settings_field($value['id'], '', array(&$this, "create_section_for_ajax_button"), $page, $value['grouping'], $value);
 					break;
 
+				case 'oauth-authorize':
+					add_settings_field($value['id'], '', array(&$this, "create_section_for_oauth_authorization"), $page, $value['grouping'], $value);
+					break;
 			}
 		}
 	}
@@ -989,6 +995,12 @@ class Photonic_Options_Manager {
 	function create_section_for_ajax_button($value) {
 		$this->create_opening_tag($value);
 		//echo "<a href='' "
+		$this->create_closing_tag($value);
+	}
+
+	function create_section_for_oauth_authorization($value) {
+		$this->create_opening_tag($value);
+		echo "<a class='button oauth-authorize smugmug' href='".$value['link']."'>".$value['std']."</a>";
 		$this->create_closing_tag($value);
 	}
 

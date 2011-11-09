@@ -1,3 +1,8 @@
+Version 1.07 - 09th Nov 2011
+============================
+1.	Added support for SmugMug
+2.	Modified the Picasa plugin to not display the file name if no title is found.
+
 Version 1.06 - 25th Oct 2011
 ============================
 1.	Fixed an issue with the 500px.com extension, which had to be changed to invoke HTTPS instead of HTTP.

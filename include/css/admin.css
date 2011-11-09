@@ -42,13 +42,15 @@ div.donate ul li.coffee { background: #444 url("../images/nav-bar.png") no-repea
 div.photonic-options-header-bar { text-align: center; width: 100%; display: block; border-top: 1px dotted #666; }
 ul.photonic-options-header-bar { margin: 5px auto; }
 ul.photonic-options-header-bar li { display: inline; margin: 2px 5px; padding: 5px 0; }
-ul.photonic-options-header-bar li a { text-decoration: none; font-weight: bold; line-height: 30px; }
-.photonic-options-header-bar a, .photonic-options-header-bar a:visited { color: #6cf; padding-left: 20px; }
+ul.photonic-options-header-bar li a { text-decoration: none; font-weight: bold; line-height: 16px; }
+.photonic-options-header-bar a, .photonic-options-header-bar a:visited { color: #6cf; padding-left: 5px; }
 .photonic-options-header-bar a:hover, .photonic-options-header-bar a:active, .photonic-options-header-bar a.current-tab { color: #ff6600; }
-.photonic-options-header-bar a#photonic-options-generic { background: transparent url("../images/nav-menu.png") no-repeat 0 0; }
-.photonic-options-header-bar a#photonic-options-flickr { background: transparent url("../images/nav-menu.png") no-repeat 0 -16px; }
-.photonic-options-header-bar a#photonic-options-picasa { background: transparent url("../images/nav-menu.png") no-repeat 0 -32px; }
-.photonic-options-header-bar a#photonic-options-500px { background: transparent url("../images/nav-menu.png") no-repeat 0 -48px; }
+.photonic-options-header-bar .icon { background: transparent url("../images/nav-menu.png") no-repeat; width: 16px; height: 16px; display: inline-block; }
+#photonic-options-generic .icon { background-position: 0 0; }
+#photonic-options-flickr .icon { background-position: 0 -16px; }
+#photonic-options-picasa .icon { background-position: 0 -32px; }
+#photonic-options-500px .icon { background-position: 0 -48px; }
+#photonic-options-smugmug .icon { background-position: 0 -64px; }
 
 .fix:after { content:"."; display:block; height:0; clear:both; visibility:hidden; }
 .fix { display:block; }

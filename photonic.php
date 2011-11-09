@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: Photonic Gallery for Flickr, Picasa and 500px
+ * Plugin Name: Photonic Gallery for Flickr, Picasa, SmugMug and 500px
  * Plugin URI: http://aquoid.com/news/plugins/photonic/
- * Description: Extends the native gallery shortcode to support Flickr, Picasa and 500px. JS libraries like Fancybox and Colorbox are supported. The plugin also helps convert a regular WP gallery into a slideshow.
- * Version: 1.06
+ * Description: Extends the native gallery shortcode to support Flickr, Picasa, SmugMug and 500px. JS libraries like Fancybox, Colorbox and PrettyPhoto are supported. The plugin also helps convert a regular WP gallery into a slideshow.
+ * Version: 1.07
  * Author: Sayontan Sinha
  * Author URI: http://mynethome.net/blog
  * License: GNU General Public License (GPL), v2 (or newer)
@@ -20,7 +20,11 @@ class Photonic {
 	function Photonic() {
 		global $photonic_options, $photonic_setup_options, $photonic_is_ie6;
 		if (!defined('PHOTONIC_VERSION')) {
-			define('PHOTONIC_VERSION', '1.06');
+			define('PHOTONIC_VERSION', '1.07');
+		}
+
+		if (!defined('PHOTONIC_PATH')) {
+			define('PHOTONIC_PATH', plugin_dir_path(__FILE__));
 		}
 
 		require_once(plugin_dir_path(__FILE__)."/options/photonic-options.php");
@@ -62,6 +66,9 @@ class Photonic {
 
 		add_action('wp_ajax_photonic_picasa_display_album', array(&$this, 'picasa_display_album'));
 		add_action('wp_ajax_nopriv_photonic_picasa_display_album', array(&$this, 'picasa_display_album'));
+
+		add_action('wp_ajax_photonic_smug_display_album', array(&$this, 'smug_display_album'));
+		add_action('wp_ajax_nopriv_photonic_smug_display_album', array(&$this, 'smug_display_album'));
 
 		add_filter('media_upload_tabs', array(&$this, 'media_upload_tabs'));
 		add_action('media_upload_photonic', array(&$this, 'media_upload_photonic'));
@@ -135,6 +142,7 @@ class Photonic {
 		global $photonic_flickr_photos_pop_per_row_constraint, $photonic_flickr_photos_pop_constrain_by_count, $photonic_flickr_photo_pop_title_display, $photonic_flickr_photo_title_display;
 		global $photonic_picasa_photo_title_display, $photonic_picasa_photo_pop_title_display, $photonic_wp_thumbnail_title_display;
 		global $photonic_500px_photos_per_row_constraint, $photonic_500px_photos_constrain_by_count, $photonic_500px_photos_pop_per_row_constraint, $photonic_500px_photos_pop_constrain_by_count, $photonic_500px_photo_title_display;
+		global $photonic_smug_photo_title_display, $photonic_smug_photo_pop_title_display, $photonic_smug_albums_album_title_display;
 
 		wp_enqueue_script('photonic', plugins_url('include/scripts/photonic.js', __FILE__), array('jquery'), $this->version);
 		wp_deregister_script('jquery-cycle');
@@ -213,6 +221,9 @@ class Photonic {
 			'picasa_photo_pop_title_display' => $photonic_picasa_photo_pop_title_display,
 			'wp_thumbnail_title_display' => $photonic_wp_thumbnail_title_display,
 			'Dpx_photo_title_display' => $photonic_500px_photo_title_display,
+			'smug_photo_title_display' => $photonic_smug_photo_title_display,
+			'smug_photo_pop_title_display' => $photonic_smug_photo_pop_title_display,
+			'smug_albums_album_title_display' => $photonic_smug_albums_album_title_display,
 
 			'slideshow_library' => $photonic_slideshow_library,
 			'slideshow_mode' => (isset($photonic_slideshow_mode) && $photonic_slideshow_mode == 'on') ? true : false,
@@ -286,6 +297,7 @@ class Photonic {
 	function print_scripts() {
 		global $photonic_flickr_collection_set_constrain_by_padding, $photonic_flickr_photos_constrain_by_padding, $photonic_flickr_photos_pop_constrain_by_padding, $photonic_flickr_galleries_constrain_by_padding;
 		global $photonic_picasa_photos_pop_constrain_by_padding, $photonic_picasa_photos_constrain_by_padding, $photonic_wp_slide_align, $photonic_500px_photos_constrain_by_padding;
+		global $photonic_smug_photos_constrain_by_padding, $photonic_smug_photos_pop_constrain_by_padding, $photonic_smug_albums_album_constrain_by_padding;
 		$css = '<style type="text/css">'."\n";
 		$css .= ".photonic-pad-photosets { margin: {$photonic_flickr_collection_set_constrain_by_padding}px; }\n";
 		$css .= ".photonic-pad-galleries { margin: {$photonic_flickr_galleries_constrain_by_padding}px; }\n";
@@ -297,16 +309,24 @@ class Photonic {
 
 		$css .= ".photonic-500px-stream .photonic-pad-photos { margin: 0 {$photonic_500px_photos_constrain_by_padding}px; }\n";
 		$css .= ".photonic-500px-stream img { ".$this->get_border_css('photonic_500px_photo_thumb_border').$this->get_padding_css('photonic_500px_photo_thumb_padding')." }\n";
+
+		$css .= ".photonic-pad-albums { margin: {$photonic_smug_albums_album_constrain_by_padding}px; }\n";
+		$css .= ".photonic-smug-stream .photonic-pad-photos { margin: 0 {$photonic_smug_photos_constrain_by_padding}px; }\n";
+		$css .= ".photonic-smug-stream img { ".$this->get_border_css('photonic_smug_photo_thumb_border').$this->get_padding_css('photonic_smug_photo_thumb_padding')." }\n";
+		$css .= ".photonic-panel .photonic-smug-image img { ".$this->get_border_css('photonic_smug_photo_pop_thumb_border').$this->get_padding_css('photonic_smug_photo_pop_thumb_padding')." }\n";
+
 		$css .= ".photonic-panel { ".$this->get_bg_css('photonic_flickr_gallery_panel_background').$this->get_border_css('photonic_flickr_set_popup_thumb_border')." }\n";
 
 		$css .= ".photonic-panel .photonic-flickr-image img { ".$this->get_border_css('photonic_flickr_pop_photo_thumb_border').$this->get_padding_css('photonic_flickr_pop_photo_thumb_padding')." }\n";
 		$css .= ".photonic-flickr-panel .photonic-pad-photos { margin: 0 {$photonic_flickr_photos_pop_constrain_by_padding}px; }\n";
 		$css .= ".photonic-picasa-panel .photonic-pad-photos { margin: 0 {$photonic_picasa_photos_pop_constrain_by_padding}px; }\n";
+		$css .= ".photonic-smug-panel .photonic-pad-photos { margin: 0 {$photonic_smug_photos_pop_constrain_by_padding}px; }\n";
 		$css .= ".photonic-flickr-coll-thumb img { ".$this->get_border_css('photonic_flickr_coll_thumb_border').$this->get_padding_css('photonic_flickr_coll_thumb_padding')." }\n";
 		$css .= ".photonic-flickr-set .photonic-flickr-set-solo-thumb img { ".$this->get_border_css('photonic_flickr_set_alone_thumb_border').$this->get_padding_css('photonic_flickr_set_alone_thumb_padding')." }\n";
 		$css .= ".photonic-flickr-set-thumb img { ".$this->get_border_css('photonic_flickr_sets_set_thumb_border').$this->get_padding_css('photonic_flickr_sets_set_thumb_padding')." }\n";
 		$css .= ".photonic-flickr-set-pop-thumb img { ".$this->get_border_css('photonic_flickr_set_pop_thumb_border').$this->get_padding_css('photonic_flickr_set_pop_thumb_padding')." }\n";
 		$css .= ".photonic-flickr-gallery-pop-thumb img { ".$this->get_border_css('photonic_flickr_gallery_pop_thumb_border').$this->get_padding_css('photonic_flickr_gallery_pop_thumb_padding')." }\n";
+		$css .= ".photonic-smug-album-thumb img { ".$this->get_border_css('photonic_smug_albums_album_thumb_border').$this->get_padding_css('photonic_smug_albums_album_thumb_padding')." }\n";
 
 		if (checked($photonic_wp_slide_align, 'on', false)) {
 			$css .= ".photonic-post-gallery-img img {margin: auto; display: block}\n";
@@ -335,6 +355,7 @@ class Photonic {
 		$this->register_extension('Photonic_Picasa_Processor', plugin_dir_path(__FILE__)."/extensions/Photonic_Picasa_Processor.php");
 		$this->register_extension('Photonic_Native_Processor', plugin_dir_path(__FILE__)."/extensions/Photonic_Native_Processor.php");
 		$this->register_extension('Photonic_500px_Processor', plugin_dir_path(__FILE__)."/extensions/Photonic_500px_Processor.php");
+		$this->register_extension('Photonic_SmugMug_Processor', plugin_dir_path(__FILE__)."/extensions/Photonic_SmugMug_Processor.php");
 	}
 
 	public function register_extension($extension, $path) {
@@ -356,7 +377,7 @@ class Photonic {
 	 * @return string
 	 */
 	function modify_gallery($content, $attr = array()) {
-		global $post, $photonic_flickr_gallery, $photonic_picasa_gallery, $photonic_native_gallery, $photonic_500px_gallery;
+		global $post, $photonic_flickr_gallery, $photonic_picasa_gallery, $photonic_native_gallery, $photonic_500px_gallery, $photonic_smugmug_gallery;
 		if ($attr == null) {
 			$attr = array();
 		}
@@ -369,6 +390,8 @@ class Photonic {
 		), $attr);
 
 		extract($attr);
+
+		$type = strtolower($type);
 
 		switch ($type) {
 			case 'flickr':
@@ -388,6 +411,12 @@ class Photonic {
 					$photonic_500px_gallery = new Photonic_500px_Processor();
 				}
 				$images = $photonic_500px_gallery->get_gallery_images($attr);
+				break;
+			case 'smugmug':
+				if (!isset($photonic_smugmug_gallery)) {
+					$photonic_smugmug_gallery = new Photonic_SmugMug_Processor();
+				}
+				$images = $photonic_smugmug_gallery->get_gallery_images($attr);
 				break;
 			case 'default':
 			default:
@@ -589,13 +618,20 @@ class Photonic {
 			$photonic_picasa_gallery = new Photonic_Picasa_Processor();
 		}
 		$photonic_picasa_gallery->display_album();
-/*		$panel = $_POST['panel'];
-		$panel = substr($panel, 28);
-		$user = substr($panel, 0, strpos($panel, '-'));
-		$album = substr($panel, strpos($panel, '-') + 1);
-		$album = substr($album, strpos($album, '-') + 1);
-		echo $this->get_picasa_gallery_images(array('user_id' => $user, 'albumid' => $album, 'view' => 'album', 'display' => 'popup'));
-		die();*/
+	}
+
+	/**
+	 * If a SmugMug album thumbnail is being displayed on a page, clicking on the thumbnail should launch a popup displaying all
+	 * album photos. This function handles the click event and the subsequent invocation of the popup.
+	 *
+	 * @return void
+	 */
+	function smug_display_album() {
+		global $photonic_smugmug_gallery;
+		if (!isset($photonic_smugmug_gallery)) {
+			$photonic_smugmug_gallery = new Photonic_SmugMug_Processor();
+		}
+		$photonic_smugmug_gallery->display_album();
 	}
 
 	/**
@@ -873,6 +909,39 @@ class Photonic {
 		}
 		$ret .= '</select>';
 		return $ret;
+	}
+
+	/**
+	 * Make an HTTP request
+	 *
+	 * @static
+	 * @param $url
+	 * @param $method GET | POST | DELETE
+	 * @param null $post_fields
+	 * @param string $user_agent
+	 * @param int $timeout
+	 * @param bool $ssl_verify_peer
+	 * @return array|WP_Error
+	 */
+	static function http($url, $method = 'POST', $post_fields = NULL, $user_agent = 'Photonic Plugin for WordPress', $timeout = 30, $ssl_verify_peer = false) {
+		$curl_args = array(
+			'user-agent', $user_agent,
+			'timeout' => $timeout,
+			'sslverify' => $ssl_verify_peer,
+			'headers' => array('Expect:'),
+			'method' => $method,
+			'body' => $post_fields,
+		);
+
+		switch ($method) {
+			case 'DELETE':
+				if (!empty($post_fields)) {
+					$url = "{$url}?{$post_fields}";
+				}
+		}
+
+		$response = wp_remote_request($url, $curl_args);
+		return $response;
 	}
 }
 

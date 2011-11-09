@@ -1,14 +1,14 @@
 <?php
 /**
  * Creates a form in the "Add Media" screen under the new "Photonic" tab. This form lets you insert the gallery shortcode with
- * the right arguments for native WP galleries, Flickr and Picasa.
+ * the right arguments for native WP galleries, Flickr, Picasa, SmugMug and 500px.
  *
  * @package Photonic
  * @subpackage UI
  */
 
 $selected_tab = isset($_GET['photonic-tab']) ? esc_attr($_GET['photonic-tab']) : 'default';
-if (!in_array($selected_tab, array('default', 'flickr', 'picasa', '500px'))) {
+if (!in_array($selected_tab, array('default', 'flickr', 'picasa', 'smugmug', '500px'))) {
 	$selected_tab = 'default';
 }
 
@@ -311,6 +311,43 @@ $fields = array(
 				'hint' => __('In pixels', 'photonic')
 			),
 
+		),
+	),
+	'smugmug' => array(
+		'name' => __('SmugMug', 'photonic'),
+		'prelude' => __('You have to define your SmugMug API Key under Settings &rarr; Photonic &rarr; SmugMug &rarr; SmugMug Settings', 'photonic'),
+		'fields' => array(
+			array(
+				'id' => 'view',
+				'name' => __('Display', 'photonic'),
+				'type' => 'select',
+				'options' => array(
+					'tree' => __('Tree', 'photonic'),
+					'albums' => __('All albums', 'photonic'),
+					'album' => __('Single Album', 'photonic'),
+				),
+				'req' => true,
+			),
+
+			array(
+				'id' => 'nick_name',
+				'name' => __('Nickname', 'photonic'),
+				'type' => 'text',
+				'hint' => __('If your SmugMug URL is http://joe-sixpack.smugmug.com, this is "joe-sixpack". Required if the "Display" is "Tree" or "All albums".', 'photonic')
+			),
+
+			array(
+				'id' => 'album',
+				'name' => __('Album', 'photonic')."</a>",
+				'type' => 'text',
+				'hint' => __('Required if you are showing "Single Album" above. If your gallery URL is http://nick-name.smugmug.com/gallery/<b>abcdefgh_123456</b>, this is <b>abcdefgh_123456</b>', 'photonic')
+			),
+
+			array(
+				'id' => 'columns',
+				'name' => __('Number of columns', 'photonic'),
+				'type' => 'text',
+			),
 		),
 	),
 	'500px' => array(

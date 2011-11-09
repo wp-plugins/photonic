@@ -1,18 +1,18 @@
-=== Photonic Flickr+Picasa+500px Gallery ===
+=== Photonic Gallery for Flickr, Picasa, SmugMug and 500px ===
 Contributors: sayontan
 Donate link: http://aquoid.com/news/plugins/photonic/
-Tags: gallery, flickr, picasa, 500px, fancybox, colorbox, prettyphoto, slideshow, jquery, shortcode
+Tags: gallery, flickr, picasa, 500px, smugmug, fancybox, colorbox, prettyphoto, slideshow, jquery, shortcode
 Requires at least: WP 3.1
 Tested up to: WP 3.2.1
-Stable tag: 1.06
+Stable tag: trunk
 
-A plugin that enhances the capabilities of the native gallery shortcode in WordPress by letting you show Flickr, Picasa and 500px photos.
+A plugin that enhances the capabilities of the native gallery shortcode in WordPress by letting you show Flickr, Picasa, SmugMug and 500px photos.
 
 == Description ==
 
 Photonic lets you use the WordPress <code>gallery</code> shortcode and ramps it up with a lot of added functionality. It adds support for
 several new parameters to enhance your galleries. It supports Flickr photos, Photosets, Galleries and Collections, along with Picasa photos and albums,
-and 500px photos.
+SmugMug albums and images, and 500px photos.
 
 = Flickr Support =
 
@@ -33,6 +33,16 @@ The following Picasa concepts are supported in Photonic:
 *	<a href='http://aquoid.com/news/plugins/photonic/picasa/picasa-albums/'>Albums</a>
 
 For demos of Picasa support visit the <a href='http://aquoid.com/news/plugins/photonic/picasa/'>Picasa page</a>.
+
+= SmugMug Support =
+
+The following SmugMug concepts are supported in Photonic:
+
+*	<a href='http://aquoid.com/news/plugins/photonic/smugmug/smugmug-tree/'>User Tree</a>
+*	<a href='http://aquoid.com/news/plugins/photonic/smugmug/smugmug-photos/'>Photos</a>
+*	<a href='http://aquoid.com/news/plugins/photonic/smugmug/smugmug-albums/'>Albums</a>
+
+For demos of SmugMug support visit the <a href='http://aquoid.com/news/plugins/photonic/smugmug/'>SmugMug page</a>.
 
 = 500px Support =
 
@@ -79,9 +89,8 @@ not see any empty shortcode tags on your site.
 
 = What about other photo-sharing platforms? =
 
-Other photo sharing platforms such as <a href='http://smugmug.com'>SmugMug</a> will be supported.
-In addition there will be generic support provided for the generic Media RSS format, which can facilitate integration with platforms
-such as ZenPhoto.
+Suggestions are welcome for other photo-sharing platforms. In addition there will be support provided for the generic
+Media RSS format, which can facilitate integration with platforms such as ZenPhoto.
 
 = What about other JS libraries? =
 
@@ -92,9 +101,11 @@ Note that there have been slight modifications to both the above scripts to make
 
 = Are there any known issues? =
 
-Yes, there are a couple and both deal with tooltips. The plugin optionally uses the <a href='http://bassistance.de/jquery-plugins/jquery-plugin-tooltip/'>JQuery Tooltip</a>
+Yes, there are a couple dealing with tooltips. The plugin optionally uses the <a href='http://bassistance.de/jquery-plugins/jquery-plugin-tooltip/'>JQuery Tooltip</a>
 script to show image tooltips. The drawback is that for IE7 the native HTML tooltip and the custom tooltip are shown simultaneously.
 This is a bug with the thumbnail script.
+
+In addition, if you access a protected album in SmugMug in Photonic, you don't get the desired results.
 
 = Are translations supported? =
 
@@ -102,6 +113,11 @@ Yes, but only for the plugin front-end. The admin panel is not translated at thi
 in the third-party JS scripts are not translated.
 
 == Changelog ==
+
+= 1.07 =
+
+*	Added support for SmugMug
+*	Modified the Picasa plugin to not display the file name if no title is found.
 
 = 1.06 =
 
