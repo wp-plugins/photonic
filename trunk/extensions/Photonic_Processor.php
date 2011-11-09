@@ -10,7 +10,7 @@
 abstract class Photonic_Processor {
 	public $library, $thumb_size, $full_size;
 
-	function Photonic_Processor() {
+	function __construct() {
 		global $photonic_slideshow_library;
 		$this->library = $photonic_slideshow_library;
 	}

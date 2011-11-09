@@ -124,7 +124,7 @@ $j(document).ready(function() {
 	});
 
 	if (Photonic_JS.slideshow_library == 'fancybox' && Photonic_JS.slideshow_mode) {
-		setInterval($j.fancybox.next, parseInt(Photonic_JS.slideshow_interval));
+		setInterval($j.fancybox.next, parseInt(Photonic_JS.slideshow_interval, 10));
 	}
 
 	$j('a.launch-gallery-fancybox').each(function() {
@@ -146,7 +146,7 @@ $j(document).ready(function() {
 			theme: Photonic_JS.pphoto_theme,
 			autoplay_slideshow: Photonic_JS.slideshow_mode,
 			slideshow: Photonic_JS.slideshow_interval,
-			show_title: true,
+			show_title: false,
 			social_tools: '',
 			deeplinking: false
 		});
@@ -276,13 +276,110 @@ $j(document).ready(function() {
 		return false;
 	});
 
+	$j('a.photonic-smug-album-thumb').live('click', function(e) {
+		var thumb_id = this.id;
+		var href = this.href;
+		var panel_id = thumb_id.substr(26);
+		var panel = '#photonic-smug-panel-' + panel_id;
+
+		var loading = document.createElement('div');
+		loading.className = 'photonic-loading';
+		$j(loading).appendTo($j('body')).show();
+
+		if ($j(panel).length == 0) {
+			$j.post(Photonic_JS.ajaxurl, "action=photonic_smug_display_album&panel=" + thumb_id + "&href=" + href, function(data) {
+				var div = $j(data);
+
+				var ul = div.find('ul');
+				var screens = ul.find('li').length;
+				var prev = document.createElement('a');
+				prev.id = 'photonic-smug-album-' + panel_id + '-prev';
+				prev.href = '#';
+				prev.className = 'panel-previous';
+				prev.innerHTML = '&nbsp;';
+
+				var next = document.createElement('a');
+				next.id = 'photonic-smug-album-' + panel_id + '-next';
+				next.href = '#';
+				next.className = 'panel-next';
+				next.innerHTML = '&nbsp;';
+
+				$j(ul).first('li').waitForImages(function() {
+					div.attr('id', 'photonic-smug-panel-' + panel_id).appendTo($j('#photonic-smug-album-' + panel_id)).show();
+					if (screens > 1) {
+						$j(ul).before(prev)
+							.after(next)
+							.cycle({
+								timeout: 0,
+								slideResize: false,
+								prev: 'a#photonic-smug-album-' + panel_id + '-prev',
+								next: 'a#photonic-smug-album-' + panel_id + '-next',
+								sync: false
+							});
+					}
+					else {
+						$j(this).cycle({
+							timeout: 0,
+							slideResize: false,
+							sync: false
+						});
+					}
+
+					$j(panel).modal({
+						autoPosition: false,
+						dataCss: { width: '' + Photonic_JS.gallery_panel_width + 'px' },
+						overlayCss: { background: '#000' },
+						closeClass: 'photonic-smug-panel-' + panel_id,
+						opacity: 90,
+						close: true,
+						escClose: false,
+						containerId: 'photonic-smug-panel-container-' + panel_id,
+						onClose: function(dialog) { $j.modal.close(); $j('#photonic-smug-panel-' + panel_id).css({ display: 'none' }) },
+						onShow: modalOnSmugShow,
+						onOpen: modalOpen
+					});
+
+					var viewport = [$j(window).width(), $j(window).height(), $j(document).scrollLeft(), $j(document).scrollTop()];
+					var target = {};
+
+					target.top = parseInt(Math.max(viewport[3] - 20, viewport[3] + ((viewport[1] - $j('#photonic-smug-panel-container-' + panel_id).height() - 40) * 0.5)), 10);
+					target.left = parseInt(Math.max(viewport[2] - 20, viewport[2] + ((viewport[0] - $j('#photonic-smug-panel-container-' + panel_id).width() - 40) * 0.5)), 10);
+
+					$j('#photonic-smug-panel-container-' + panel_id).css({top: target.top, left: target.left });
+					$j(loading).hide();
+				});
+			});
+		}
+		else {
+			$j(loading).hide();
+			$j(panel).modal({
+				autoPosition: false,
+				dataCss: { width: '' + Photonic_JS.gallery_panel_width + 'px' },
+				overlayCss: { background: '#000' },
+				opacity: 90,
+				close: true,
+				escClose: false,
+				containerId: 'photonic-smug-panel-container-' + panel_id,
+				onClose: modalClose
+			});
+			var viewport = [$j(window).width(), $j(window).height(), $j(document).scrollLeft(), $j(document).scrollTop()];
+			var target = {};
+			target.top = parseInt(Math.max(viewport[3] - 20, viewport[3] + ((viewport[1] - $j('#photonic-smug-panel-' + panel_id).height() - 40) * 0.5)), 10);
+			target.left = parseInt(Math.max(viewport[2] - 20, viewport[2] + ((viewport[0] - $j('#photonic-smug-panel-' + panel_id).width() - 40) * 0.5)), 10);
+			$j('#' + 'photonic-smug-panel-container-' + panel_id).css({top: target.top, left: target.left});
+			$j('.slideshow-grid-panel').cycle({timeout: 0, prev: 'a#photonic-smug-album-' + panel_id + '-prev', next: 'a#photonic-smug-album-' + panel_id + '-next'});
+		}
+
+		return false;
+	});
+
 	$j('a.modalCloseImg').live('click', function() {
 		var thisClass = this.className;
 		thisClass = thisClass.substr(14);
 		$j('#' + thisClass).hide();
 	});
 
-	$j('.photonic-flickr-stream a, a.photonic-flickr-set-thumb, a.photonic-flickr-gallery-thumb, .photonic-picasa-stream a, .photonic-post-gallery-nav a, .photonic-500px-stream a').each(function() {
+	$j('.photonic-flickr-stream a, a.photonic-flickr-set-thumb, a.photonic-flickr-gallery-thumb, .photonic-picasa-stream a, .photonic-post-gallery-nav a, .photonic-500px-stream a, .photonic-smug-stream a').each(function() {
 		$j(this).data('title', $j(this).attr('title'));
 		var tempTitle = $j(this).data('title');
 		if (typeof tempTitle != 'undefined' && tempTitle != '') {
@@ -295,7 +392,8 @@ $j(document).ready(function() {
 	if (Photonic_JS.flickr_photo_title_display == 'tooltip' || Photonic_JS.flickr_collection_set_title_display == 'tooltip' || Photonic_JS.flickr_gallery_title_display == 'tooltip' ||
 			Photonic_JS.picasa_photo_title_display == 'tooltip' || Photonic_JS.picasa_photo_pop_title_display == 'tooltip' ||
 			Photonic_JS.wp_thumbnail_title_display == 'tooltip' ||
-			Photonic_JS.Dpx_photo_title_display == 'tooltip' ) {
+			Photonic_JS.Dpx_photo_title_display == 'tooltip' ||
+			Photonic_JS.smug_photo_title_display == 'tooltip' || Photonic_JS.smug_photo_pop_title_display == 'tooltip' || Photonic_JS.smug_albums_album_title_display == 'tooltip') {
 		var tooltipObj = Photonic_JS.flickr_photo_title_display == 'tooltip' ? '.photonic-flickr-stream .photonic-flickr-photo a' : '';
 		tooltipObj += (tooltipObj != '' && Photonic_JS.flickr_collection_set_title_display == 'tooltip') ? ',' : '';
 		tooltipObj += Photonic_JS.flickr_collection_set_title_display == 'tooltip' ? 'a.photonic-flickr-set-thumb' : '';
@@ -309,6 +407,12 @@ $j(document).ready(function() {
 		tooltipObj += Photonic_JS.wp_thumbnail_title_display == 'tooltip' ? '.photonic-post-gallery-nav a' : '';
 		tooltipObj += (tooltipObj != '' && Photonic_JS.Dpx_photo_title_display == 'tooltip') ? ',' : '';
 		tooltipObj += Photonic_JS.Dpx_photo_title_display == 'tooltip' ? '.photonic-500px-stream a' : '';
+		tooltipObj += (tooltipObj != '' && Photonic_JS.smug_photo_title_display == 'tooltip') ? ',' : '';
+		tooltipObj += Photonic_JS.smug_photo_title_display == 'tooltip' ? '.photonic-smug-stream a' : '';
+		tooltipObj += (tooltipObj != '' && Photonic_JS.smug_photo_pop_title_display == 'tooltip') ? ',' : '';
+		tooltipObj += Photonic_JS.smug_photo_pop_title_display == 'tooltip' ? '.photonic-smug-panel a' : '';
+		tooltipObj += (tooltipObj != '' && Photonic_JS.smug_albums_album_title_display == 'tooltip') ? ',' : '';
+		tooltipObj += Photonic_JS.smug_albums_album_title_display == 'tooltip' ? '.photonic-smug-album-thumb a' : '';
 
 		$j(tooltipObj).each(function() {
 			var iTitle = $j(this).find('img').attr('alt');
@@ -396,7 +500,7 @@ $j(document).ready(function() {
 					script.text = "$j('a.launch-gallery-colorbox').each(function() { $j(this).colorbox({ opacity: 0.8, maxWidth: '95%', maxHeight: '95%', slideshow: Photonic_JS.slideshow_mode, slideshowSpeed: Photonic_JS.slideshow_interval });});";
 				}
 				else if (Photonic_JS.slideshow_library == 'prettyphoto') {
-					script.text = "$j(\"a[rel^='photonic-prettyPhoto']\").prettyPhoto({ theme: Photonic_JS.pphoto_theme, autoplay_slideshow: Photonic_JS.slideshow_mode, slideshow: parseInt(Photonic_JS.slideshow_interval), show_title: true, social_tools: '', deeplinking: false }); ";
+					script.text = "$j(\"a[rel^='photonic-prettyPhoto']\").prettyPhoto({ theme: Photonic_JS.pphoto_theme, autoplay_slideshow: Photonic_JS.slideshow_mode, slideshow: parseInt(Photonic_JS.slideshow_interval, 10), show_title: false, social_tools: '', deeplinking: false }); ";
 				}
 				div_content.appendChild(script);
 			}
@@ -604,7 +708,7 @@ $j(document).ready(function() {
 					script.text = "$j('a.launch-gallery-colorbox').each(function() { $j(this).colorbox({ opacity: 0.8, maxWidth: '95%', maxHeight: '95%', slideshow: Photonic_JS.slideshow_mode, slideshowSpeed: Photonic_JS.slideshow_interval });});";
 				}
 				else if (Photonic_JS.slideshow_library == 'prettyphoto') {
-					script.text = "$j(\"a[rel^='photonic-prettyPhoto']\").prettyPhoto({ theme: Photonic_JS.pphoto_theme, autoplay_slideshow: Photonic_JS.slideshow_mode, slideshow: parseInt(Photonic_JS.slideshow_interval), show_title: true, social_tools: '', deeplinking: false }); ";
+					script.text = "$j(\"a[rel^='photonic-prettyPhoto']\").prettyPhoto({ theme: Photonic_JS.pphoto_theme, autoplay_slideshow: Photonic_JS.slideshow_mode, slideshow: parseInt(Photonic_JS.slideshow_interval, 10), show_title: false, social_tools: '', deeplinking: false }); ";
 				}
 				div_content.appendChild(script);
 			}
@@ -776,6 +880,24 @@ $j(document).ready(function() {
 		});
 	}
 
+	function modalOnSmugShow(dialog) {
+		var s = this; // refers to the simplemodal object
+		$j('.photonic-smug-album-thumb', dialog.data[0]).click(function () { // use the modal data context
+			var id = '#photonic-smug-panel-' + this.id.substr(19);
+
+			setTimeout(function () { // wait for 6/10ths of a second, then open the next dialog
+				s.close(); // close the current dialog
+				$j(id).modal({
+					onShow: modalOnSmugShow,
+					onOpen: modalOpen,
+					onClose: modalClose
+				});
+			}, 600);
+
+			return false;
+		});
+	}
+
 	// callback function
 	function modalOpen(dialog) {
 		dialog.overlay.fadeIn(200, function () {
@@ -904,7 +1026,7 @@ $j(document).ready(function() {
  * @param rsp
  */
 function photonicJsonFlickrHeaderApi(rsp) {
-	var position = parseInt(Photonic_JS.flickr_position);
+	var position = parseInt(Photonic_JS.flickr_position, 10);
 	position++;
 	Photonic_JS.flickr_position = position;
 	if (rsp.stat != "ok") {
@@ -987,7 +1109,7 @@ function photonicJsonFlickrHeaderApi(rsp) {
  * @param rsp
  */
 function photonicJsonFlickrStreamApi(rsp) {
-	var position = parseInt(Photonic_JS.flickr_position);
+	var position = parseInt(Photonic_JS.flickr_position, 10);
 	position++;
 	Photonic_JS.flickr_position = position;
 	var main_size = Photonic_JS.flickr_main_size == 'none' ? '' : '_' + Photonic_JS.flickr_main_size;

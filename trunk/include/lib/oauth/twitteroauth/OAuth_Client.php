@@ -6,6 +6,8 @@
  *
  * The original class was the first PHP Library to support OAuth for Twitter's REST API.
  */
+require(PHOTONIC_PATH.'/include/lib/oauth/twitteroauth/OAuth.php');
+
 abstract class Photonic_OAuth_Client {
 	public $http_code; // Last HTTP status code returned
 	public $url; // Last API call
@@ -18,6 +20,7 @@ abstract class Photonic_OAuth_Client {
 	public $user_agent; // User Agent
 	public $http_header = array();
 	public $method;
+	public $oauth_token, $oauth_token_secret, $oauth_parameters = array();
 
 	/**
 	 * Constructs the OAuth client. Every client defined should pass the host, consumer key and consumer secret to its constructor.
@@ -41,7 +44,8 @@ abstract class Photonic_OAuth_Client {
 		$this->consumer = new OAuthConsumer($consumer_key, $consumer_secret);
 		if (!empty($oauth_token) && !empty($oauth_token_secret)) {
 			$this->token = new OAuthConsumer($oauth_token, $oauth_token_secret);
-		} else {
+		}
+		else {
 			$this->token = null;
 		}
 
@@ -89,8 +93,9 @@ abstract class Photonic_OAuth_Client {
 		if (!empty($oauth_callback)) {
 			$parameters['oauth_callback'] = $oauth_callback;
 		}
-		$request = $this->oAuthRequest($this->request_Token_URL(), 'GET', $parameters);
-		$token = OAuthUtil::parse_parameters($request);
+		$request = $this->oAuth_request($this->request_Token_URL(), 'GET', $parameters);
+		$body = $request['body'];
+		$token = OAuthUtil::parse_parameters($body);
 		$this->token = new OAuthConsumer($token['oauth_token'], $token['oauth_token_secret']);
 		return $token;
 	}
@@ -123,13 +128,17 @@ abstract class Photonic_OAuth_Client {
 	 *				"user_id" => "9436992",
 	 *				"screen_name" => "abraham")
 	 */
-	function getAccessToken($oauth_verifier = false) {
+	function get_access_token($oauth_verifier = false) {
 		$parameters = array();
 		if (!empty($oauth_verifier)) {
 			$parameters['oauth_verifier'] = $oauth_verifier;
 		}
-		$request = $this->oAuthRequest($this->access_token_URL(), 'GET', $parameters);
-		$token = OAuthUtil::parse_parameters($request);
+
+		$parameters = array_merge($parameters, $this->oauth_parameters);
+
+		$request = $this->oAuth_request($this->access_token_URL(), 'GET', $parameters);
+		$body = $request['body'];
+		$token = OAuthUtil::parse_parameters($body);
 		$this->token = new OAuthConsumer($token['oauth_token'], $token['oauth_token_secret']);
 		return $token;
 	}
@@ -150,7 +159,7 @@ abstract class Photonic_OAuth_Client {
 		$parameters['x_auth_username'] = $username;
 		$parameters['x_auth_password'] = $password;
 		$parameters['x_auth_mode'] = 'client_auth';
-		$request = $this->oAuthRequest($this->access_token_URL(), 'POST', $parameters);
+		$request = $this->oAuth_request($this->access_token_URL(), 'POST', $parameters);
 		$token = OAuthUtil::parse_parameters($request);
 		$this->token = new OAuthConsumer($token['oauth_token'], $token['oauth_token_secret']);
 		return $token;
@@ -164,9 +173,10 @@ abstract class Photonic_OAuth_Client {
 	 * @return array|mixed
 	 */
 	function get($url, $parameters = array()) {
-		$response = $this->oAuthRequest($url, 'GET', $parameters);
+		$response = $this->oAuth_request($url, 'GET', $parameters);
+		$body = $response['body'];
 		if ($this->format === 'json' && $this->decode_json) {
-			return json_decode($response);
+			return json_decode($body);
 		}
 		return $response;
 	}
@@ -179,9 +189,10 @@ abstract class Photonic_OAuth_Client {
 	 * @return array|mixed
 	 */
 	function post($url, $parameters = array()) {
-		$response = $this->oAuthRequest($url, 'POST', $parameters);
+		$response = $this->oAuth_request($url, 'POST', $parameters);
+		$body = $response['body'];
 		if ($this->format === 'json' && $this->decode_json) {
-			return json_decode($response);
+			return json_decode($body);
 		}
 		return $response;
 	}
@@ -194,7 +205,7 @@ abstract class Photonic_OAuth_Client {
 	 * @return array|mixed
 	 */
 	function delete($url, $parameters = array()) {
-		$response = $this->oAuthRequest($url, 'DELETE', $parameters);
+		$response = $this->oAuth_request($url, 'DELETE', $parameters);
 		if ($this->format === 'json' && $this->decode_json) {
 			return json_decode($response);
 		}
@@ -209,12 +220,17 @@ abstract class Photonic_OAuth_Client {
 	 * @param $parameters
 	 * @return mixed
 	 */
-	function oAuthRequest($url, $method, $parameters) {
+	function oAuth_request($url, $method, $parameters) {
 		if (strrpos($url, 'https://') !== 0 && strrpos($url, 'http://') !== 0) {
 			$url = "{$this->host}{$url}.{$this->format}";
 		}
+
 		$request = OAuthRequest::from_consumer_and_token($this->consumer, $this->token, $method, $url, $parameters);
 		$request->sign_request($this->sha1_method, $this->consumer, $this->token);
+
+		// Put all OAuth parameters into an array.
+		$this->oauth_parameters = $request->get_parameters();
+
 		switch ($method) {
 			case 'GET':
 				return $this->http($request->to_url(), 'GET');
@@ -250,7 +266,7 @@ abstract class Photonic_OAuth_Client {
 		}
 
 		$response = wp_remote_request($url, $curl_args);
-		$this->http_code = $response['code'];
+		$this->http_code = $response['response']['code'];
 		$this->url = $url;
 		return $response;
 	}
@@ -286,4 +302,3 @@ abstract class Photonic_OAuth_Client {
 		return strlen($header);
 	}
 }
-?>

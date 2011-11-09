@@ -4,7 +4,7 @@
 .page-nav-left a {background: url(../images/panel-lr.png) 0 0 no-repeat; }
 .page-nav-right a {background: url(../images/panel-lr.png) -30px 0 no-repeat; }
 
-div.photonic-post-gallery { width: 100%; }
+div.photonic-post-gallery { width: 100%; clear: both; }
 ul.photonic-post-gallery { float: left; }
 .photonic-post-gallery ul { margin: 0; padding: 0; position: relative;}
 .photonic-post-gallery li { list-style: none; float: left; }
@@ -13,8 +13,9 @@ ul.photonic-post-gallery { float: left; }
 .photonic-post-gallery-nav a { display: inline-block; }
 ul.photonic-post-gallery-content {margin: 5px 0; }
 
-.panel-previous { position: absolute; left: 15px; top: 50%; background: url(../images/panel-lr.png) 0 0 no-repeat; width: 30px; height: 30px; }
-.panel-next { position: absolute; right: 15px; top: 50%; background: url(../images/panel-lr.png) -30px 0 no-repeat; width: 30px; height: 30px; }
+.panel-previous { position: absolute; left: 15px; top: 50%; background: url(../images/panel-lr.png) 0 0 no-repeat; width: 30px; height: 30px; text-decoration: none; }
+.panel-next { position: absolute; right: 15px; top: 50%; background: url(../images/panel-lr.png) -30px 0 no-repeat; width: 30px; height: 30px; text-decoration: none; }
+.panel-previous:hover, .panel-next:hover { text-decoration: none; }
 ul.slideshow-grid-panel  { float: left; width: 100% !important; position: relative; display: inline-block; }
 li.slideshow-grid { width: 100% !important; }
 li.slideshow-grid li { display: inline-block; }
@@ -50,6 +51,8 @@ li.slideshow-grid li { display: inline-block; }
 .photonic-gallery-24c { width: 4.1%; }
 .photonic-gallery-25c { width: 3.95%; }
 
+.photonic-tree li { list-style: none; }
+
 .photonic-panel ul { padding: 0; margin: 10px auto; }
 .photonic-panel { display: none; text-align: center; width: 800px; z-index: 5; padding: 10px; border-radius:10px; }
 
@@ -59,7 +62,7 @@ li.slideshow-grid li { display: inline-block; }
 .photonic-flickr-panel-header a { text-decoration: none; font-size: 100%; }
 .photonic-panel-content { padding: 10px 40px; }
 
-.photonic-flickr-image, .photonic-picasa-image, .photonic-500px-image {
+.photonic-flickr-image, .photonic-picasa-image, .photonic-500px-image, .photonic-smug-image {
 	display: inline-block;
 	list-style: none;
 	vertical-align: top;
@@ -69,16 +72,16 @@ li.slideshow-grid li { display: inline-block; }
 	zoom: 1;
 	*display: inline;
 }
-.photonic-flickr-image img, .photonic-picasa-image img, .photonic-500px-image img  { padding: 5px; margin: 5px; filter: alpha(opacity=75); opacity: 0.75; }
-.photonic-flickr-image a, .photonic-picasa-image a, .photonic-500px-image a { display: inline-block; text-align: center; text-decoration: none; font-size: 0.9em; vertical-align: middle; }
-.photonic-flickr-image a span, .photonic-picasa-image a span, .photonic-500px-image a span { display: block; padding: 3px; width: 90%; }
-.photonic-flickr-image a:hover img, .photonic-picasa-image a:hover img, .photonic-500px-image a:hover img { filter: alpha(opacity=100); opacity: 1; }
+.photonic-flickr-image img, .photonic-picasa-image img, .photonic-500px-image img, .photonic-smug-image img  { padding: 5px; margin: 5px; filter: alpha(opacity=75); opacity: 0.75; }
+.photonic-flickr-image a, .photonic-picasa-image a, .photonic-500px-image a, .photonic-smug-image a { display: inline-block; text-align: center; text-decoration: none; font-size: 0.9em; vertical-align: middle; }
+.photonic-flickr-image a span, .photonic-picasa-image a span, .photonic-500px-image a span, .photonic-smug-image a span { display: block; padding: 3px; width: 90%; }
+.photonic-flickr-image a:hover img, .photonic-picasa-image a:hover img, .photonic-500px-image a:hover img, .photonic-smug-image a:hover img { filter: alpha(opacity=100); opacity: 1; }
 
 .photonic-flickr-collection { display: inline-block; width: 100%; text-align: left; border-width: 1px 0 1px 0; border-style: dotted; border-color: #888; padding: 0.5em 0; margin: 0.5em 0; }
-.photonic-flickr-set, .photonic-flickr-gallery { list-style: none; display: inline-block; width: 100%; text-align: left; border-width: 1px 0 1px 0; border-style: dotted; border-color: #888; padding: 0.5em 0; margin: 0.5em 0; }
+.photonic-flickr-set, .photonic-flickr-gallery, .photonic-smug-album, .photonic-smug-category, .photonic-smug-sub-category { list-style: none; display: inline-block; width: 100%; text-align: left; border-width: 1px 0 1px 0; border-style: dotted; border-color: #888; padding: 0.5em 0; margin: 0.5em 0; }
 
-.photonic-photoset-title, .photonic-gallery-title, .photonic-photo-title, .photonic-photo-pop-title { display: block; }
-.photonic-photoset-photo-count, .photonic-gallery-photo-count { font-size: 85%; font-style: italic; }
+.photonic-photoset-title, .photonic-gallery-title, .photonic-photo-title, .photonic-photo-pop-title, .photonic-album-title { display: block; }
+.photonic-photoset-photo-count, .photonic-gallery-photo-count, .photonic-album-photo-count { font-size: 85%; font-style: italic; }
 
 .photonic-header-thumb { float: left; margin: 0 1em 0 0; }
 .photonic-header-details { float: left; }
