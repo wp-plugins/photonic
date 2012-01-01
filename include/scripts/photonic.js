@@ -1027,11 +1027,11 @@ $j(document).ready(function() {
  */
 function photonicJsonFlickrHeaderApi(rsp) {
 	var position = parseInt(Photonic_JS.flickr_position, 10);
-	position++;
-	Photonic_JS.flickr_position = position;
 	if (rsp.stat != "ok") {
 		return;
 	}
+	position++;
+	Photonic_JS.flickr_position = position;
 
 	var s = "";
 	var thumb, owner, image, cleanTitle, flickr_link, anchor;
