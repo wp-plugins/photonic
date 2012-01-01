@@ -1,3 +1,9 @@
+Version 1.08 - 01st Jan 2012
+============================
+1.	Made a change to the Picasa processor to handle the recent change by Google. Google's change was forcing images to 512px.
+2.	Updated the plugin to support WP 3.3.
+3.   Fixed an issue with FancyBox that was showing server log errors for IE.
+
 Version 1.07 - 09th Nov 2011
 ============================
 1.	Added support for SmugMug
@@ -8,8 +14,6 @@ Version 1.06 - 25th Oct 2011
 1.	Fixed an issue with the 500px.com extension, which had to be changed to invoke HTTPS instead of HTTP.
 2.	Added support for the "sort" parameter for 500px.
 3.	Fixed an issue with the PrettyPhoto library where you couldn't see the "View in Flickr" link.
-
-Update translation file!
 
 Version 1.05 - 24th Oct 2011
 ============================

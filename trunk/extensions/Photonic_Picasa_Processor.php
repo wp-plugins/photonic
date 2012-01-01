@@ -36,17 +36,6 @@ class Photonic_Picasa_Processor extends Photonic_Processor {
 			return '';
 		}
 
-		$crop_str = 'c';
-		if (isset($crop) && trim($crop) != '') {
-			$crop = Photonic::string_to_bool($crop);
-			if (!$crop) {
-				$crop_str = 'u';
-			}
-		}
-		else {
-			$crop = true;
-		}
-
 		if (!isset($view)) {
 			$view = null;
 		}
@@ -91,7 +80,8 @@ class Photonic_Picasa_Processor extends Photonic_Processor {
 			$query_url .= 'thumbsize=75&';
 		}
 
-		$query_url .= $crop_str;
+		$query_url .= 'imgmax=1600u';
+		//$query_url .= $crop_str;
 
 		$response = wp_remote_request($query_url);
 		if (is_wp_error($response)) {
