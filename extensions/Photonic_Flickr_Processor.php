@@ -91,58 +91,60 @@ class Photonic_Flickr_Processor extends Photonic_Processor {
 					break;
 			}
 		}
-//		else {
-			// Collection > galleries > photosets
-			if (isset($collection_id)) {
-				$collections = $this->get_collection_list($user_id, $collection_id);
-				foreach ($collections as $collection) {
-					$query_urls[] = 'http://api.flickr.com/services/rest/?'.$format.$json_api.'method=flickr.collections.getTree&collection_id='.$collection['id'];
-					$nested = array();
-					foreach ($collection['sets'] as $set) {
-						$nested[] = 'http://api.flickr.com/services/rest/?'.$format.$json_api.'method=flickr.photosets.getInfo&photoset_id='.$set['id'];
-					}
-					$query_urls[] = $nested;
+		else if (isset($view) && $view == 'photos' && isset($group_id)) {
+			$query_urls[] = 'http://api.flickr.com/services/rest/?'.$format.$json_api.'method=flickr.photos.search';
+		}
+
+		// Collection > galleries > photosets
+		if (isset($collection_id)) {
+			$collections = $this->get_collection_list($user_id, $collection_id);
+			foreach ($collections as $collection) {
+				$query_urls[] = 'http://api.flickr.com/services/rest/?'.$format.$json_api.'method=flickr.collections.getTree&collection_id='.$collection['id'];
+				$nested = array();
+				foreach ($collection['sets'] as $set) {
+					$nested[] = 'http://api.flickr.com/services/rest/?'.$format.$json_api.'method=flickr.photosets.getInfo&photoset_id='.$set['id'];
 				}
+				$query_urls[] = $nested;
 			}
-			else if (isset($gallery_id)) {
-				if (!isset($user_id)) {
-					return __('User id is required for displaying a single gallery', 'photonic');
-				}
-				$temp_query = 'http://api.flickr.com/services/rest/?method=flickr.galleries.getList&user_id='.$user_id.'&api_key='.$photonic_flickr_api_key;
-				$feed = wp_remote_request($temp_query);
-				if (!is_wp_error($feed) && 200 == $feed['response']['code']) {
-					$feed = $feed['body'];
-					$feed = simplexml_load_string($feed);
-					if (is_a($feed, 'SimpleXMLElement')) {
-						$main_attributes = $feed->attributes();
-						if ($main_attributes['stat'] == 'ok') {
-							$children = $feed->children();
-							if (count($children) != 0) {
-								if (isset($feed->galleries)) {
-									$galleries = $feed->galleries;
-									$galleries = $galleries->gallery;
-									if (count($galleries) > 0) {
-										$gallery = $galleries[0];
-										$gallery = $gallery->attributes();
-										$global_dbid = $gallery['id'];
-										$global_dbid = substr($global_dbid, 0, stripos($global_dbid, '-'));
-									}
+		}
+		else if (isset($gallery_id)) {
+			if (!isset($user_id)) {
+				return __('User id is required for displaying a single gallery', 'photonic');
+			}
+			$temp_query = 'http://api.flickr.com/services/rest/?method=flickr.galleries.getList&user_id='.$user_id.'&api_key='.$photonic_flickr_api_key;
+			$feed = wp_remote_request($temp_query);
+			if (!is_wp_error($feed) && 200 == $feed['response']['code']) {
+				$feed = $feed['body'];
+				$feed = simplexml_load_string($feed);
+				if (is_a($feed, 'SimpleXMLElement')) {
+					$main_attributes = $feed->attributes();
+					if ($main_attributes['stat'] == 'ok') {
+						$children = $feed->children();
+						if (count($children) != 0) {
+							if (isset($feed->galleries)) {
+								$galleries = $feed->galleries;
+								$galleries = $galleries->gallery;
+								if (count($galleries) > 0) {
+									$gallery = $galleries[0];
+									$gallery = $gallery->attributes();
+									$global_dbid = $gallery['id'];
+									$global_dbid = substr($global_dbid, 0, stripos($global_dbid, '-'));
 								}
 							}
 						}
 					}
 				}
-				if (isset($global_dbid)) {
-					$gallery_id = $global_dbid.'-'.$gallery_id;
-				}
-				$query_urls[] = 'http://api.flickr.com/services/rest/?'.$format.'jsoncallback=photonicJsonFlickrHeaderApi&'.'method=flickr.galleries.getInfo';
-				$query_urls[] = 'http://api.flickr.com/services/rest/?'.$format.$json_api.'method=flickr.galleries.getPhotos';
 			}
-			else if (isset($photoset_id)) {
-				$query_urls[] = 'http://api.flickr.com/services/rest/?'.$format.'jsoncallback=photonicJsonFlickrHeaderApi&'.'method=flickr.photosets.getInfo';
-				$query_urls[] = 'http://api.flickr.com/services/rest/?'.$format.$json_api.'method=flickr.photosets.getPhotos';
+			if (isset($global_dbid)) {
+				$gallery_id = $global_dbid.'-'.$gallery_id;
 			}
-//		}
+			$query_urls[] = 'http://api.flickr.com/services/rest/?'.$format.'jsoncallback=photonicJsonFlickrHeaderApi&'.'method=flickr.galleries.getInfo';
+			$query_urls[] = 'http://api.flickr.com/services/rest/?'.$format.$json_api.'method=flickr.galleries.getPhotos';
+		}
+		else if (isset($photoset_id)) {
+			$query_urls[] = 'http://api.flickr.com/services/rest/?'.$format.'jsoncallback=photonicJsonFlickrHeaderApi&'.'method=flickr.photosets.getInfo';
+			$query_urls[] = 'http://api.flickr.com/services/rest/?'.$format.$json_api.'method=flickr.photosets.getPhotos';
+		}
 
 		if (isset($user_id)) {
 			$query .= '&user_id='.$user_id;
