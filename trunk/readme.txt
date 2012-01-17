@@ -3,7 +3,7 @@ Contributors: sayontan
 Donate link: http://aquoid.com/news/plugins/photonic/
 Tags: gallery, flickr, picasa, 500px, smugmug, fancybox, colorbox, prettyphoto, slideshow, jquery, shortcode
 Requires at least: WP 3.1
-Tested up to: WP 3.3
+Tested up to: WP 3.3.1
 Stable tag: trunk
 
 A plugin that enhances the capabilities of the native gallery shortcode in WordPress by letting you show Flickr, Picasa, SmugMug and 500px photos.
@@ -113,6 +113,12 @@ Yes, but only for the plugin front-end. The admin panel is not translated at thi
 in the third-party JS scripts are not translated.
 
 == Changelog ==
+
+= 1.09 =
+
+*	Fixed a bug with the Flickr processor, which was preventing the execution of the shortcode with a group_id parameter
+*	Fixed a minor problem with the popup panels, where hovering over the panel titles was resulting in a Tooltip error.
+*	The Picasa inserter was not showing the "album" field. This has been rectified.
 
 = 1.08 =
 

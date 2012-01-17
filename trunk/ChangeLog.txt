@@ -1,8 +1,14 @@
+Version 1.09 - 16th Jan 2012
+============================
+1.	Fixed a bug with the Flickr processor, which was preventing the execution of the shortcode with a group_id parameter
+2.	Fixed a minor problem with the popup panels, where hovering over the panel titles was resulting in a Tooltip error.
+3.	The Picasa inserter was not showing the "album" field. This has been rectified.
+
 Version 1.08 - 01st Jan 2012
 ============================
 1.	Made a change to the Picasa processor to handle the recent change by Google. Google's change was forcing images to 512px.
 2.	Updated the plugin to support WP 3.3.
-3.   Fixed an issue with FancyBox that was showing server log errors for IE.
+3.  Fixed an issue with FancyBox that was showing server log errors for IE.
 
 Version 1.07 - 09th Nov 2011
 ============================

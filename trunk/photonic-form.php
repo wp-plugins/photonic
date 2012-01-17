@@ -298,6 +298,12 @@ $fields = array(
 			),
 
 			array(
+				'id' => 'album',
+				'name' => __('Album', 'photonic')."</a>",
+				'type' => 'text',
+			),
+
+			array(
 				'id' => 'max_results',
 				'name' => __('Number of photos to show', 'photonic')."</a>",
 				'type' => 'text',

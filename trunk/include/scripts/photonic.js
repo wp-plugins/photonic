@@ -33,8 +33,8 @@
         }
 
         return objs.each(function() {
-            var obj = $(this),
-                imgs = obj.find('img');
+            var obj = $(this);
+			var imgs = obj.find('img');
 
             if (imgs.length == 0) {
                 return true;
@@ -380,12 +380,14 @@ $j(document).ready(function() {
 	});
 
 	$j('.photonic-flickr-stream a, a.photonic-flickr-set-thumb, a.photonic-flickr-gallery-thumb, .photonic-picasa-stream a, .photonic-post-gallery-nav a, .photonic-500px-stream a, .photonic-smug-stream a').each(function() {
-		$j(this).data('title', $j(this).attr('title'));
-		var tempTitle = $j(this).data('title');
-		if (typeof tempTitle != 'undefined' && tempTitle != '') {
-			var tempIndex = tempTitle.indexOf('|');
-			tempTitle = tempTitle.substr(0, tempIndex);
-			$j(this).attr('title', tempTitle);
+		if (!($j(this).parent().hasClass('photonic-header-title'))) {
+			$j(this).data('title', $j(this).attr('title'));
+			var tempTitle = $j(this).data('title');
+			if (typeof tempTitle != 'undefined' && tempTitle != '') {
+				var tempIndex = tempTitle.indexOf('|');
+				tempTitle = tempTitle.substr(0, tempIndex);
+				$j(this).attr('title', tempTitle);
+			}
 		}
 	});
 
@@ -415,13 +417,15 @@ $j(document).ready(function() {
 		tooltipObj += Photonic_JS.smug_albums_album_title_display == 'tooltip' ? '.photonic-smug-album-thumb a' : '';
 
 		$j(tooltipObj).each(function() {
-			var iTitle = $j(this).find('img').attr('alt');
-			$j(this).tooltip({
-				bodyHandler: function() {
-					return iTitle;
-				},
-				showURL: false
-			});
+			if (!($j(this).parent().hasClass('photonic-header-title'))) {
+				var iTitle = $j(this).find('img').attr('alt');
+				$j(this).tooltip({
+					bodyHandler: function() {
+						return iTitle;
+					},
+					showURL: false
+				});
+			}
 		});
 	}
 
@@ -508,7 +512,7 @@ $j(document).ready(function() {
 			if (Photonic_JS.flickr_photo_pop_title_display == 'tooltip') {
 				script = document.createElement('script');
 				script.type = 'text/javascript';
-				script.text = "$j('.photonic-flickr-panel a').each(function() { $j(this).data('title', $j(this).attr('title')); }); $j('.photonic-flickr-panel a').each(function() { var iTitle = $j(this).find('img').attr('alt'); $j(this).tooltip({ bodyHandler: function() {	return iTitle; }, showURL: false });})";
+				script.text = "$j('.photonic-flickr-panel a').each(function() { $j(this).data('title', $j(this).attr('title')); }); $j('.photonic-flickr-panel a').each(function() { if (!($j(this).parent().hasClass('photonic-header-title'))) { var iTitle = $j(this).find('img').attr('alt'); $j(this).tooltip({ bodyHandler: function() { return iTitle; }, showURL: false });}})";
 				div_content.appendChild(script);
 			}
 
@@ -716,7 +720,7 @@ $j(document).ready(function() {
 			if (Photonic_JS.flickr_photo_pop_title_display == 'tooltip') {
 				script = document.createElement('script');
 				script.type = 'text/javascript';
-				script.text = "$j('.photonic-flickr-panel a').each(function() { $j(this).data('title', $j(this).attr('title')); }); $j('.photonic-flickr-panel a').each(function() { var iTitle = $j(this).find('img').attr('alt'); $j(this).tooltip({ bodyHandler: function() {	return iTitle; }, showURL: false });})";
+				script.text = "$j('.photonic-flickr-panel a').each(function() { $j(this).data('title', $j(this).attr('title')); }); $j('.photonic-flickr-panel a').each(function() { if (!($j(this).parent().hasClass('photonic-header-title'))) { var iTitle = $j(this).find('img').attr('alt'); $j(this).tooltip({ bodyHandler: function() {	return iTitle; }, showURL: false });}})";
 				div_content.appendChild(script);
 			}
 
