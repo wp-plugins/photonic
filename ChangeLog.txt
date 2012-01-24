@@ -1,3 +1,7 @@
+Version 1.10 - 23rd Jan 2012
+============================
+1.	Fixed a bug with the SmugMug processor, which was preventing the display of an album popup.
+
 Version 1.09 - 16th Jan 2012
 ============================
 1.	Fixed a bug with the Flickr processor, which was preventing the execution of the shortcode with a group_id parameter

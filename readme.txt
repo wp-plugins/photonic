@@ -114,6 +114,10 @@ in the third-party JS scripts are not translated.
 
 == Changelog ==
 
+= 1.10 =
+
+*	Fixed a bug with the SmugMug processor, which was preventing the display of an album popup.
+
 = 1.09 =
 
 *	Fixed a bug with the Flickr processor, which was preventing the execution of the shortcode with a group_id parameter
