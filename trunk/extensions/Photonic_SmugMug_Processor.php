@@ -348,7 +348,7 @@ class Photonic_SmugMug_Processor extends Photonic_Processor {
 					}
 
 					if ($photonic_smug_photo_pop_title_display == 'tooltip') {
-						$ret .= "<script type='text/javascript'>\$j('.photonic-smug-panel a').each(function() { \$j(this).data('title', \$j(this).attr('title')); }); \$j('.photonic-smug-panel a').each(function() { if (!($j(this).parent().hasClass('photonic-header-title'))) { var iTitle = \$j(this).find('img').attr('alt'); \$j(this).tooltip({ bodyHandler: function() { return iTitle; }, showURL: false });}})</script>";
+						$ret .= "<script type='text/javascript'>\$j('.photonic-smug-panel a').each(function() { \$j(this).data('title', \$j(this).attr('title')); }); \$j('.photonic-smug-panel a').each(function() { if (!(\$j(this).parent().hasClass('photonic-header-title'))) { var iTitle = \$j(this).find('img').attr('alt'); \$j(this).tooltip({ bodyHandler: function() { return iTitle; }, showURL: false });}})</script>";
 					}
 
 					if ($photonic_slideshow_library == 'fancybox') {
