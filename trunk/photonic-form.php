@@ -194,6 +194,7 @@ $fields = array(
 					'photosets' => __('Photosets', 'photonic'),
 					'galleries' => __('Galleries', 'photonic'),
 					'collections' => __('Collections', 'photonic'),
+					'photo' => __('Single Photo', 'photonic'),
 				),
 				'req' => true,
 			),
@@ -217,6 +218,13 @@ $fields = array(
 				'name' => __('Collection ID', 'photonic')."</a>",
 				'type' => 'text',
 				'hint' => __('Will show contents of a single collection if "Display" is set to "Collections"', 'photonic')
+			),
+
+			array(
+				'id' => 'photo_id',
+				'name' => __('Photo ID', 'photonic')."</a>",
+				'type' => 'text',
+				'hint' => __('Will show a single photo if "Display" is set to "Single Photo"', 'photonic')
 			),
 
 			array(

@@ -3,13 +3,13 @@
  * Plugin Name: Photonic Gallery for Flickr, Picasa, SmugMug and 500px
  * Plugin URI: http://aquoid.com/news/plugins/photonic/
  * Description: Extends the native gallery shortcode to support Flickr, Picasa, SmugMug and 500px. JS libraries like Fancybox, Colorbox and PrettyPhoto are supported. The plugin also helps convert a regular WP gallery into a slideshow.
- * Version: 1.10
+ * Version: 1.11
  * Author: Sayontan Sinha
  * Author URI: http://mynethome.net/blog
- * License: GNU General Public License (GPL), v2 (or newer)
- * License URI: http://www.gnu.org/licenses/gpl-2.0.html
+ * License: GNU General Public License (GPL), v3 (or newer)
+ * License URI: http://www.gnu.org/licenses/gpl-3.0.html
  *
- * Copyright (c) 2009 - 2011 Sayontan Sinha. All rights reserved.
+ * Copyright (c) 2009 - 2012 Sayontan Sinha. All rights reserved.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -20,7 +20,7 @@ class Photonic {
 	function Photonic() {
 		global $photonic_options, $photonic_setup_options, $photonic_is_ie6;
 		if (!defined('PHOTONIC_VERSION')) {
-			define('PHOTONIC_VERSION', '1.09');
+			define('PHOTONIC_VERSION', '1.11');
 		}
 
 		if (!defined('PHOTONIC_PATH')) {
@@ -168,8 +168,6 @@ class Photonic {
 			wp_enqueue_script('photonic-carousel', plugins_url('include/scripts/jquery.jcarousel.min.js', __FILE__), array('jquery'), $this->version);
 		}
 		
-		wp_enqueue_script('photonic-modal', plugins_url('include/scripts/jquery.simplemodal.1.4.1.min.js', __FILE__), array('jquery'), $this->version);
-
 		$js_array = array(
 			'ajaxurl' => admin_url('admin-ajax.php'),
 			'flickr_api_key' => $photonic_flickr_api_key,
@@ -385,14 +383,14 @@ class Photonic {
 	 * @return string
 	 */
 	function modify_gallery($content, $attr = array()) {
-		global $post, $photonic_flickr_gallery, $photonic_picasa_gallery, $photonic_native_gallery, $photonic_500px_gallery, $photonic_smugmug_gallery;
+		global $post, $photonic_flickr_gallery, $photonic_picasa_gallery, $photonic_native_gallery, $photonic_500px_gallery, $photonic_smugmug_gallery, $photonic_default_gallery_type;
 		if ($attr == null) {
 			$attr = array();
 		}
 
 		$attr = array_merge(array(
 			// Specially for Photonic
-			'type' => 'default',  //default, flickr, picasa
+			'type' => $photonic_default_gallery_type,  //default, flickr, picasa
 			'style' => 'default',   //default, strip-below, strip-above, strip-right, strip-left, no-strip, launch
 			'id'         => $post->ID,
 		), $attr);

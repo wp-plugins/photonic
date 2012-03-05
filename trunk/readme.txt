@@ -22,6 +22,7 @@ The following Flickr concepts are supported in Photonic:
 *	<a href='http://aquoid.com/news/plugins/photonic/flickr/flickr-photosets/'>PhotoSets</a>
 *	<a href='http://aquoid.com/news/plugins/photonic/flickr/flickr-galleries/'>Galleries</a>
 *	<a href='http://aquoid.com/news/plugins/photonic/flickr/flickr-collections/'>Collections</a>
+*	<a href='http://aquoid.com/news/plugins/photonic/flickr/flickr-photo/'>Single Photo</a>
 
 For demos of Flickr support visit the <a href='http://aquoid.com/news/plugins/photonic/flickr/'>Flickr page</a>.
 
@@ -113,6 +114,12 @@ Yes, but only for the plugin front-end. The admin panel is not translated at thi
 in the third-party JS scripts are not translated.
 
 == Changelog ==
+
+= 1.11 =
+
+*	Combined SimpleModal script with Photonic to save an HTTP request.
+*   Deleted some redundant JS files.
+*   Added support for a different default type.
 
 = 1.10 =
 
