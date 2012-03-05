@@ -16,7 +16,7 @@ $photonic_generic_options = array(
 			"colorbox" => "<a href='http://colorpowered.com/colorbox/'>Colorbox</a> &ndash; ~10KB: Released under the MIT license",
 			"prettyphoto" => "<a href='http://www.no-margin-for-errors.com/projects/prettyphoto-jquery-lightbox-clone/'>PrettyPhoto</a> &ndash; ~23KB:
 				Released under the Creative Commons Attribution 2.5 license, but the  <a href='http://twitter.com/#!/scaron/status/126614077169602560'>author permits distribution with GPL software</a>.",
-//							 "slimbox2" => "<a href='http://www.digitalia.be/software/slimbox2'>Slimbox2</a> - ~10KB, moderate range of effects",
+			//"jquery-lightbox" => "<a href='http://leandrovieira.com/projects/jquery/lightbox/'>JQuery Lightbox</a> &ndash; ~7K: Released under CC SA",
 			"none" => "None"
 		),
 		"std" => "fancybox"),
@@ -45,6 +45,21 @@ $photonic_generic_options = array(
 		"type" => "checkbox",
 		"std" => ""
 	),*/
+
+	array("name" => "Default Gallery Type",
+		"desc" => "If no gallery type is specified, the following selection will be used:",
+		"id" => "default_gallery_type",
+		"grouping" => "generic-settings",
+		"type" => "radio",
+		"options" => array(
+			"default" => "WordPress Galleries",
+			"flickr" => "Flickr",
+			"picasa" => "Picasa",
+			"smugmug" => "SmugMug",
+			"500px" => "500px.com"
+		),
+		"std" => "default"
+	),
 
 	array("name" => "Native WP Galleries",
 		"desc" => "Control settings for native WP gallieries, invoked by <code>[gallery id='abc']</code>",

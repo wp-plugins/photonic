@@ -85,6 +85,13 @@ class Photonic_Flickr_Processor extends Photonic_Processor {
 					}
 					break;
 
+				case 'photo':
+					if (isset($photo_id)) {
+						$query_urls[] = 'http://api.flickr.com/services/rest/?'.$format.$json_api.'method=flickr.photos.getInfo';
+//						$query_urls[] = 'http://api.flickr.com/services/rest/?'.$format.$json_api.'method=flickr.photos.getExif';
+					}
+					break;
+
 				case 'photos':
 				default:
 					$query_urls[] = 'http://api.flickr.com/services/rest/?'.$format.$json_api.'method=flickr.photos.search';
@@ -93,6 +100,10 @@ class Photonic_Flickr_Processor extends Photonic_Processor {
 		}
 		else if (isset($view) && $view == 'photos' && isset($group_id)) {
 			$query_urls[] = 'http://api.flickr.com/services/rest/?'.$format.$json_api.'method=flickr.photos.search';
+		}
+		else if (isset($view) && $view == 'photo' && isset($photo_id)) {
+			$query_urls[] = 'http://api.flickr.com/services/rest/?'.$format.$json_api.'method=flickr.photos.getInfo';
+//			$query_urls[] = 'http://api.flickr.com/services/rest/?'.$format.$json_api.'method=flickr.photos.getExif';
 		}
 
 		// Collection > galleries > photosets
@@ -159,6 +170,9 @@ class Photonic_Flickr_Processor extends Photonic_Processor {
 		else if (isset($photoset_id)) {
 			$query .= '&photoset_id='.$photoset_id;
 		}
+		else if (isset($photo_id)) {
+			$query .= '&photo_id='.$photo_id;
+		}
 
 		if (isset($tags)) {
 			$query .= '&tags='.$tags;
@@ -197,7 +211,10 @@ class Photonic_Flickr_Processor extends Photonic_Processor {
 		}
 
 		foreach ($query_urls as $query_url) {
-			$ret .= "<div class='photonic-flickr-stream $carousel'><ul>";
+			$ret .= "<div class='photonic-flickr-stream $carousel'>";
+			if ((isset($view) && $view != 'photo') || !isset($view)) {
+				$ret .= "<ul>";
+			}
 			$iterator = array();
 			if (is_array($query_url)) {
 				$iterator = $query_url;
@@ -222,7 +239,10 @@ class Photonic_Flickr_Processor extends Photonic_Processor {
 				$ret .= "</script>\n";
 				$ret .= "<script type='text/javascript' src='".$nested_query_url.$query."'></script>\n";
 			}
-			$ret .= "</ul></div>";
+			if ((isset($view) && $view != 'photo') || !isset($view)) {
+				$ret .= "</ul>";
+			}
+			$ret .= "</div>";
 		}
 		return $ret;
 	}

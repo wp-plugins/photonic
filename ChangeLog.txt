@@ -1,3 +1,9 @@
+Version 1.11 - 05th Mar 2012
+============================
+1.	Combined SimpleModal script with Photonic to save an HTTP request.
+2.  Deleted some redundant JS files.
+3.  Added support for a different default type.
+
 Version 1.10 - 23rd Jan 2012
 ============================
 1.	Fixed a bug with the SmugMug processor, which was preventing the display of an album popup.
