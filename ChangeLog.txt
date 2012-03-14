@@ -1,8 +1,13 @@
+Version 1.12 - 14th Mar 2012
+============================
+1.	Fixed a problem with handling double quotes in the title of Flickr photos.
+
 Version 1.11 - 05th Mar 2012
 ============================
 1.	Combined SimpleModal script with Photonic to save an HTTP request.
 2.  Deleted some redundant JS files.
 3.  Added support for a different default type.
+4.  Added support for single photos in Flickr.
 
 Version 1.10 - 23rd Jan 2012
 ============================

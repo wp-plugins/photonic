@@ -115,11 +115,16 @@ in the third-party JS scripts are not translated.
 
 == Changelog ==
 
+= 1.12 =
+
+*	Fixed a problem with handling double quotes in the title of Flickr photos.
+
 = 1.11 =
 
 *	Combined SimpleModal script with Photonic to save an HTTP request.
 *   Deleted some redundant JS files.
 *   Added support for a different default type.
+*   Added support for single photos in Flickr.
 
 = 1.10 =
 
