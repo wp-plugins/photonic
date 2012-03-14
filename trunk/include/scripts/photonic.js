@@ -1196,12 +1196,14 @@ function photonicJsonFlickrStreamApi(rsp) {
 				orig = Photonic_JS.slideshow_library == 'none' ? url : orig;
 
 				var origEncodedTitle = photonicHtmlEncode(photo.title);
+				origEncodedTitle = $j('<div/>').text(origEncodedTitle).html().replace(/"/g, "&quot;");
 				var encodedFlickrView = "<a href='" + url + "'>" + Photonic_JS.flickr_view + "</a>";
 				var encodedTitle = Photonic_JS.slideshow_library == 'none' ? origEncodedTitle : (origEncodedTitle == '' ? encodedFlickrView : origEncodedTitle + " | " + encodedFlickrView);
 				var showTitle = '';
 				if (Photonic_JS.flickr_photo_title_display == 'below') {
 					showTitle = '<span class="photonic-photo-title">' + origEncodedTitle + '</span>';
 				}
+
 				s += '<li class="photonic-flickr-image photonic-flickr-photo ' + col_class + '"><a href="' + orig + '" class="' + a_class + '" rel="' + a_rel + '" title="' + encodedTitle + '">' + '<img alt="' +
 						origEncodedTitle + '"src="' + thumb + '"/>' + '</a>' + showTitle + '</li>';
 			}
