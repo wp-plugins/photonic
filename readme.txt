@@ -6,13 +6,14 @@ Requires at least: WP 3.1
 Tested up to: WP 3.3.1
 Stable tag: trunk
 
-A plugin that enhances the capabilities of the native gallery shortcode in WordPress by letting you show Flickr, Picasa, SmugMug and 500px photos.
+WordPress galleries on steroids!! A plugin that enhances the capabilities of the native gallery shortcode in WordPress by letting you show Flickr, Picasa, SmugMug and 500px photos.
 
 == Description ==
 
 Photonic lets you use the WordPress <code>gallery</code> shortcode and ramps it up with a lot of added functionality. It adds support for
 several new parameters to enhance your galleries. It supports Flickr photos, Photosets, Galleries and Collections, along with Picasa photos and albums,
-SmugMug albums and images, and 500px photos.
+SmugMug albums and images, and 500px photos. You can also enable authentication for your site visitors that will let them see private and protected
+photos from each provider.
 
 = Flickr Support =
 
@@ -23,6 +24,7 @@ The following Flickr concepts are supported in Photonic:
 *	<a href='http://aquoid.com/news/plugins/photonic/flickr/flickr-galleries/'>Galleries</a>
 *	<a href='http://aquoid.com/news/plugins/photonic/flickr/flickr-collections/'>Collections</a>
 *	<a href='http://aquoid.com/news/plugins/photonic/flickr/flickr-photo/'>Single Photo</a>
+*	<a href='http://aquoid.com/news/plugins/photonic/flickr/flickr-authentication/'>Authentication</a>
 
 For demos of Flickr support visit the <a href='http://aquoid.com/news/plugins/photonic/flickr/'>Flickr page</a>.
 
@@ -114,6 +116,11 @@ Yes, but only for the plugin front-end. The admin panel is not translated at thi
 in the third-party JS scripts are not translated.
 
 == Changelog ==
+
+= 1.20 =
+
+*	Added authentication support for Flickr, 500px.com and SmugMug.
+*   Disabled the showing of password-protected SmugMug galleries.
 
 = 1.12 =
 

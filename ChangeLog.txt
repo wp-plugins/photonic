@@ -1,3 +1,8 @@
+Version 1.20 - 22nd Mar 2012
+============================
+1.	Added authentication support for Flickr, 500px.com and SmugMug.
+2.  Disabled the showing of password-protected SmugMug galleries.
+
 Version 1.12 - 14th Mar 2012
 ============================
 1.	Fixed a problem with handling double quotes in the title of Flickr photos.

@@ -290,6 +290,10 @@ $j(document).ready(function() {
 	});
 
 	$j('a.photonic-smug-album-thumb').live('click', function(e) {
+		if ($j(this).hasClass('photonic-smug-passworded')) {
+			return false;
+		}
+
 		var thumb_id = this.id;
 		var href = this.href;
 		var panel_id = thumb_id.substr(26);
@@ -447,6 +451,33 @@ $j(document).ready(function() {
 			// Configuration goes here
 		});
 	}
+
+	$j('.auth-button').click(function (){
+		var provider = '';
+		if ($j(this).hasClass('auth-button-flickr')) {
+			provider = 'flickr';
+		}
+		else if ($j(this).hasClass('auth-button-500px')) {
+			provider = '500px';
+		}
+		else if ($j(this).hasClass('auth-button-smug')) {
+			provider = 'smug';
+		}
+		var callbackId = $j(this).attr('rel');
+
+		$j.post(Photonic_JS.ajaxurl, "action=photonic_authenticate&provider=" + provider + '&callback_id=' + callbackId, function(data) {
+			if (provider == 'flickr') {
+				window.location.replace(data);
+			}
+			else if (provider == '500px') {
+				window.location.replace(data);
+			}
+			else if (provider == 'smug') {
+				window.open(data);
+			}
+		});
+		return false;
+	});
 
 	/**
 	 * Displays all photos in a Flickr Set. Invoked when the Set is being fetched for the first time for display in a popup.
@@ -900,16 +931,18 @@ $j(document).ready(function() {
 	function modalOnSmugShow(dialog) {
 		var s = this; // refers to the simplemodal object
 		$j('.photonic-smug-album-thumb', dialog.data[0]).click(function () { // use the modal data context
-			var id = '#photonic-smug-panel-' + this.id.substr(19);
+			if (!$j(this).hasClass('photonic-smug-passworded')) {
+				var id = '#photonic-smug-panel-' + this.id.substr(19);
 
-			setTimeout(function () { // wait for 6/10ths of a second, then open the next dialog
-				s.close(); // close the current dialog
-				$j(id).modal({
-					onShow: modalOnSmugShow,
-					onOpen: modalOpen,
-					onClose: modalClose
-				});
-			}, 600);
+				setTimeout(function () { // wait for 6/10ths of a second, then open the next dialog
+					s.close(); // close the current dialog
+					$j(id).modal({
+						onShow: modalOnSmugShow,
+						onOpen: modalOpen,
+						onClose: modalClose
+					});
+				}, 600);
+			}
 
 			return false;
 		});
@@ -957,8 +990,16 @@ $j(document).ready(function() {
 
 		if ($j(panel).length == 0) {
 			var photoset_id = current_panel.substr(current_panel.lastIndexOf('-') + 1);
-			var url = 'http://api.flickr.com/services/rest/?format=json&api_key=' + (Photonic_JS.flickr_api_key) + '&method=flickr.photosets.getPhotos&photoset_id=' + photoset_id + '&jsoncallback=?';
-			$j.getJSON(url, photonicDisplaySetImages);
+			if (Photonic_JS.flickr_auth_call) {
+				$j.post(Photonic_JS.ajaxurl, "action=photonic_flickr_sign&method=flickr.photosets.getPhotos&photoset_id=" + photoset_id, function(data) {
+					$j.getJSON(data, photonicDisplaySetImages);
+				});
+			}
+			else {
+				var url = 'http://api.flickr.com/services/rest/?format=json&api_key=' + (Photonic_JS.flickr_api_key) + '&method=flickr.photosets.getPhotos&photoset_id=' + photoset_id + '&jsoncallback=?';
+				// A quicker call, avoids server round-trip
+				$j.getJSON(url, photonicDisplaySetImages);
+			}
 		}
 		else {
 			$j(loading).hide();
@@ -1007,8 +1048,15 @@ $j(document).ready(function() {
 			remainder = remainder.substr(remainder.lastIndexOf('-') + 1);
 			gallery_id = remainder + '-' + gallery_id;
 
-			var url = 'http://api.flickr.com/services/rest/?format=json&api_key=' + (Photonic_JS.flickr_api_key) + '&method=flickr.galleries.getPhotos&gallery_id=' + gallery_id + '&jsoncallback=?';
-			$j.getJSON(url, photonicDisplayGalleryImages);
+			if (Photonic_JS.flickr_auth_call) {
+				$j.post(Photonic_JS.ajaxurl, "action=photonic_flickr_sign&method=flickr.galleries.getPhotos&gallery_id=" + gallery_id, function(data) {
+					$j.getJSON(data, photonicDisplayGalleryImages);
+				});
+			}
+			else {
+				var url = 'http://api.flickr.com/services/rest/?format=json&api_key=' + (Photonic_JS.flickr_api_key) + '&method=flickr.galleries.getPhotos&gallery_id=' + gallery_id + '&jsoncallback=?';
+				$j.getJSON(url, photonicDisplayGalleryImages);
+			}
 		}
 		else {
 			$j(loading).hide();

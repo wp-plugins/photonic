@@ -7,6 +7,14 @@
  */
 
 class Photonic_Flickr_Processor extends Photonic_Processor {
+	function __construct() {
+		parent::__construct();
+		global $photonic_flickr_api_key, $photonic_flickr_api_secret;
+		$this->api_key = $photonic_flickr_api_key;
+		$this->api_secret = $photonic_flickr_api_secret;
+		$this->provider = 'flickr';
+	}
+
 	/**
 	 * A very flexible function to display a user's photos from Flickr. This makes use of the Flickr API, hence it requires the user's API key.
 	 * The API key is defined in the options. The function makes use of three different APIs:
@@ -36,6 +44,7 @@ class Photonic_Flickr_Processor extends Photonic_Processor {
 	 */
 	function get_gallery_images($attr = array()) {
 		global $photonic_flickr_api_key, $photonic_flickr_position, $photonic_carousel_mode;
+		global $photonic_flickr_login_shown, $photonic_flickr_allow_oauth, $photonic_flickr_oauth_done;
 
 		$attr = array_merge(array(
 			'style' => 'default',
@@ -43,6 +52,7 @@ class Photonic_Flickr_Processor extends Photonic_Processor {
 			// Defaults from WP ...
 			'columns'    => 'auto',
 			'size'       => 's',
+			'privacy_filter' => '',
 		), $attr);
 		extract($attr);
 
@@ -123,7 +133,21 @@ class Photonic_Flickr_Processor extends Photonic_Processor {
 				return __('User id is required for displaying a single gallery', 'photonic');
 			}
 			$temp_query = 'http://api.flickr.com/services/rest/?method=flickr.galleries.getList&user_id='.$user_id.'&api_key='.$photonic_flickr_api_key;
-			$feed = wp_remote_request($temp_query);
+
+			if ($photonic_flickr_oauth_done) {
+				$end_point = Photonic_Processor::get_normalized_http_url($temp_query);
+				if (strstr($temp_query, $end_point) > -1) {
+					$params = substr($temp_query, strlen($end_point));
+					if (strlen($params) > 1) {
+						$params = substr($params, 1);
+					}
+					$params = Photonic_Processor::parse_parameters($params);
+					$signed_args = $this->sign_call($end_point, 'GET', $params);
+					$temp_query = $end_point.'?'.Photonic_Processor::build_query($signed_args);
+				}
+			}
+
+			$feed = Photonic::http($temp_query);
 			if (!is_wp_error($feed) && 200 == $feed['response']['code']) {
 				$feed = $feed['body'];
 				$feed = simplexml_load_string($feed);
@@ -198,6 +222,12 @@ class Photonic_Flickr_Processor extends Photonic_Processor {
 			$query .= '&per_page='.$per_page;
 		}
 
+		$login_required = false;
+		if (isset($privacy_filter) && trim($privacy_filter) != '') {
+			$query .= '&privacy_filter='.$privacy_filter;
+			$login_required = $privacy_filter == 1 ? false : true;
+		}
+
 		// Allow users to define additional query parameters
 		//$query_url = apply_filters('photonic_flickr_query_url', $query_url, $attr);
 		$query_urls = apply_filters('photonic_flickr_query_urls', $query_urls, $attr);
@@ -208,6 +238,12 @@ class Photonic_Flickr_Processor extends Photonic_Processor {
 		}
 		else {
 			$carousel = '';
+		}
+
+		if (!$photonic_flickr_login_shown && $photonic_flickr_allow_oauth && is_singular() && !$photonic_flickr_oauth_done && $login_required) {
+			$post_id = get_the_ID();
+			$ret .= $this->get_login_box($post_id);
+			$photonic_flickr_login_shown = true;
 		}
 
 		foreach ($query_urls as $query_url) {
@@ -237,7 +273,21 @@ class Photonic_Flickr_Processor extends Photonic_Processor {
 					$ret .= "\tphotonic_flickr_columns_".$photonic_flickr_position." = 'auto';\n";
 				}
 				$ret .= "</script>\n";
-				$ret .= "<script type='text/javascript' src='".$nested_query_url.$query."'></script>\n";
+				$merged_query = $nested_query_url.$query;
+				// We only worry about signing the call if the authentication is done. Otherwise we just show what is available.
+				if ($photonic_flickr_oauth_done) {
+					$end_point = Photonic_Processor::get_normalized_http_url($merged_query);
+					if (strstr($merged_query, $end_point) > -1) {
+						$params = substr($merged_query, strlen($end_point));
+						if (strlen($params) > 1) {
+							$params = substr($params, 1);
+						}
+						$params = Photonic_Processor::parse_parameters($params);
+						$signed_args = $this->sign_call($end_point, 'GET', $params);
+						$merged_query = $end_point.'?'.Photonic_Processor::build_query($signed_args);
+					}
+				}
+				$ret .= "<script type='text/javascript' src='".$merged_query."'></script>\n";
 			}
 			if ((isset($view) && $view != 'photo') || !isset($view)) {
 				$ret .= "</ul>";
@@ -256,13 +306,26 @@ class Photonic_Flickr_Processor extends Photonic_Processor {
 	 * @return array
 	 */
 	function get_collection_list($user_id, $collection_id = '') {
-		global $photonic_flickr_api_key;
+		global $photonic_flickr_api_key, $photonic_flickr_oauth_done;
 		$query = 'http://api.flickr.com/services/rest/?method=flickr.collections.getTree&user_id='.$user_id.'&api_key='.$photonic_flickr_api_key;
 		if ($collection_id != '') {
 			$query .= '&collection_id='.$collection_id;
 		}
 
-		$feed = wp_remote_request($query);
+		if ($photonic_flickr_oauth_done) {
+			$end_point = Photonic_Processor::get_normalized_http_url($query);
+			if (strstr($query, $end_point) > -1) {
+				$params = substr($query, strlen($end_point));
+				if (strlen($params) > 1) {
+					$params = substr($params, 1);
+				}
+				$params = Photonic_Processor::parse_parameters($params);
+				$signed_args = $this->sign_call($end_point, 'GET', $params);
+				$query = $end_point.'?'.Photonic_Processor::build_query($signed_args);
+			}
+		}
+
+		$feed = Photonic::http($query);
 		if (!is_wp_error($feed) && 200 == $feed['response']['code']) {
 			$feed = $feed['body'];
 			$feed = simplexml_load_string($feed);
@@ -333,6 +396,103 @@ class Photonic_Flickr_Processor extends Photonic_Processor {
 			}
 		}
 		return $ret;
+	}
+
+	function sign_js_call() {
+		if (isset($_POST['method'])) {
+			$method = $_POST['method'];
+			global $photonic_flickr_api_key, $photonic_flickr_oauth_done;
+			$query = 'http://api.flickr.com/services/rest/?format=json&api_key='.$photonic_flickr_api_key.'&method='.$method.'&nojsoncallback=1';
+			if (isset($_POST['photoset_id'])) {
+				$photoset_id = $_POST['photoset_id'];
+				if ($photoset_id != '') {
+					$query .= '&photoset_id='.$photoset_id;
+				}
+			}
+
+			if ($photonic_flickr_oauth_done) {
+				$end_point = Photonic_Processor::get_normalized_http_url($query);
+				if (strstr($query, $end_point) > -1) {
+					$params = substr($query, strlen($end_point));
+					if (strlen($params) > 1) {
+						$params = substr($params, 1);
+					}
+					$params = Photonic_Processor::parse_parameters($params);
+					$signed_args = $this->sign_call($end_point, 'GET', $params);
+					$query = $end_point.'?'.Photonic_Processor::build_query($signed_args);
+				}
+			}
+			echo $query;
+		}
+		die();
+	}
+
+	/**
+	 * Access Token URL
+	 *
+	 * @return string
+	 */
+	public function access_token_URL() {
+		return 'http://www.flickr.com/services/oauth/access_token';
+	}
+
+	/**
+	 * Authenticate URL
+	 *
+	 * @return string
+	 */
+	public function authenticate_URL() {
+		return 'http://www.flickr.com/services/oauth/authorize';
+	}
+
+	/**
+	 * Authorize URL
+	 *
+	 * @return string
+	 */
+	public function authorize_URL() {
+		return 'http://www.flickr.com/services/oauth/authorize';
+	}
+
+	/**
+	 * Request Token URL
+	 *
+	 * @return string
+	 */
+	public function request_token_URL() {
+		return 'http://www.flickr.com/services/oauth/request_token';
+	}
+
+	public function end_point() {
+		return 'http://api.flickr.com/services/rest/';
+	}
+
+	function parse_token($response) {
+		$body = $response['body'];
+		$token = Photonic_Processor::parse_parameters($body);
+		return $token;
+	}
+
+	public function check_access_token_method() {
+		return 'flickr.test.login';
+	}
+
+	/**
+	 * Method to validate that the stored token is indeed authenticated.
+	 *
+	 * @param $request_token
+	 * @return array|WP_Error
+	 */
+	function check_access_token($request_token) {
+		$parameters = array('method' => $this->check_access_token_method(), 'format' => 'json', 'nojsoncallback' => 1);
+		$signed_parameters = $this->sign_call($this->end_point(), 'GET', $parameters);
+
+		$end_point = $this->end_point();
+		$end_point .= '?'.Photonic_Processor::build_query($signed_parameters);
+		$parameters = null;
+
+		$response = Photonic::http($end_point, 'GET', $parameters);
+		return $response;
 	}
 }
 ?>

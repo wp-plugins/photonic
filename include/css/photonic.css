@@ -114,3 +114,39 @@ li.slideshow-grid li { display: inline-block; }
 	font-size: 12px;
 }
 #tooltip h3, #tooltip div { margin: 0; }
+
+#photonic-login-box-flickr .auth-button, #photonic-login-box-500px .auth-button, #photonic-login-box-smug .auth-button {
+	padding: 10px 15px;
+	display: inline-block;
+	text-align: center;
+	text-decoration: none;
+	min-width: 120px;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 14px;
+	margin: 20px 0 0;
+	background: #6af;
+	background: -moz-linear-gradient(center top, #336699 20%, #224477 100%) repeat scroll 0 0 transparent;
+	background: -webkit-linear-gradient(center top, #336699 20%, #224477 100%) repeat scroll 0 0 transparent;
+	color: #fff;
+	float: none;
+	border-radius: 3px;
+}
+#photonic-login-box-flickr .auth-button:hover, #photonic-login-box-500px .auth-button:hover, #photonic-login-box-smug .auth-button:hover {
+	text-decoration: none;
+	color: #fff;
+	background: #48d;
+	background: -moz-linear-gradient(center top, #224477 20%, #336699 100%) repeat scroll 0 0 transparent;
+	background: -webkit-linear-gradient(center top, #224477 20%, #336699 100%) repeat scroll 0 0 transparent;
+}
+.photonic-login-box {
+	border: 1px solid #888;
+	padding: 10px;
+	border-radius: 5px;
+	display: block;
+	clear: both;
+}
+
+.photonic-auth-button {
+	margin: 0 auto;
+	text-align: center;
+}
