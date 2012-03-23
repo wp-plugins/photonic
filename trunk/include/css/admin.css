@@ -79,7 +79,7 @@ ul.ui-widget-header { background: none; border: none; }
 .ui-helper-reset { font-size: 85%; }
 .ui-tabs .ui-tabs-nav { width: 20%; float: left; position: relative; }
 
-.opt-sub-table { display: block; width: 95%; margin: 20px 10px; border-collapse: collapse; }
+.opt-sub-table { width: 95%; margin: 20px 10px; border-collapse: collapse; }
 .opt-sub-table-col { width: 48%; margin: 10px; }
 .opt-sub-table-5 { border-collapse: collapse; width: 98%; }
 .opt-sub-table-col-5 { width: 22%; }
@@ -181,3 +181,33 @@ td { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
 
 input[type='checkbox'], input[type='radio'] { margin-right: 1em; }
 input[type="text"].color { padding: 5px; background-image: url(../images/color_wheel.png); background-repeat: no-repeat; background-position: 95% center; }
+
+.auth-button {
+	padding: 10px 20px;
+	display: block;
+	text-align: center;
+	text-decoration: none;
+	width: 200px;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 14px;
+	margin: 10px auto;
+	background: #eee;
+	color: #aaa;
+	border-radius: 3px;
+}
+
+.auth-done {
+	background: #def;
+}
+
+.auth-active {
+	background: #6af;
+	color: #eee;
+}
+
+.photonic-section textarea {
+	width: 90%;
+	height: 200px;
+}
+
+

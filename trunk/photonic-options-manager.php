@@ -375,9 +375,12 @@ class Photonic_Options_Manager {
 					add_settings_field($value['id'], '', array(&$this, "create_section_for_text"), $page, $value['grouping'], $value);
 					break;
 
+				case "textarea";
+					add_settings_field($value['id'], '', array(&$this, "create_section_for_textarea"), $page, $value['grouping'], $value);
+					break;
+
 				case "select":
 					add_settings_field($value['id'], '', array(&$this, "create_section_for_select"), $page, $value['grouping'], $value);
-//					add_settings_field($value['id'], '', array(&$this, "create_section_for_select"), $parent, 'default', $value);
 					break;
 
 				case "radio":
@@ -454,6 +457,25 @@ class Photonic_Options_Manager {
 		}
 
 		echo '<input type="text" name="photonic_options['.$value['id'].']" value="'.$text.'" />'."\n";
+		if (isset($value['hint'])) {
+			echo " &laquo; ".$value['hint']."<br />\n";
+		}
+		$this->create_closing_tag($value);
+	}
+
+	function create_section_for_textarea($value) {
+		global $photonic_options;
+		$this->create_opening_tag($value);
+		echo '<textarea name="photonic_options['.$value['id'].']" cols="" rows="">'."\n";
+		if (isset($photonic_options[$value['id']]) && $photonic_options[$value['id']] != "") {
+			$text = stripslashes($photonic_options[$value['id']]);
+			$text = esc_attr($text);
+			echo $text;
+		}
+		else {
+			echo $value['std'];
+		}
+		echo '</textarea>';
 		if (isset($value['hint'])) {
 			echo " &laquo; ".$value['hint']."<br />\n";
 		}

@@ -23,16 +23,26 @@ $photonic_500px_options = array(
 		"type" => "text",
 		"std" => ""),
 
-/*	array("name" => "500px Authentication",
-		"desc" => "To make use of the 500px functionality you have to use your 500px API Key.
-							You can <a href='http://www.flickr.com/services/api/misc.api_keys.html'>obtain a key online</a> if you don't have one.
-							Note that you are responsible for following all of the Flickr API's <a href='http://www.flickr.com/services/api/tos/'>Terms of Service</a>",
-		"id" => "500px_api_auth",
+	array("name" => "Private Photos",
+		"desc" => "Let visitors of your site login to 500px.com to see private photos for which they have permissions (will show a login button if they are not logged in)",
+		"id" => "500px_allow_oauth",
 		"grouping" => "500px-settings",
-		"type" => "ajax-button",
-		"conditional" => true,
-		"conditions" => array('operator' => 'NOR', 'conditions' => array('500px_api_key' => '', '500px_api_secret' => '')),
-		"std" => "Authenticate your site"),*/
+		"type" => "checkbox",
+		"std" => ""),
+
+	array("name" => "Login Box Text",
+		"desc" => "If private photos are enabled, this is the text users will see before the login button (you can use HTML tags here)",
+		"id" => "500px_login_box",
+		"grouping" => "500px-settings",
+		"type" => "textarea",
+		"std" => "Some features that you are trying to access may be visible to logged in users of 500px.com only. Please login if you want to see them."),
+
+	array("name" => "Login Button Text",
+		"desc" => "If private photos are enabled, this is the text users will see before the login button (you can use HTML tags other than &lt;a&gt; here)",
+		"id" => "500px_login_button",
+		"grouping" => "500px-settings",
+		"type" => "text",
+		"std" => "Login"),
 
 	array("name" => "500px Photos",
 		"desc" => "Control settings for 500px Photos when displayed in your page",

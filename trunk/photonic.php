@@ -3,7 +3,7 @@
  * Plugin Name: Photonic Gallery for Flickr, Picasa, SmugMug and 500px
  * Plugin URI: http://aquoid.com/news/plugins/photonic/
  * Description: Extends the native gallery shortcode to support Flickr, Picasa, SmugMug and 500px. JS libraries like Fancybox, Colorbox and PrettyPhoto are supported. The plugin also helps convert a regular WP gallery into a slideshow.
- * Version: 1.12
+ * Version: 1.20
  * Author: Sayontan Sinha
  * Author URI: http://mynethome.net/blog
  * License: GNU General Public License (GPL), v3 (or newer)
@@ -20,7 +20,7 @@ class Photonic {
 	function Photonic() {
 		global $photonic_options, $photonic_setup_options, $photonic_is_ie6;
 		if (!defined('PHOTONIC_VERSION')) {
-			define('PHOTONIC_VERSION', '1.12');
+			define('PHOTONIC_VERSION', '1.20');
 		}
 
 		if (!defined('PHOTONIC_PATH')) {
@@ -63,6 +63,10 @@ class Photonic {
 		add_filter('post_gallery', array(&$this, 'modify_gallery'), 20, 2);
 		add_action('wp_enqueue_scripts', array(&$this, 'add_scripts'), 20);
 		add_action('wp_head', array(&$this, 'print_scripts'), 20);
+		add_action('wp_loaded', array(&$this, 'check_authentication'), 20);
+
+		add_action('wp_ajax_photonic_flickr_sign', array(&$this, 'flickr_sign'));
+		add_action('wp_ajax_nopriv_photonic_flickr_sign', array(&$this, 'flickr_sign'));
 
 		add_action('wp_ajax_photonic_picasa_display_album', array(&$this, 'picasa_display_album'));
 		add_action('wp_ajax_nopriv_photonic_picasa_display_album', array(&$this, 'picasa_display_album'));
@@ -75,6 +79,9 @@ class Photonic {
 
 		$this->registered_extensions = array();
 		$this->add_extensions();
+
+		add_action('wp_ajax_photonic_authenticate', array(&$this, 'authenticate'));
+		add_action('wp_ajax_nopriv_photonic_authenticate', array(&$this, 'authenticate'));
 
 		//WP provides a global $is_IE, but we specifically need to find IE6x (or, heaven forbid, IE5x). Note that older versions of Opera used to identify themselves as IE6, so we exclude Opera.
 		$photonic_is_ie6 = preg_match('/\bmsie [56]/i', $_SERVER['HTTP_USER_AGENT']) && !preg_match('/\bopera/i', $_SERVER['HTTP_USER_AGENT']);
@@ -130,6 +137,10 @@ class Photonic {
 			wp_enqueue_script('jquery');
 			wp_enqueue_style('photonic-upload', plugins_url('include/css/admin-form.css', __FILE__), array(), $this->version);
 		}
+		else if ('photonic/authentication.php' == $hook) {
+			wp_enqueue_style('photonic-admin-jq', plugins_url('include/scripts/jquery-ui/css/jquery-ui-1.7.3.custom.css', __FILE__), array(), $this->version);
+			wp_enqueue_style('photonic-admin-css', plugins_url('include/css/admin.css', __FILE__), array('photonic-admin-jq'), $this->version);
+		}
 	}
 
 	/**
@@ -139,7 +150,7 @@ class Photonic {
 	 */
 	function add_scripts() {
 		global $photonic_slideshow_library, $photonic_slideshow_mode, $photonic_slideshow_interval, $photonic_pphoto_theme, $photonic_carousel_mode;
-		global $photonic_flickr_api_key, $photonic_flickr_thumb_size, $photonic_flickr_main_size, $photonic_fbox_title_position, $photonic_gallery_panel_width, $photonic_gallery_panel_items;
+		global $photonic_flickr_api_key, $photonic_flickr_oauth_done, $photonic_flickr_thumb_size, $photonic_flickr_main_size, $photonic_fbox_title_position, $photonic_gallery_panel_width, $photonic_gallery_panel_items;
 		global $photonic_flickr_hide_collection_thumbnail, $photonic_flickr_hide_collection_title, $photonic_flickr_hide_collection_set_count, $photonic_flickr_collection_set_title_display, $photonic_flickr_hide_collection_set_photos_count_display;
 		global $photonic_flickr_photos_constrain_by_count, $photonic_flickr_collection_set_constrain_by_count, $photonic_flickr_collection_set_per_row_constraint, $photonic_flickr_photos_per_row_constraint;
 		global $photonic_flickr_hide_set_thumbnail, $photonic_flickr_hide_set_title, $photonic_flickr_hide_set_photo_count, $photonic_flickr_hide_set_pop_thumbnail, $photonic_flickr_hide_set_pop_title, $photonic_flickr_hide_set_pop_photo_count;
@@ -214,6 +225,8 @@ class Photonic {
 			'flickr_photos_pop_per_row_constraint' => $photonic_flickr_photos_pop_per_row_constraint,
 			'flickr_photos_pop_constrain_by_count' => $photonic_flickr_photos_pop_constrain_by_count,
 
+			'flickr_auth_call' => $photonic_flickr_oauth_done,
+
 			'Dpx_photos_per_row_constraint' => $photonic_500px_photos_per_row_constraint,
 			'Dpx_photos_constrain_by_count' => $photonic_500px_photos_constrain_by_count,
 			'Dpx_photos_pop_per_row_constraint' => $photonic_500px_photos_pop_per_row_constraint,
@@ -250,17 +263,6 @@ class Photonic {
 			}
 			else {
 				wp_enqueue_style("photonic-slideshow", plugins_url('include/scripts/fancybox/jquery.fancybox-1.3.4.css', __FILE__), array(), $this->version);
-			}
-		}
-		else if ($photonic_slideshow_library == 'slimbox2') {
-			if (@file_exists($stylesheet_directory.'/scripts/slimbox/slimbox2.css')) {
-				wp_enqueue_style("photonic-slideshow", get_stylesheet_directory_uri().'/scripts/slimbox/slimbox2.css', array(), $this->version);
-			}
-			else if (@file_exists($template_directory.'/scripts/slimbox/slimbox2.css')) {
-				wp_enqueue_style("photonic-slideshow", get_template_directory_uri().'/scripts/slimbox/slimbox2.css', array(), $this->version);
-			}
-			else {
-				wp_enqueue_style("photonic-slideshow", plugins_url('include/scripts/slimbox/slimbox2.css', __FILE__), array(), $this->version);
 			}
 		}
 		else if ($photonic_slideshow_library == 'colorbox') {
@@ -640,6 +642,13 @@ class Photonic {
 		$photonic_smugmug_gallery->display_album();
 	}
 
+	function flickr_sign() {
+		global $photonic_flickr_gallery;
+		if (!isset($photonic_flickr_gallery)) {
+			$photonic_flickr_gallery = new Photonic_Flickr_Processor();
+		}
+		$photonic_flickr_gallery->sign_js_call();
+	}
 	/**
 	 * Checks if a text being passed to it is an integer or not.
 	 *
@@ -922,16 +931,16 @@ class Photonic {
 	 *
 	 * @static
 	 * @param $url
-	 * @param $method GET | POST | DELETE
+	 * @param string $method GET | POST | DELETE
 	 * @param null $post_fields
 	 * @param string $user_agent
 	 * @param int $timeout
 	 * @param bool $ssl_verify_peer
 	 * @return array|WP_Error
 	 */
-	static function http($url, $method = 'POST', $post_fields = NULL, $user_agent = 'Photonic Plugin for WordPress', $timeout = 30, $ssl_verify_peer = false) {
+	static function http($url, $method = 'POST', $post_fields = NULL, $user_agent = null, $timeout = 30, $ssl_verify_peer = false) {
 		$curl_args = array(
-			'user-agent', $user_agent,
+			'user-agent' => $user_agent,
 			'timeout' => $timeout,
 			'sslverify' => $ssl_verify_peer,
 			'headers' => array('Expect:'),
@@ -944,10 +953,208 @@ class Photonic {
 				if (!empty($post_fields)) {
 					$url = "{$url}?{$post_fields}";
 				}
+				break;
 		}
 
 		$response = wp_remote_request($url, $curl_args);
 		return $response;
+	}
+
+	/**
+	 * Returns the page where the OAuth API is being invoked. The invocation happens through admin-ajax.php, but we don't want
+	 * the validated user to land up there. Instead we want the users to reach the page where they clicked the "Login" button.
+	 *
+	 * @static
+	 * @return string
+	 */
+	static function get_callback_url() {
+		global $photonic_callback_url;
+		if (isset($photonic_callback_url)) {
+			return $photonic_callback_url;
+		}
+
+		$page_URL = 'http';
+		if (isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on") {
+			$page_URL .= "s";
+		}
+		$page_URL .= "://";
+		if (isset($_SERVER["SERVER_PORT"]) && $_SERVER["SERVER_PORT"] != "80") {
+			$page_URL .= $_SERVER["SERVER_NAME"].":".$_SERVER["SERVER_PORT"].$_SERVER["REQUEST_URI"];
+		}
+		else {
+			$page_URL .= $_SERVER["SERVER_NAME"].$_SERVER["REQUEST_URI"];
+		}
+		return $page_URL;
+	}
+
+	/**
+	 * Checks if a user has authenticated a particular provider's services. When this is invoked we don't know if the page has
+	 * a Flickr / 500px / SmugMug gallery, so we just invoke it and set some global variables.
+	 *
+	 * @return mixed
+	 */
+	function check_authentication() {
+		global $photonic_flickr_allow_oauth, $photonic_500px_allow_oauth, $photonic_smug_allow_oauth, $photonic_picasa_allow_oauth;
+		if (!$photonic_flickr_allow_oauth && !$photonic_500px_allow_oauth && !$photonic_smug_allow_oauth && !$photonic_picasa_allow_oauth) {
+			return;
+		}
+
+		global $photonic_flickr_oauth_done, $photonic_500px_oauth_done, $photonic_smug_oauth_done, $photonic_picasa_oauth_done;
+		$photonic_flickr_oauth_done = $photonic_500px_oauth_done = $photonic_smug_oauth_done = $photonic_picasa_oauth_done = false;
+
+		$cookie = Photonic::parse_cookie();
+		if ($photonic_flickr_allow_oauth && isset($cookie['flickr']) && isset($cookie['flickr']['oauth_token']) && isset($cookie['flickr']['oauth_token_secret'])) {
+			global $photonic_flickr_gallery;
+			if (!isset($photonic_flickr_gallery)) {
+				$photonic_flickr_gallery = new Photonic_Flickr_Processor();
+			}
+			$current_token = array(
+				'oauth_token' => $cookie['flickr']['oauth_token'],
+				'oauth_token_secret' => $cookie['flickr']['oauth_token_secret'],
+			);
+			if (isset($_REQUEST['oauth_verifier']) && isset($_REQUEST['oauth_token'])) {
+				$current_token['oauth_token'] = $_REQUEST['oauth_token'];
+				$current_token['oauth_verifier'] = $_REQUEST['oauth_verifier'];
+				$new_token = $photonic_flickr_gallery->get_access_token($current_token);
+				if (isset($new_token['oauth_token']) && isset($new_token['oauth_token_secret'])) {
+					$photonic_flickr_oauth_done = true;
+					$redirect = remove_query_arg(array('oauth_token', 'oauth_verifier'));
+					wp_redirect($redirect);
+					exit;
+				}
+			}
+			else if (isset($cookie['flickr']['oauth_token_type']) && $cookie['flickr']['oauth_token_type'] == 'access') {
+				$access_token_response = $photonic_flickr_gallery->check_access_token($current_token);
+				$photonic_flickr_oauth_done = $photonic_flickr_gallery->is_access_token_valid($access_token_response);
+			}
+		}
+
+		if ($photonic_500px_allow_oauth && isset($cookie['500px']) && isset($cookie['500px']['oauth_token']) && isset($cookie['500px']['oauth_token_secret'])) {
+			global $photonic_500px_gallery;
+			if (!isset($photonic_500px_gallery)) {
+				$photonic_500px_gallery = new Photonic_500px_Processor();
+			}
+			$current_token = array(
+				'oauth_token' => $cookie['500px']['oauth_token'],
+				'oauth_token_secret' => $cookie['500px']['oauth_token_secret'],
+			);
+			if (isset($_REQUEST['oauth_verifier']) && isset($_REQUEST['oauth_token'])) {
+				$current_token['oauth_token'] = $_REQUEST['oauth_token'];
+				$current_token['oauth_verifier'] = $_REQUEST['oauth_verifier'];
+				$new_token = $photonic_500px_gallery->get_access_token($current_token);
+				if (isset($new_token['oauth_token']) && isset($new_token['oauth_token_secret'])) {
+					// Strip out the token and the verifier from the callback URL and send the user to the callback URL.
+					$photonic_500px_oauth_done = true;
+					$redirect = remove_query_arg(array('oauth_token', 'oauth_verifier'));
+					wp_redirect($redirect);
+					exit;
+				}
+			}
+			else if (isset($cookie['500px']['oauth_token_type']) && $cookie['500px']['oauth_token_type'] == 'access') {
+				$access_token_response = $photonic_500px_gallery->check_access_token($current_token);
+				$photonic_500px_oauth_done = $photonic_500px_gallery->is_access_token_valid($access_token_response);
+			}
+		}
+
+		if ($photonic_smug_allow_oauth && isset($cookie['smug']) && isset($cookie['smug']['oauth_token']) && isset($cookie['smug']['oauth_token_secret'])) {
+			global $photonic_smugmug_gallery;
+			if (!isset($photonic_smugmug_gallery)) {
+				$photonic_smugmug_gallery = new Photonic_SmugMug_Processor();
+			}
+			$current_token = array(
+				'oauth_token' => $cookie['smug']['oauth_token'],
+				'oauth_token_secret' => $cookie['smug']['oauth_token_secret']
+			);
+			if (!$photonic_smug_oauth_done &&
+					((isset($cookie['smug']['oauth_token_type']) && $cookie['smug']['oauth_token_type'] == 'request') || !isset($cookie['smug']['oauth_token_type']))) {
+				$new_token = $photonic_smugmug_gallery->get_access_token($current_token);
+				if (isset($new_token['oauth_token']) && isset($new_token['oauth_token_secret'])) {
+					$access_token_response = $photonic_smugmug_gallery->check_access_token($new_token);
+					$photonic_smug_oauth_done = $photonic_smugmug_gallery->is_access_token_valid($access_token_response);
+				}
+			}
+			else if (isset($cookie['smug']['oauth_token_type']) && $cookie['smug']['oauth_token_type'] == 'access') {
+				$access_token_response = $photonic_smugmug_gallery->check_access_token($current_token);
+				$photonic_smug_oauth_done = $photonic_smugmug_gallery->is_access_token_valid($access_token_response);
+			}
+		}
+	}
+
+	/**
+	 * Searches for specific cookies in the user's browser. It then builds an array with the available cookies. The keys of the array
+	 * are the individual providers ('flickr', 'smug' etc) and the values are arrays of key-value mappings.
+	 *
+	 * @static
+	 * @return array
+	 */
+	public static function parse_cookie() {
+		$cookie = array(
+			'flickr' => array(),
+			'500px' => array(),
+			'smug' => array(),
+			'picasa' => array(),
+		);
+		$cookie_keys = array('oauth_token', 'oauth_token_secret', 'oauth_token_type');
+		foreach ($cookie as $provider => $cookies) {
+			$orig_secret = 'photonic_'.$provider.'_api_secret';
+			global $$orig_secret;
+			if (isset($$orig_secret)) {
+				$secret = md5($$orig_secret, false);
+				foreach ($cookie_keys as $cookie_key) {
+					$key = '-'.str_replace('_', '-', $cookie_key);
+					if (isset($_COOKIE['photonic-'.$secret.$key])) {
+						$cookie[$provider][$cookie_key] = $_COOKIE['photonic-'.$secret.$key];
+					}
+				}
+			}
+		}
+		return $cookie;
+	}
+
+	/**
+	 * The initiation process for the authentication. When a user clicks on this button, a request token is obtained and the authorization
+	 * is performed. Then the user is redirected to an authorization site, where the user can authorize this site.
+	 */
+	function authenticate() {
+		if (isset($_POST['provider'])) {
+			$provider = $_POST['provider'];
+			$callback_id = $_POST['callback_id'];
+			$post_id = substr($callback_id, 19);
+			global $photonic_callback_url;
+			$photonic_callback_url = get_permalink($post_id);
+
+			switch ($provider) {
+				case 'flickr':
+					global $photonic_flickr_gallery;
+					if (!isset($photonic_flickr_gallery)) {
+						$photonic_flickr_gallery = new Photonic_Flickr_Processor();
+					}
+					$request_token = $photonic_flickr_gallery->get_request_token();
+					$authorize_url = $photonic_flickr_gallery->get_authorize_URL($request_token);
+					echo $authorize_url.'&perms=read';
+					die;
+
+				case '500px':
+					global $photonic_500px_gallery;
+					if (!isset($photonic_500px_gallery)) {
+						$photonic_500px_gallery = new Photonic_500px_Processor();
+					}
+					$request_token = $photonic_500px_gallery->get_request_token();
+					$authorize_url = $photonic_500px_gallery->get_authorize_URL($request_token);
+					echo $authorize_url;
+					die;
+
+				case 'smug':
+					global $photonic_smugmug_gallery;
+					if (!isset($photonic_smugmug_gallery)) {
+						$photonic_smugmug_gallery = new Photonic_SmugMug_Processor();
+					}
+					$request_token = $photonic_smugmug_gallery->get_request_token('http://api.smugmug.com/services/oauth/');
+					$authorize_url = $photonic_smugmug_gallery->get_authorize_URL($request_token);
+					echo $authorize_url.'&Access=Full&Permissions=Read';
+					die;
+			}
+		}
 	}
 }
 

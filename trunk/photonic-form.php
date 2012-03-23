@@ -283,6 +283,21 @@ $fields = array(
 				'type' => 'text',
 			),
 
+			array(
+				'id' => 'privacy_filter',
+				'name' => __('Privacy filter', 'photonic'),
+				'type' => 'select',
+				'options' => array(
+					'' => __('None', 'photonic'),
+					'1' => __('Public photos', 'photonic'),
+					'2' => __('Private photos visible to friends', 'photonic'),
+					'3' => __('Private photos visible to family', 'photonic'),
+					'4' => __('Private photos visible to friends & family', 'photonic'),
+					'5' => __('Completely private photos', 'photonic'),
+				),
+				'hint' => __('Applicable only if Flickr private photos are turned on', 'photonic'),
+			),
+
 		),
 	),
 	'picasa' => array(

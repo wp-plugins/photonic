@@ -60,5 +60,53 @@ class Photonic_Native_Processor extends Photonic_Processor {
 		}
 		return $attachments;
 	}
+
+	/**
+	 * Access Token URL
+	 *
+	 * @return string
+	 */
+	public function access_token_URL() {
+		// TODO: Implement access_token_URL() method.
+	}
+
+	/**
+	 * Authenticate URL
+	 *
+	 * @return string
+	 */
+	public function authenticate_URL() {
+		// TODO: Implement authenticate_URL() method.
+	}
+
+	/**
+	 * Authorize URL
+	 *
+	 * @return string
+	 */
+	public function authorize_URL() {
+		// TODO: Implement authorize_URL() method.
+	}
+
+	/**
+	 * Request Token URL
+	 *
+	 * @return string
+	 */
+	public function request_token_URL() {
+		// TODO: Implement request_token_method() method.
+	}
+
+	public function end_point() {
+		// TODO: Implement end_point() method.
+	}
+
+	function parse_token($response) {
+		// TODO: Implement parse_token() method.
+	}
+
+	public function check_access_token_method() {
+		// TODO: Implement check_access_token_method() method.
+	}
 }
 ?>

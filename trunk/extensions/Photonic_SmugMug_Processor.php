@@ -1,25 +1,11 @@
 <?php
-
-if (!class_exists('Photonic_SmugMug_Client')) {
-//	require_once(PHOTONIC_PATH.'/include/lib/oauth/twitteroauth/Photonic_SmugMug_Client.php');
-}
-
 class Photonic_SmugMug_Processor extends Photonic_Processor {
-	var $client;
-
 	function __construct() {
 		parent::__construct();
-/*		$this->client = new Photonic_SmugMug_Client(
-			'https://secure.smugmug.com/services/api/json/1.3.0/',
-//			'http://api.smugmug.com/services/api/json/1.3.0/',
-			'',
-			'',
-			null,
-			null,
-			'json',
-			true,
-			'Photonic Plugin for WordPress'
-		);*/
+		global $photonic_smug_api_key, $photonic_smug_api_secret;
+		$this->api_key = $photonic_smug_api_key;
+		$this->api_secret = $photonic_smug_api_secret;
+		$this->provider = 'smug';
 	}
 
 	/**
@@ -65,7 +51,7 @@ class Photonic_SmugMug_Processor extends Photonic_Processor {
 		switch ($view) {
 			case 'albums':
 				$chained_calls[] = 'smugmug.albums.get';
-				$args['Extras'] = 'URL,ImageCount';
+				$args['Extras'] = 'URL,ImageCount,Passworded,Password,NiceName';
 				break;
 
 			case 'album':
@@ -76,12 +62,12 @@ class Photonic_SmugMug_Processor extends Photonic_Processor {
 				if (isset($album_id) && trim($album_id) != '' && isset($album_key) && trim($album_key) != '') {
 					$args['AlbumID'] = $album_id;
 					$args['AlbumKey'] = $album_key;
-					$args['Extras'] = "{$photonic_smug_thumb_size}URL,{$photonic_smug_main_size}URL,Caption,Title";
+					$args['Extras'] = "{$photonic_smug_thumb_size}URL,{$photonic_smug_main_size}URL,Caption,Title,Passworded";
 				}
 				else if (isset($album) && trim($album) != '') {
 					$args['AlbumID'] = substr($album, 0, stripos($album, '_'));
 					$args['AlbumKey'] = substr($album, stripos($album, '_') + 1);
-					$args['Extras'] = "{$photonic_smug_thumb_size}URL,{$photonic_smug_main_size}URL,Caption,Title";
+					$args['Extras'] = "{$photonic_smug_thumb_size}URL,{$photonic_smug_main_size}URL,Caption,Title,Passworded";
 				}
 
 				if (isset($password) && trim($password) != '') {
@@ -92,7 +78,7 @@ class Photonic_SmugMug_Processor extends Photonic_Processor {
 			case 'tree':
 			default:
 				$chained_calls[] = 'smugmug.users.getTree';
-				$args['Extras'] = "URL,ImageCount";
+				$args['Extras'] = "URL,ImageCount,Passworded";
 				break;
 		}
 
@@ -106,7 +92,15 @@ class Photonic_SmugMug_Processor extends Photonic_Processor {
 			$args['NickName'] = $nick_name;
 		}
 
-		return $this->make_chained_calls($chained_calls, $args, $attr);
+		$ret = '';
+		global $photonic_smug_login_shown, $photonic_smug_allow_oauth, $photonic_smug_oauth_done;
+		if (!$photonic_smug_login_shown && $photonic_smug_allow_oauth && is_single() && !$photonic_smug_oauth_done) {
+			$post_id = get_the_ID();
+			$ret .= $this->get_login_box($post_id);
+			$photonic_smug_login_shown = true;
+		}
+
+		return $ret.$this->make_chained_calls($chained_calls, $args, $attr);
 	}
 
 	/**
@@ -126,9 +120,17 @@ class Photonic_SmugMug_Processor extends Photonic_Processor {
 			extract($shortcode_attr);
 
 			$ret = '';
+			global $photonic_smug_oauth_done;
 			foreach ($chained_calls as $call) {
 				$smug_args['method'] = $call;
-				$response = Photonic::http('https://secure.smugmug.com/services/api/json/1.3.0/', 'POST', $smug_args);
+				if ($photonic_smug_oauth_done) {
+					$signed_args = $this->sign_call('https://secure.smugmug.com/services/api/json/1.3.0/', 'POST', $smug_args);
+					$response = Photonic::http('https://secure.smugmug.com/services/api/json/1.3.0/', 'POST', $signed_args);
+				}
+				else {
+					$response = Photonic::http('https://secure.smugmug.com/services/api/json/1.3.0/', 'POST', $smug_args);
+				}
+
 				if ($call == 'smugmug.albums.get') {
 					$body = $response['body'];
 					$body = json_decode($body);
@@ -246,8 +248,23 @@ class Photonic_SmugMug_Processor extends Photonic_Processor {
 			foreach ($albums as $album) {
 				$album_li = '';
 				if ($album->ImageCount != 0) {
+					if (isset($album->Passworded) && $album->Passworded) {
+						continue;
+						//$passworded = 'photonic-smug-passworded';
+					}
+					else {
+						$passworded = '';
+					}
+
+					if (isset($album->Password)) {
+						$password = 'photonic-smug-password-'.$album->Password;
+					}
+					else {
+						$password = '';
+					}
+
 					$album_li .= "<li class='photonic-smug-image photonic-smug-album-thumb $pad_class' id='photonic-smug-album-{$album->id}-{$album->Key}-$photonic_smug_position'>";
-					$album_li .= "<a href='{$album->URL}' title='" . esc_attr($album->Title) . "' class='photonic-smug-album-thumb' id='photonic-smug-album-thumb-{$album->id}-{$album->Key}-$photonic_smug_position'>";
+					$album_li .= "<a href='{$album->URL}' title='" . esc_attr($album->Title) . "' class='photonic-smug-album-thumb {$passworded} {$password}' id='photonic-smug-album-thumb-{$album->id}-{$album->Key}-$photonic_smug_position'>";
 					$album_li .= "<img class='random-image' src='https://secure.smugmug.com/photos/random.mg?AlbumID={$album->id}&AlbumKey={$album->Key}&Size=$photonic_smug_thumb_size&rand=$rand' alt='" . esc_attr($album->Title) . "' />";
 					$album_li .= "</a>";
 
@@ -461,5 +478,61 @@ class Photonic_SmugMug_Processor extends Photonic_Processor {
 		$album_key = substr($album_key, 0, strpos($album_key, '-'));
 		echo $this->get_gallery_images(array('album_id' => $album_id, 'album_key' => $album_key, 'view' => 'album', 'display' => 'popup', 'panel' => $panel));
 		die();
+	}
+
+	/**
+	 * Access Token URL
+	 *
+	 * @return string
+	 */
+	public function access_token_URL() {
+		return 'smugmug.auth.getAccessToken';
+	}
+
+	/**
+	 * Authenticate URL
+	 *
+	 * @return string
+	 */
+	public function authenticate_URL() {
+		return 'http://api.smugmug.com/services/oauth/authorize.mg';
+	}
+
+	/**
+	 * Authorize URL
+	 *
+	 * @return string
+	 */
+	public function authorize_URL() {
+		return 'http://api.smugmug.com/services/oauth/authorize.mg';
+	}
+
+	/**
+	 * Request Token URL
+	 *
+	 * @return string
+	 */
+	public function request_token_URL() {
+		return 'smugmug.auth.getRequestToken';
+	}
+
+	public function end_point() {
+		return 'https://secure.smugmug.com/services/api/json/1.3.0/';
+	}
+
+	function parse_token($response) {
+		$body = $response['body'];
+		$body = json_decode($body);
+
+		if ($body->stat == 'ok') {
+			$auth = $body->Auth;
+			$token = $auth->Token;
+			return array('oauth_token' => $token->id, 'oauth_token_secret' => $token->Secret);
+		}
+		return array();
+	}
+
+	public function check_access_token_method() {
+		return 'smugmug.auth.checkAccessToken';
 	}
 }

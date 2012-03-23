@@ -7,6 +7,14 @@
  */
 
 class Photonic_500px_Processor extends Photonic_Processor {
+	function __construct() {
+		parent::__construct();
+		global $photonic_500px_api_key, $photonic_500px_api_secret;
+		$this->api_key = $photonic_500px_api_key;
+		$this->api_secret = $photonic_500px_api_secret;
+		$this->provider = '500px';
+	}
+
 	/**
 	 * A very flexible function to display photos from 500px. This makes use of the 500px API, hence it requires the user's Consumer API key.
 	 * The API key is defined in the options. The function makes use of one API call:
@@ -86,8 +94,31 @@ class Photonic_500px_Processor extends Photonic_Processor {
 		// Allow users to define additional query parameters
 		$query_url = apply_filters('photonic_500px_query', $query_url, $attr);
 
+		global $photonic_500px_oauth_done;
+		if ($photonic_500px_oauth_done) {
+			$end_point = Photonic_Processor::get_normalized_http_url($query_url);
+			if (strstr($query_url, $end_point) > -1) {
+				$params = substr($query_url, strlen($end_point));
+				if (strlen($params) > 1) {
+					$params = substr($params, 1);
+				}
+				$params = Photonic_Processor::parse_parameters($params);
+				$signed_args = $this->sign_call($end_point, 'GET', $params);
+				$query_url = $end_point.'?'.Photonic_Processor::build_query($signed_args);
+			}
+		}
+
+		$ret = '';
+
+		global $photonic_500px_login_shown, $photonic_500px_allow_oauth, $photonic_500px_oauth_done;
+		if (!$photonic_500px_login_shown && $photonic_500px_allow_oauth && is_single() && !$photonic_500px_oauth_done) {
+			$post_id = get_the_ID();
+			$ret .= $this->get_login_box($post_id);
+			$photonic_500px_login_shown = true;
+		}
+
 		$photonic_500px_position++;
-		$ret = "<div class='photonic-500px-stream' id='photonic-500px-stream-$photonic_500px_position'>";
+		$ret .= "<div class='photonic-500px-stream' id='photonic-500px-stream-$photonic_500px_position'>";
 		$ret .= $this->process_response($query_url, $thumb_size, $main_size, $columns);
 		$ret .= "</div>";
 		return $ret;
@@ -156,5 +187,81 @@ class Photonic_500px_Processor extends Photonic_Processor {
 			}
 			return $ret;
 		}
+	}
+
+	/**
+	 * Access Token URL
+	 *
+	 * @return string
+	 */
+	public function access_token_URL() {
+		return 'https://api.500px.com/v1/oauth/access_token';
+	}
+
+	/**
+	 * Authenticate URL
+	 *
+	 * @return string
+	 */
+	public function authenticate_URL() {
+		return 'https://api.500px.com/v1/oauth/authorize';
+	}
+
+	/**
+	 * Authorize URL
+	 *
+	 * @return string
+	 */
+	public function authorize_URL() {
+		return 'https://api.500px.com/v1/oauth/authorize';
+	}
+
+	/**
+	 * Request Token URL
+	 *
+	 * @return string
+	 */
+	public function request_token_URL() {
+		return 'https://api.500px.com/v1/oauth/request_token';
+	}
+
+	public function end_point() {
+		return 'https://api.500px.com/v1/photos';
+	}
+
+	function parse_token($response) {
+		$body = $response['body'];
+		$token = Photonic_Processor::parse_parameters($body);
+		return $token;
+	}
+
+	public function check_access_token_method() {
+		// TODO: Implement check_access_token_method() method.
+	}
+
+	/**
+	 * Method to validate that the stored token is indeed authenticated.
+	 *
+	 * @param $request_token
+	 * @return array|WP_Error
+	 */
+	function check_access_token($request_token) {
+		global $photonic_500px_api_key;
+		$signed_parameters = $this->sign_call('https://api.500px.com/v1/users', 'GET', array('consumer_key' => $photonic_500px_api_key));
+
+		$end_point = $this->end_point();
+		$end_point .= '?'.Photonic_Processor::build_query($signed_parameters);
+
+		$response = Photonic::http($end_point, 'GET', null);
+		return $response;
+	}
+
+	public function is_access_token_valid($response) {
+		$response = $response['response'];
+
+		if ($response['code'] == 200) {
+			return true;
+		}
+		return false;
 	}
 }
