@@ -117,6 +117,11 @@ in the third-party JS scripts are not translated.
 
 == Changelog ==
 
+= 1.21 =
+
+*	Added support for SmugMug password-protected albums where the user has access to the albums. Other albums show up, but clicking on them takes the users nowhere.
+*	Fixed a bug that was killing the last thumbnail in a popup for SmugMug.
+
 = 1.20 =
 
 *	Added authentication support for Flickr, 500px.com and SmugMug.
