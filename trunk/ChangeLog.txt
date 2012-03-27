@@ -1,3 +1,9 @@
+Version 1.21 - 27th Mar 2012
+============================
+1.	Added support for SmugMug password-protected albums where the user has access to the albums. Other albums show up, but
+	clicking on them takes the users nowhere.
+2.	Fixed a bug that was killing the last thumbnail in a popup for SmugMug.
+
 Version 1.20 - 22nd Mar 2012
 ============================
 1.	Added authentication support for Flickr, 500px.com and SmugMug.

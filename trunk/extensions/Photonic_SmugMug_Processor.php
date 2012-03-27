@@ -62,12 +62,12 @@ class Photonic_SmugMug_Processor extends Photonic_Processor {
 				if (isset($album_id) && trim($album_id) != '' && isset($album_key) && trim($album_key) != '') {
 					$args['AlbumID'] = $album_id;
 					$args['AlbumKey'] = $album_key;
-					$args['Extras'] = "{$photonic_smug_thumb_size}URL,{$photonic_smug_main_size}URL,Caption,Title,Passworded";
+					$args['Extras'] = "{$photonic_smug_thumb_size}URL,{$photonic_smug_main_size}URL,Caption,Title,Passworded,Password";
 				}
 				else if (isset($album) && trim($album) != '') {
 					$args['AlbumID'] = substr($album, 0, stripos($album, '_'));
 					$args['AlbumKey'] = substr($album, stripos($album, '_') + 1);
-					$args['Extras'] = "{$photonic_smug_thumb_size}URL,{$photonic_smug_main_size}URL,Caption,Title,Passworded";
+					$args['Extras'] = "{$photonic_smug_thumb_size}URL,{$photonic_smug_main_size}URL,Caption,Title,Passworded,Password";
 				}
 
 				if (isset($password) && trim($password) != '') {
@@ -121,6 +121,7 @@ class Photonic_SmugMug_Processor extends Photonic_Processor {
 
 			$ret = '';
 			global $photonic_smug_oauth_done;
+			$passworded = false;
 			foreach ($chained_calls as $call) {
 				$smug_args['method'] = $call;
 				if ($photonic_smug_oauth_done) {
@@ -148,6 +149,9 @@ class Photonic_SmugMug_Processor extends Photonic_Processor {
 					$body = json_decode($body);
 					if ($body->stat == 'ok') {
 						$album = $body->Album;
+						if (isset($album->Passworded) && $album->Passworded && !isset($album->Password) && !isset($signed_args['Password'])) {
+							$passworded = true;
+						}
 						$rand = rand(1000, 9999);
 						$insert = '';
 						$insert .= "<div class='photonic-smug-stream'>";
@@ -168,13 +172,18 @@ class Photonic_SmugMug_Processor extends Photonic_Processor {
 							$ret .= $insert;
 						}
 					}
+					else if ($body->stat == 'fail' && $body->code == 31) {
+						$passworded = false;
+					}
 				}
 				else if ($call == 'smugmug.images.get') {
-					if (isset($insert)) {
-						$ret .= $this->process_images($response, $columns, $shortcode_attr, $insert);
-					}
-					else {
-						$ret .= $this->process_images($response, $columns, $shortcode_attr);
+					if (!$passworded) {
+						if (isset($insert)) {
+							$ret .= $this->process_images($response, $columns, $shortcode_attr, $insert);
+						}
+						else {
+							$ret .= $this->process_images($response, $columns, $shortcode_attr);
+						}
 					}
 				}
 				else if ($call == 'smugmug.users.getTree') {
@@ -248,23 +257,15 @@ class Photonic_SmugMug_Processor extends Photonic_Processor {
 			foreach ($albums as $album) {
 				$album_li = '';
 				if ($album->ImageCount != 0) {
-					if (isset($album->Passworded) && $album->Passworded) {
-						continue;
-						//$passworded = 'photonic-smug-passworded';
+					if (isset($album->Passworded) && $album->Passworded && !isset($album->Password)) {
+						$passworded = 'photonic-smug-passworded';
 					}
 					else {
 						$passworded = '';
 					}
 
-					if (isset($album->Password)) {
-						$password = 'photonic-smug-password-'.$album->Password;
-					}
-					else {
-						$password = '';
-					}
-
 					$album_li .= "<li class='photonic-smug-image photonic-smug-album-thumb $pad_class' id='photonic-smug-album-{$album->id}-{$album->Key}-$photonic_smug_position'>";
-					$album_li .= "<a href='{$album->URL}' title='" . esc_attr($album->Title) . "' class='photonic-smug-album-thumb {$passworded} {$password}' id='photonic-smug-album-thumb-{$album->id}-{$album->Key}-$photonic_smug_position'>";
+					$album_li .= "<a href='{$album->URL}' title='" . esc_attr($album->Title) . "' class='photonic-smug-album-thumb {$passworded}' id='photonic-smug-album-thumb-{$album->id}-{$album->Key}-$photonic_smug_position'>";
 					$album_li .= "<img class='random-image' src='https://secure.smugmug.com/photos/random.mg?AlbumID={$album->id}&AlbumKey={$album->Key}&Size=$photonic_smug_thumb_size&rand=$rand' alt='" . esc_attr($album->Title) . "' />";
 					$album_li .= "</a>";
 
@@ -359,7 +360,7 @@ class Photonic_SmugMug_Processor extends Photonic_Processor {
 							$ret .= "<li class='photonic-smug-image'>";
 						}
 						$ret .= $this->process_images_info($image, $rel, $a_pad_class, $library, 'popup');
-						if ($count % $photonic_gallery_panel_items == 0 || $count == count($images) - 1) {
+						if ($count % $photonic_gallery_panel_items == 0 || $count == count($images)) {
 							$ret .= "</li>";
 						}
 					}
@@ -419,9 +420,6 @@ class Photonic_SmugMug_Processor extends Photonic_Processor {
 				$ret .= "</div>";
 				return $ret;
 			}
-		}
-		else {
-			print_r($body->message);
 		}
 		return "";
 	}
