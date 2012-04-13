@@ -1,3 +1,9 @@
+Version 1.22 - 12th Apr 2012
+============================
+1.  Made minor corrections to authentication behaviour. If not connected to the internet, Photonic was returning a fatal error.
+2.  Changed the wording for PrettyPhoto licensing. PrettyPhoto is licensed under GPL, and that is now explicitly stated in the options page.
+3.  Added the capability to include shortcodes inside the parameters of the gallery shortcode (nested shortcodes)
+
 Version 1.21 - 27th Mar 2012
 ============================
 1.	Added support for SmugMug password-protected albums where the user has access to the albums. Other albums show up, but

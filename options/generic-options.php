@@ -14,9 +14,7 @@ $photonic_generic_options = array(
 		"type" => "radio",
 		"options" => array("fancybox" => "<a href='http://fancybox.net/'>FancyBox</a> &ndash; ~16KB: Released under MIT and GPL licenses.",
 			"colorbox" => "<a href='http://colorpowered.com/colorbox/'>Colorbox</a> &ndash; ~10KB: Released under the MIT license",
-			"prettyphoto" => "<a href='http://www.no-margin-for-errors.com/projects/prettyphoto-jquery-lightbox-clone/'>PrettyPhoto</a> &ndash; ~23KB:
-				Released under the Creative Commons Attribution 2.5 license, but the  <a href='http://twitter.com/#!/scaron/status/126614077169602560'>author permits distribution with GPL software</a>.",
-			//"jquery-lightbox" => "<a href='http://leandrovieira.com/projects/jquery/lightbox/'>JQuery Lightbox</a> &ndash; ~7K: Released under CC SA",
+			"prettyphoto" => "<a href='http://www.no-margin-for-errors.com/projects/prettyphoto-jquery-lightbox-clone/'>PrettyPhoto</a> &ndash; ~23KB: Released under the GPL v2.0 license",
 			"none" => "None"
 		),
 		"std" => "fancybox"),
@@ -45,6 +43,14 @@ $photonic_generic_options = array(
 		"type" => "checkbox",
 		"std" => ""
 	),*/
+
+	array("name" => "Nested Shortcodes in parameters",
+		"desc" => "Allow parameters of the gallery shortcode to use shortcodes themselves",
+		"id" => "nested_shortcodes",
+		"grouping" => "generic-settings",
+		"type" => "checkbox",
+		"std" => ""
+	),
 
 	array("name" => "Default Gallery Type",
 		"desc" => "If no gallery type is specified, the following selection will be used:",
