@@ -3,6 +3,7 @@
 	Use: Lightbox clone for jQuery
 	Author: Stephane Caron (http://www.no-margin-for-errors.com)
 	Version: 3.1.3
+	License: GPL v2.0, as per http://www.no-margin-for-errors.com/projects/prettyphoto-jquery-lightbox-clone/
 
 	Modifications: Minor additions by Sayontan Sinha to support title attribute using "data" for the tooltip plugin.
 ------------------------------------------------------------------------- */

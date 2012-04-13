@@ -444,6 +444,10 @@ abstract class Photonic_Processor {
 	 * @return bool
 	 */
 	public function is_access_token_valid($response) {
+		if (is_wp_error($response)) {
+			return false;
+		}
+
 		$body = $response['body'];
 		$body = json_decode($body);
 

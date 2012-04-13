@@ -3,7 +3,7 @@
  * Plugin Name: Photonic Gallery for Flickr, Picasa, SmugMug and 500px
  * Plugin URI: http://aquoid.com/news/plugins/photonic/
  * Description: Extends the native gallery shortcode to support Flickr, Picasa, SmugMug and 500px. JS libraries like Fancybox, Colorbox and PrettyPhoto are supported. The plugin also helps convert a regular WP gallery into a slideshow.
- * Version: 1.21
+ * Version: 1.22
  * Author: Sayontan Sinha
  * Author URI: http://mynethome.net/blog
  * License: GNU General Public License (GPL), v3 (or newer)
@@ -20,7 +20,7 @@ class Photonic {
 	function Photonic() {
 		global $photonic_options, $photonic_setup_options, $photonic_is_ie6;
 		if (!defined('PHOTONIC_VERSION')) {
-			define('PHOTONIC_VERSION', '1.21');
+			define('PHOTONIC_VERSION', '1.22');
 		}
 
 		if (!defined('PHOTONIC_PATH')) {
@@ -385,7 +385,7 @@ class Photonic {
 	 * @return string
 	 */
 	function modify_gallery($content, $attr = array()) {
-		global $post, $photonic_flickr_gallery, $photonic_picasa_gallery, $photonic_native_gallery, $photonic_500px_gallery, $photonic_smugmug_gallery, $photonic_default_gallery_type;
+		global $post, $photonic_flickr_gallery, $photonic_picasa_gallery, $photonic_native_gallery, $photonic_500px_gallery, $photonic_smugmug_gallery, $photonic_default_gallery_type, $photonic_nested_shortcodes;
 		if ($attr == null) {
 			$attr = array();
 		}
@@ -396,6 +396,10 @@ class Photonic {
 			'style' => 'default',   //default, strip-below, strip-above, strip-right, strip-left, no-strip, launch
 			'id'         => $post->ID,
 		), $attr);
+
+		if ($photonic_nested_shortcodes) {
+			$attr = array_map('do_shortcode', $attr);
+		}
 
 		extract($attr);
 
@@ -994,6 +998,9 @@ class Photonic {
 	 * @return mixed
 	 */
 	function check_authentication() {
+		if (is_admin()) {
+			return;
+		}
 		global $photonic_flickr_allow_oauth, $photonic_500px_allow_oauth, $photonic_smug_allow_oauth, $photonic_picasa_allow_oauth;
 		if (!$photonic_flickr_allow_oauth && !$photonic_500px_allow_oauth && !$photonic_smug_allow_oauth && !$photonic_picasa_allow_oauth) {
 			return;

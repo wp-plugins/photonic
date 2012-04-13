@@ -6,7 +6,7 @@ Requires at least: WP 3.1
 Tested up to: WP 3.3.1
 Stable tag: trunk
 
-WordPress galleries on steroids!! A plugin that enhances the capabilities of the native gallery shortcode in WordPress by letting you show Flickr, Picasa, SmugMug and 500px photos.
+WordPress galleries on steroids! A stylish plugin for beautiful galleries of your public and private Flickr, Picasa, SmugMug and 500px photos.
 
 == Description ==
 
@@ -116,6 +116,12 @@ Yes, but only for the plugin front-end. The admin panel is not translated at thi
 in the third-party JS scripts are not translated.
 
 == Changelog ==
+
+= 1.22 =
+
+*   Made minor corrections to authentication behaviour. If not connected to the internet, Photonic was returning a fatal error.
+*   Changed the wording for PrettyPhoto licensing. PrettyPhoto is licensed under GPL, and that is now explicitly stated in the options page.
+*   Added the capability to include shortcodes inside the parameters of the gallery shortcode (nested shortcodes)
 
 = 1.21 =
 
