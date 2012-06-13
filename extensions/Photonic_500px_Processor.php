@@ -44,6 +44,8 @@ class Photonic_500px_Processor extends Photonic_Processor {
 			'thumb_size'       => '1',
 			'main_size'       => '4',
 		), $attr);
+		$attr = array_map('trim', $attr);
+
 		extract($attr);
 
 		if (!isset($photonic_500px_api_key) || trim($photonic_500px_api_key) == '') {
@@ -51,23 +53,25 @@ class Photonic_500px_Processor extends Photonic_Processor {
 		}
 
 		$user_feature = false;
-		$query_url = 'https://api.500px.com/v1/photos?consumer_key='.$photonic_500px_api_key;
-		if (isset($feature) && trim($feature) != '') {
-			$feature = esc_html(trim($feature));
+		$base_query = 'https://api.500px.com/v1/photos';
+		if (isset($tag) || isset($term)) {
+			$base_query .= '/search';
+		}
+		$query_url = $base_query.'?consumer_key='.$photonic_500px_api_key;
+		if (isset($feature) && $feature != '') {
+			$feature = esc_html($feature);
 			$query_url .= '&feature='.$feature;
-			if (in_array(trim($feature), array('user', 'user_friends', 'user_favorites'))) {
+			if (in_array($feature, array('user', 'user_friends', 'user_favorites'))) {
 				$user_feature = true;
 			}
 		}
 
 		$user_set = false;
-		if (isset($user_id) && trim($user_id) != '') {
-			$user_id = trim($user_id);
+		if (isset($user_id) && $user_id != '') {
 			$query_url .= '&user_id='.$user_id;
 			$user_set = true;
 		}
-		else if (isset($username) && trim($username) != '') {
-			$username = trim($username);
+		else if (isset($username) && $username != '') {
 			$query_url .= '&username='.$username;
 			$user_set = true;
 		}
@@ -76,19 +80,30 @@ class Photonic_500px_Processor extends Photonic_Processor {
 			return __("A user-specific feature has been requested, but the username or user_id is missing", 'photonic');
 		}
 
-		if (isset($only) && trim($only) != '') {
-			$only = urlencode(trim($only));
-			$query_url .= '&only='.trim($only);
+		if (isset($only) && $only != '') {
+			$only = urlencode($only);
+			$query_url .= '&only='.$only;
 		}
 
-		if (isset($rpp) && trim($rpp) != '') {
-			$rpp = trim($rpp);
-			$query_url .= '&rpp='.trim($rpp);
+		if (isset($exclude) && $exclude != '') {
+			$exclude = urlencode($exclude);
+			$query_url .= '&exclude='.$exclude;
 		}
 
-		if (isset($sort) && trim($sort) != '') {
-			$sort = trim($sort);
-			$query_url .= '&sort='.trim($sort);
+		if (isset($rpp) && $rpp != '') {
+			$query_url .= '&rpp='.$rpp;
+		}
+
+		if (isset($sort) && $sort != '') {
+			$query_url .= '&sort='.$sort;
+		}
+
+		if (isset($tag) && $tag != '') {
+			$query_url .= '&tag='.$tag;
+		}
+
+		if (isset($term) && $term != '') {
+			$query_url .= '&term='.$term;
 		}
 
 		// Allow users to define additional query parameters

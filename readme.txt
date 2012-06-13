@@ -3,7 +3,7 @@ Contributors: sayontan
 Donate link: http://aquoid.com/news/plugins/photonic/
 Tags: gallery, flickr, picasa, 500px, smugmug, fancybox, colorbox, prettyphoto, slideshow, jquery, shortcode
 Requires at least: WP 3.1
-Tested up to: WP 3.3.1
+Tested up to: WP 3.4
 Stable tag: trunk
 
 WordPress galleries on steroids! A stylish plugin for beautiful galleries of your public and private Flickr, Picasa, SmugMug and 500px photos.
@@ -116,6 +116,11 @@ Yes, but only for the plugin front-end. The admin panel is not translated at thi
 in the third-party JS scripts are not translated.
 
 == Changelog ==
+
+= 1.23 =
+
+*   Added search support for 500px.com, via tags and terms
+*   Added new categories, sort criteria and capability to exclude a category for 500px.com
 
 = 1.22 =
 
