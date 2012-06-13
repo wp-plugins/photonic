@@ -1,3 +1,8 @@
+Version 1.23 - 14th Jun 2012
+============================
+1.  Added search support for 500px.com
+2.  Added new categories, sort criteria and capability to exclude a category for 500px.com
+
 Version 1.22 - 12th Apr 2012
 ============================
 1.  Made minor corrections to authentication behaviour. If not connected to the internet, Photonic was returning a fatal error.

@@ -417,7 +417,7 @@ $fields = array(
 
 			array(
 				'id' => 'only',
-				'name' => __('Category', 'photonic'),
+				'name' => __('Include category', 'photonic'),
 				'type' => 'select',
 				'options' => array(
 					'' => __('All Categories', 'photonic'),
@@ -443,8 +443,47 @@ $fields = array(
 					'Sport' => __("Sport", 'photonic'),
 					'Still Life' => __("Still Life", 'photonic'),
 					'Street' => __("Street", 'photonic'),
+					'Transportation' => __("Transportation", 'photonic'),
 					'Travel' => __("Travel", 'photonic'),
 					'Underwater' => __("Underwater", 'photonic'),
+					'Urban Exploration' => __("Urban Exploration", 'photonic'),
+					'Wedding' => __("Wedding", 'photonic'),
+				),
+			),
+
+			array(
+				'id' => 'exclude',
+				'name' => __('Exclude category', 'photonic'),
+				'type' => 'select',
+				'options' => array(
+					'' => __('No Category', 'photonic'),
+					'Abstract' => __('Abstract', 'photonic'),
+					'Animals' => __('Animals', 'photonic'),
+					'Black and White' => __("Black and White", 'photonic'),
+					'Celebrities' => __('Celebrities', 'photonic'),
+					'City and Architecture' => __('Fresh today', 'photonic'),
+					'Commercial' => __('Commercial', 'photonic'),
+					'Concert' => __("Concert", 'photonic'),
+					'Family' => __("Family", 'photonic'),
+					'Fashion' => __("Fashion", 'photonic'),
+					'Film' => __("Film", 'photonic'),
+					'Fine Art' => __("Fine Art", 'photonic'),
+					'Food' => __("Food", 'photonic'),
+					'Journalism' => __("Journalism", 'photonic'),
+					'Landscapes' => __("Landscapes", 'photonic'),
+					'Macro' => __("Macro", 'photonic'),
+					'Nature' => __("Nature", 'photonic'),
+					'Nude' => __("Nude", 'photonic'),
+					'People' => __("People", 'photonic'),
+					'Performing Arts' => __("Performing Arts", 'photonic'),
+					'Sport' => __("Sport", 'photonic'),
+					'Still Life' => __("Still Life", 'photonic'),
+					'Street' => __("Street", 'photonic'),
+					'Transportation' => __("Transportation", 'photonic'),
+					'Travel' => __("Travel", 'photonic'),
+					'Underwater' => __("Underwater", 'photonic'),
+					'Urban Exploration' => __("Urban Exploration", 'photonic'),
+					'Wedding' => __("Wedding", 'photonic'),
 				),
 			),
 
@@ -456,8 +495,25 @@ $fields = array(
 					'created_at' => __('Created at', 'photonic'),
 					'rating' => __('Rating', 'photonic'),
 					'times_viewed' => __('Times viewed', 'photonic'),
+					'votes_count' => __('Votes count', 'photonic'),
+					'favorites_count' => __('Favorites count', 'photonic'),
+					'comments_count' => __('Comments count', 'photonic'),
 					'taken_at' => __('Taken at', 'photonic'),
 				),
+			),
+
+			array(
+				'id' => 'tag',
+				'name' => __('Tags', 'photonic'),
+				'type' => 'text',
+				'hint' => __('Comma-separated list of tags (above criteria will not apply)', 'photonic')
+			),
+
+			array(
+				'id' => 'term',
+				'name' => __('Search terms', 'photonic'),
+				'type' => 'text',
+				'hint' => __('Comma-separated list of search terms (above criteria will not apply)', 'photonic')
 			),
 
 			array(
