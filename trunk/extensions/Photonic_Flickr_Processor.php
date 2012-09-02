@@ -6,7 +6,7 @@
  * @subpackage Extensions
  */
 
-class Photonic_Flickr_Processor extends Photonic_Processor {
+class Photonic_Flickr_Processor extends Photonic_OAuth1_Processor {
 	function __construct() {
 		parent::__construct();
 		global $photonic_flickr_api_key, $photonic_flickr_api_secret;

@@ -1,5 +1,5 @@
 <?php
-class Photonic_SmugMug_Processor extends Photonic_Processor {
+class Photonic_SmugMug_Processor extends Photonic_OAuth1_Processor {
 	function __construct() {
 		parent::__construct();
 		global $photonic_smug_api_key, $photonic_smug_api_secret;

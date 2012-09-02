@@ -115,7 +115,7 @@ li.slideshow-grid li { display: inline-block; }
 }
 #tooltip h3, #tooltip div { margin: 0; }
 
-#photonic-login-box-flickr .auth-button, #photonic-login-box-500px .auth-button, #photonic-login-box-smug .auth-button {
+#photonic-login-box-flickr .auth-button, #photonic-login-box-500px .auth-button, #photonic-login-box-smug .auth-button, #photonic-login-box-picasa .auth-button {
 	padding: 10px 15px;
 	display: inline-block;
 	text-align: center;
@@ -131,7 +131,7 @@ li.slideshow-grid li { display: inline-block; }
 	float: none;
 	border-radius: 3px;
 }
-#photonic-login-box-flickr .auth-button:hover, #photonic-login-box-500px .auth-button:hover, #photonic-login-box-smug .auth-button:hover {
+#photonic-login-box-flickr .auth-button:hover, #photonic-login-box-500px .auth-button:hover, #photonic-login-box-smug .auth-button:hover, #photonic-login-box-picasa .auth-button:hover {
 	text-decoration: none;
 	color: #fff;
 	background: #48d;

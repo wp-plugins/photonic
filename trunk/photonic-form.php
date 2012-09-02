@@ -524,6 +524,20 @@ $fields = array(
 			),
 
 			array(
+				'id' => 'date_from',
+				'name' => __('From this date', 'photonic'),
+				'type' => 'text',
+				'hint' => __('Format: yyyy-mm-dd. Use this to filter from a certain date (this is the start date). Keep "Sort by" to "Created at"!', 'photonic'),
+			),
+
+			array(
+				'id' => 'date_to',
+				'name' => __('To this date', 'photonic'),
+				'type' => 'text',
+				'hint' => __('Format: yyyy-mm-dd. Use this to filter to a certain date (this is the end date). Keep "Sort by" to "Created at"!', 'photonic'),
+			),
+
+			array(
 				'id' => 'thumb_size',
 				'name' => __('Thumbnail size', 'photonic'),
 				'type' => 'select',

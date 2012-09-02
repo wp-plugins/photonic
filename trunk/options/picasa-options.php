@@ -2,6 +2,33 @@
 global $photonic_picasa_options;
 
 $photonic_picasa_options = array(
+/*	array("name" => "Picasa settings",
+		"desc" => "Control settings for Picasa",
+		"category" => "picasa-settings",
+		"type" => "section",),
+
+	array("name" => "Google Client ID",
+		"desc" => "Enter your Google Client ID. You can get / create one from Google's <a href='https://code.google.com/apis/console#access'>API Console</a>.
+			You only need this if you have private photos that you want people to login to see.",
+		"id" => "picasa_client_id",
+		"grouping" => "picasa-settings",
+		"type" => "text",
+		"std" => ""),
+
+	array("name" => "Google Client Secret",
+		"desc" => "Enter your Google Client Secret.	You only need this if you have private photos that you want people to login to see.",
+		"id" => "picasa_client_secret",
+		"grouping" => "picasa-settings",
+		"type" => "text",
+		"std" => ""),
+
+	array("name" => "Private Photos",
+		"desc" => "Let visitors of your site login to Picasa to see private photos for which they have permissions (will show a login button if they are not logged in)",
+		"id" => "picasa_allow_oauth",
+		"grouping" => "picasa-settings",
+		"type" => "checkbox",
+		"std" => ""),*/
+
 	array("name" => "Picasa Photos - \"In-page\" View",
 		"desc" => "Control settings for Picasa Photos when displayed in your page",
 		"category" => "picasa-photos",

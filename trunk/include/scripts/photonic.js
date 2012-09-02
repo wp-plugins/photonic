@@ -59,20 +59,6 @@
     };
 })(jQuery);
 
-/**
- * jQuery Dimensions
- *
- * Copyright (c) 2007 Paul Bakaus (paul.bakaus@googlemail.com) and Brandon Aaron (brandon.aaron@gmail.com || http://brandonaaron.net)
- * Dual licensed under the MIT (http://www.opensource.org/licenses/mit-license.php)
- * and GPL (http://www.opensource.org/licenses/gpl-license.php) licenses.
- *
- * $LastChangedDate: 2007-06-22 04:38:37 +0200 (Fr, 22 Jun 2007) $
- * $Rev: 2141 $
- *
- * Version: 1.0b2
- */
-(function(a){var b=a.fn.height,c=a.fn.width;a.fn.extend({height:function(){if(this[0]==window)return self.innerHeight||a.boxModel&&document.documentElement.clientHeight||document.body.clientHeight;if(this[0]==document)return Math.max(document.body.scrollHeight,document.body.offsetHeight);return b.apply(this,arguments)},width:function(){if(this[0]==window)return self.innerWidth||a.boxModel&&document.documentElement.clientWidth||document.body.clientWidth;if(this[0]==document)return Math.max(document.body.scrollWidth,document.body.offsetWidth);return c.apply(this,arguments)},innerHeight:function(){return this[0]==window||this[0]==document?this.height():this.is(":visible")?this[0].offsetHeight-d(this,"borderTopWidth")-d(this,"borderBottomWidth"):this.height()+d(this,"paddingTop")+d(this,"paddingBottom")},innerWidth:function(){return this[0]==window||this[0]==document?this.width():this.is(":visible")?this[0].offsetWidth-d(this,"borderLeftWidth")-d(this,"borderRightWidth"):this.width()+d(this,"paddingLeft")+d(this,"paddingRight")},outerHeight:function(){return this[0]==window||this[0]==document?this.height():this.is(":visible")?this[0].offsetHeight:this.height()+d(this,"borderTopWidth")+d(this,"borderBottomWidth")+d(this,"paddingTop")+d(this,"paddingBottom")},outerWidth:function(){return this[0]==window||this[0]==document?this.width():this.is(":visible")?this[0].offsetWidth:this.width()+d(this,"borderLeftWidth")+d(this,"borderRightWidth")+d(this,"paddingLeft")+d(this,"paddingRight")},scrollLeft:function(b){if(b!=undefined)return this.each(function(){if(this==window||this==document)window.scrollTo(b,a(window).scrollTop());else this.scrollLeft=b});if(this[0]==window||this[0]==document)return self.pageXOffset||a.boxModel&&document.documentElement.scrollLeft||document.body.scrollLeft;return this[0].scrollLeft},scrollTop:function(b){if(b!=undefined)return this.each(function(){if(this==window||this==document)window.scrollTo(a(window).scrollLeft(),b);else this.scrollTop=b});if(this[0]==window||this[0]==document)return self.pageYOffset||a.boxModel&&document.documentElement.scrollTop||document.body.scrollTop;return this[0].scrollTop},position:function(b,c){var f=this[0],g=f.parentNode,h=f.offsetParent,b=a.extend({margin:false,border:false,padding:false,scroll:false},b||{}),i=f.offsetLeft,j=f.offsetTop,k=f.scrollLeft,l=f.scrollTop;if(a.browser.mozilla||a.browser.msie){i+=d(f,"borderLeftWidth");j+=d(f,"borderTopWidth")}if(a.browser.mozilla){do{if(a.browser.mozilla&&g!=f&&a.css(g,"overflow")!="visible"){i+=d(g,"borderLeftWidth");j+=d(g,"borderTopWidth")}if(g==h)break}while((g=g.parentNode)&&(g.tagName.toLowerCase()!="body"||g.tagName.toLowerCase()!="html"))}var m=e(f,b,i,j,k,l);if(c){a.extend(c,m);return this}else{return m}},offset:function(b,c){var f=0,g=0,h=0,i=0,j=this[0],k=this[0],l,m,n=a.css(j,"position"),o=a.browser.mozilla,p=a.browser.msie,q=a.browser.safari,r=a.browser.opera,s=false,t=false,b=a.extend({margin:true,border:false,padding:false,scroll:true,lite:false},b||{});if(b.lite)return this.offsetLite(b,c);if(j.tagName.toLowerCase()=="body"){f=j.offsetLeft;g=j.offsetTop;if(o){f+=d(j,"marginLeft")+d(j,"borderLeftWidth")*2;g+=d(j,"marginTop")+d(j,"borderTopWidth")*2}else if(r){f+=d(j,"marginLeft");g+=d(j,"marginTop")}else if(p&&jQuery.boxModel){f+=d(j,"borderLeftWidth");g+=d(j,"borderTopWidth")}}else{do{m=a.css(k,"position");f+=k.offsetLeft;g+=k.offsetTop;if(o||p){f+=d(k,"borderLeftWidth");g+=d(k,"borderTopWidth");if(o&&m=="absolute")s=true;if(p&&m=="relative")t=true}l=k.offsetParent;if(b.scroll||o){do{if(b.scroll){h+=k.scrollLeft;i+=k.scrollTop}if(o&&k!=j&&a.css(k,"overflow")!="visible"){f+=d(k,"borderLeftWidth");g+=d(k,"borderTopWidth")}k=k.parentNode}while(k!=l)}k=l;if(k.tagName.toLowerCase()=="body"||k.tagName.toLowerCase()=="html"){if((q||p&&a.boxModel)&&n!="absolute"&&n!="fixed"){f+=d(k,"marginLeft");g+=d(k,"marginTop")}if(o&&!s&&n!="fixed"||p&&n=="static"&&!t){f+=d(k,"borderLeftWidth");g+=d(k,"borderTopWidth")}break}}while(k)}var u=e(j,b,f,g,h,i);if(c){a.extend(c,u);return this}else{return u}},offsetLite:function(b,c){var d=0,f=0,g=0,h=0,i=this[0],j,b=a.extend({margin:true,border:false,padding:false,scroll:true},b||{});do{d+=i.offsetLeft;f+=i.offsetTop;j=i.offsetParent;if(b.scroll){do{g+=i.scrollLeft;h+=i.scrollTop;i=i.parentNode}while(i!=j)}i=j}while(i&&i.tagName.toLowerCase()!="body"&&i.tagName.toLowerCase()!="html");var k=e(this[0],b,d,f,g,h);if(c){a.extend(c,k);return this}else{return k}}});var d=function(b,c){return parseInt(a.css(b.jquery?b[0]:b,c))||0};var e=function(b,c,e,f,g,h){if(!c.margin){e-=d(b,"marginLeft");f-=d(b,"marginTop")}if(c.border&&(a.browser.safari||a.browser.opera)){e+=d(b,"borderLeftWidth");f+=d(b,"borderTopWidth")}else if(!c.border&&!(a.browser.safari||a.browser.opera)){e-=d(b,"borderLeftWidth");f-=d(b,"borderTopWidth")}if(c.padding){e+=d(b,"paddingLeft");f+=d(b,"paddingTop")}if(c.scroll){g-=b.scrollLeft;h-=b.scrollTop}return c.scroll?{top:f-h,left:e-g,scrollTop:h,scrollLeft:g}:{top:f,left:e}}})(jQuery)
-
 /*
  * jQuery Tooltip plugin 1.3
  *
@@ -463,6 +449,9 @@ $j(document).ready(function() {
 		else if ($j(this).hasClass('auth-button-smug')) {
 			provider = 'smug';
 		}
+		else if ($j(this).hasClass('auth-button-picasa')) {
+			provider = 'picasa'
+		}
 		var callbackId = $j(this).attr('rel');
 
 		$j.post(Photonic_JS.ajaxurl, "action=photonic_authenticate&provider=" + provider + '&callback_id=' + callbackId, function(data) {
@@ -473,6 +462,9 @@ $j(document).ready(function() {
 				window.location.replace(data);
 			}
 			else if (provider == 'smug') {
+				window.open(data);
+			}
+			else if (provider == 'picasa') {
 				window.open(data);
 			}
 		});
