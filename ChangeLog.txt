@@ -1,3 +1,8 @@
+Version 1.24 - 1st Sep 2012
+============================
+1.	Added date filtering support for 500px.com
+2.	Removed embedded JQuery Dimensions, since it is bundled with the core and it was causing conflicts with other plugins.
+
 Version 1.23 - 14th Jun 2012
 ============================
 1.  Added search support for 500px.com

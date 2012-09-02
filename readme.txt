@@ -3,8 +3,9 @@ Contributors: sayontan
 Donate link: http://aquoid.com/news/plugins/photonic/
 Tags: gallery, flickr, picasa, 500px, smugmug, fancybox, colorbox, prettyphoto, slideshow, jquery, shortcode
 Requires at least: WP 3.1
-Tested up to: WP 3.4
+Tested up to: WP 3.4.1
 Stable tag: trunk
+License: GPLv3 or later
 
 WordPress galleries on steroids! A stylish plugin for beautiful galleries of your public and private Flickr, Picasa, SmugMug and 500px photos.
 
@@ -116,6 +117,11 @@ Yes, but only for the plugin front-end. The admin panel is not translated at thi
 in the third-party JS scripts are not translated.
 
 == Changelog ==
+
+= 1.24 =
+
+*	Added date filtering support for 500px.com. Thanks to Bart Kuipers (http://www.bartkuipers.com/) for the code.
+*   Removed the included script for JQuery Dimensions, which was causing conflicts with other JQuery plugins. Dimensions has been merged into JQuery Core a while back.
 
 = 1.23 =
 

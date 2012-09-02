@@ -3,7 +3,7 @@
  * Plugin Name: Photonic Gallery for Flickr, Picasa, SmugMug and 500px
  * Plugin URI: http://aquoid.com/news/plugins/photonic/
  * Description: Extends the native gallery shortcode to support Flickr, Picasa, SmugMug and 500px. JS libraries like Fancybox, Colorbox and PrettyPhoto are supported. The plugin also helps convert a regular WP gallery into a slideshow.
- * Version: 1.23
+ * Version: 1.24
  * Author: Sayontan Sinha
  * Author URI: http://mynethome.net/blog
  * License: GNU General Public License (GPL), v3 (or newer)
@@ -20,7 +20,7 @@ class Photonic {
 	function Photonic() {
 		global $photonic_options, $photonic_setup_options, $photonic_is_ie6;
 		if (!defined('PHOTONIC_VERSION')) {
-			define('PHOTONIC_VERSION', '1.23');
+			define('PHOTONIC_VERSION', '1.24');
 		}
 
 		if (!defined('PHOTONIC_PATH')) {
@@ -79,6 +79,8 @@ class Photonic {
 
 		$this->registered_extensions = array();
 		$this->add_extensions();
+
+//		add_action('template_redirect', array(&$this, 'get_oauth2_access_token'));
 
 		add_action('wp_ajax_photonic_authenticate', array(&$this, 'authenticate'));
 		add_action('wp_ajax_nopriv_photonic_authenticate', array(&$this, 'authenticate'));
@@ -359,6 +361,8 @@ class Photonic {
 
 	function add_extensions() {
 		require_once(plugin_dir_path(__FILE__)."/extensions/Photonic_Processor.php");
+		require_once(plugin_dir_path(__FILE__)."/extensions/Photonic_OAuth1_Processor.php");
+		require_once(plugin_dir_path(__FILE__)."/extensions/Photonic_OAuth2_Processor.php");
 		$this->register_extension('Photonic_Flickr_Processor', plugin_dir_path(__FILE__)."/extensions/Photonic_Flickr_Processor.php");
 		$this->register_extension('Photonic_Picasa_Processor', plugin_dir_path(__FILE__)."/extensions/Photonic_Picasa_Processor.php");
 		$this->register_extension('Photonic_Native_Processor', plugin_dir_path(__FILE__)."/extensions/Photonic_Native_Processor.php");
@@ -900,7 +904,7 @@ class Photonic {
 	 * @return void
 	 */
 	function media_upload_photonic_form() {
-		echo media_upload_header();
+		media_upload_header();
 		require_once(plugin_dir_path(__FILE__)."/photonic-form.php");
 	}
 
@@ -1085,6 +1089,24 @@ class Photonic {
 				$photonic_smug_oauth_done = $photonic_smugmug_gallery->is_access_token_valid($access_token_response);
 			}
 		}
+//print_r($cookie);
+		if (isset($photonic_picasa_allow_oauth)) {
+			if ($photonic_picasa_allow_oauth && isset($cookie['picasa']) && isset($cookie['picasa']['oauth_token']) && isset($cookie['picasa']['oauth_token_secret'])) {
+				global $photonic_picasa_gallery;
+				if (!isset($photonic_picasa_gallery)) {
+					$photonic_picasa_gallery = new Photonic_Picasa_Processor();
+				}
+				$current_token = array(
+					'oauth_token' => $cookie['picasa']['oauth_token'],
+					'oauth_token_secret' => $cookie['picasa']['oauth_token_secret'],
+				);
+
+				if (!$photonic_picasa_oauth_done &&
+					((isset($cookie['picasa']['oauth_token_type']) && $cookie['picasa']['oauth_token_type'] == 'request') || !isset($cookie['smug']['oauth_token_type']))) {
+					//	$new_token = $photonic_picasa_gallery->get_access_token($current_token);
+				}
+			}
+		}
 	}
 
 	/**
@@ -1101,10 +1123,16 @@ class Photonic {
 			'smug' => array(),
 			'picasa' => array(),
 		);
-		$cookie_keys = array('oauth_token', 'oauth_token_secret', 'oauth_token_type');
+		$auth_types = array(
+			'flickr' => 'oauth1',
+			'500px' => 'oauth1',
+			'smug' => 'oauth1',
+			'picasa' => 'oauth2',
+		);
+		$cookie_keys = array('oauth_token', 'oauth_token_secret', 'oauth_token_type', 'access_token', 'access_token_type');
 		foreach ($cookie as $provider => $cookies) {
-			$orig_secret = 'photonic_'.$provider.'_api_secret';
-			global $$orig_secret;
+			$orig_secret = $auth_types[$provider] == 'oauth1' ? 'photonic_'.$provider.'_api_secret' : 'photonic_'.$provider.'_client_secret';
+			global $$orig_secret; //echo "$provider - ".$$orig_secret."<br/>";
 			if (isset($$orig_secret)) {
 				$secret = md5($$orig_secret, false);
 				foreach ($cookie_keys as $cookie_key) {
@@ -1160,7 +1188,51 @@ class Photonic {
 					$authorize_url = $photonic_smugmug_gallery->get_authorize_URL($request_token);
 					echo $authorize_url.'&Access=Full&Permissions=Read';
 					die;
+
+				case 'picasa':
+					global $photonic_picasa_gallery;
+					if (!isset($photonic_picasa_gallery)) {
+						$photonic_picasa_gallery = new Photonic_Picasa_Processor();
+					}
+					$authentication_response =  $photonic_picasa_gallery->authorize();
+					echo $authentication_response;
+					die;
 			}
+		}
+	}
+
+	public function get_oauth2_access_token() {
+		$parameters = Photonic_Processor::parse_parameters($_SERVER['QUERY_STRING']);
+		global $photonic_picasa_client_secret;
+		if ((isset($parameters['code']) || isset($parameters['token']) && isset($parameters['state']))) {
+			$url = remove_query_arg(array('token', 'code', 'state'));
+			if (md5($photonic_picasa_client_secret.'picasa') == $parameters['state']) {
+				$code = isset($parameters['code']) ? $parameters['code'] : $parameters['token'];
+				$secret = md5($photonic_picasa_client_secret, false);
+				setcookie('photonic-'.$secret.'-oauth-token', $code, time() + 365 * 60 * 60 * 24, COOKIEPATH);
+				setcookie('photonic-'.$secret.'-oauth-token-secret', $photonic_picasa_client_secret, time() + 365 * 60 * 60 * 24, COOKIEPATH);
+				setcookie('photonic-'.$secret.'-oauth-token-type', 'request', time() + 365 * 60 * 60 * 24, COOKIEPATH);
+
+				global $photonic_picasa_gallery;
+				if (!isset($photonic_picasa_gallery)) {
+					$photonic_picasa_gallery = new Photonic_Picasa_Processor();
+				}
+				$response = Photonic::http($photonic_picasa_gallery->access_token_URL(), 'POST', array(
+					'code' => $code,
+					'client_id' => $photonic_picasa_gallery->client_id,
+					'client_secret' => $photonic_picasa_client_secret,
+					'redirect_uri' => $photonic_picasa_gallery->redirect_url(),
+					'grant_type' => 'authorization_code',
+				));
+
+//				$body = $response['body'];
+				$body = json_decode($response);
+				$body = json_encode($body);
+				$url = add_query_arg('body', $body, $url);
+			}
+
+			wp_redirect($url);
+			exit();
 		}
 	}
 }

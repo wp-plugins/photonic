@@ -6,7 +6,7 @@
  * @subpackage Extensions
  */
 
-class Photonic_500px_Processor extends Photonic_Processor {
+class Photonic_500px_Processor extends Photonic_OAuth1_Processor {
 	function __construct() {
 		parent::__construct();
 		global $photonic_500px_api_key, $photonic_500px_api_secret;
@@ -38,7 +38,9 @@ class Photonic_500px_Processor extends Photonic_Processor {
 
 		$attr = array_merge(array(
 			'style' => 'default',
-	//		'feature' => ''  // popular | upcoming | editors | fresh_today | fresh_yesterday | fresh_week
+			'date_to'   => strftime("%F",PHP_INT_MAX), // date format yyyy-mm-dd
+			'date_from'   => '',
+			//		'feature' => ''  // popular | upcoming | editors | fresh_today | fresh_yesterday | fresh_week
 			// Defaults from WP ...
 			'columns'    => 'auto',
 			'thumb_size'       => '1',
@@ -93,6 +95,9 @@ class Photonic_500px_Processor extends Photonic_Processor {
 		if (isset($rpp) && $rpp != '') {
 			$query_url .= '&rpp='.$rpp;
 		}
+		else {
+			$rpp = 20;
+		}
 
 		if (isset($sort) && $sort != '') {
 			$query_url .= '&sort='.$sort;
@@ -134,15 +139,31 @@ class Photonic_500px_Processor extends Photonic_Processor {
 
 		$photonic_500px_position++;
 		$ret .= "<div class='photonic-500px-stream' id='photonic-500px-stream-$photonic_500px_position'>";
-		$ret .= $this->process_response($query_url, $thumb_size, $main_size, $columns);
+		$ret .= $this->process_response($query_url, $thumb_size, $main_size, $columns, $date_from, $date_to, $rpp, $rpp, 1);
 		$ret .= "</div>";
 		return $ret;
 	}
 
-	function process_response($url, $thumb_size = '1', $main_size = '4', $columns = 'auto') {
+	/**
+	 * Queries the server, then parses through the response.
+	 * The date filtering capability was provided by Bart Kuipers (http://www.bartkuipers.com/).
+	 *
+	 * @param $url
+	 * @param string $thumb_size
+	 * @param string $main_size
+	 * @param string $columns
+	 * @param string $date_from_string
+	 * @param string $date_to_string
+	 * @param int $number_of_photos_to_go
+	 * @param int $number_per_page
+	 * @param int $page_number
+	 * @return string
+	 */
+	function process_response($url, $thumb_size = '1', $main_size = '4', $columns = 'auto', $date_from_string = '',
+		$date_to_string = '', $number_of_photos_to_go = 20, $number_per_page = 20, $page_number = 1) {
 		global $photonic_slideshow_library, $photonic_500px_position, $photonic_500px_photos_per_row_constraint, $photonic_500px_photos_constrain_by_count, $photonic_500px_disable_title_link, $photonic_500px_photo_title_display;
 
-		$response = wp_remote_request($url, array('sslverify' => false));
+		$response = wp_remote_request($url.'&page='.$page_number, array('sslverify' => false));
 
 		if (is_wp_error($response)) {
 			return "";
@@ -154,7 +175,12 @@ class Photonic_500px_Processor extends Photonic_Processor {
 			$content = $response['body'];
 			$content = json_decode($content);
 			$photos = $content->photos;
-			$ret = "<ul>";
+			if ($page_number === 1) {
+				$ret = "<ul>";
+			}
+			else {
+				$ret = '';
+			}
 			if (!isset($columns)) {
 				$columns = 'auto';
 			}
@@ -170,7 +196,28 @@ class Photonic_500px_Processor extends Photonic_Processor {
 				$pad_class = 'photonic-gallery-'.$columns.'c';
 			}
 
+			$all_photos_found = false;
+
 			foreach ($photos as $photo) {
+				if (($timestamp = strtotime($photo->created_at)) !== false) {
+					if (($date_from = strtotime($date_from_string)) === false) {
+						$date_from = 1;
+					}
+					if ($timestamp < $date_from) {
+						$all_photos_found = true;
+						continue;
+					}
+					if (($date_to = strtotime($date_to_string)) === false) {
+						$date_to = PHP_INT_MAX;
+					}
+					if ($timestamp > $date_to) {
+						continue;
+					}
+				}
+				if ($number_of_photos_to_go <= 0) {
+					continue;
+				}
+
 				$image = $photo->image_url;
 				$first = substr($image, 0, strrpos($image, '/'));
 				$last = substr($image, strrpos($image, '/'));
@@ -193,9 +240,15 @@ class Photonic_500px_Processor extends Photonic_Processor {
 				}
 
 				$ret .= "</li>";
+				$number_of_photos_to_go--;
+			}
+			if ($number_of_photos_to_go > 0 && $all_photos_found != true && count($photos) >= $number_per_page ) {
+				$ret .= $this->process_response($url, $thumb_size, $main_size, $columns, $date_from_string, $date_to_string, $number_of_photos_to_go, $number_per_page, $page_number + 1);
 			}
 			if ($ret != "<ul>") {
-				$ret .= "</ul>";
+				if ($page_number === 1) {
+					$ret .= "</ul>";
+				}
 			}
 			else {
 				$ret = "";

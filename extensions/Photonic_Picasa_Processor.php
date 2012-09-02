@@ -6,7 +6,18 @@
  * @subpackage Extensions
  */
 
-class Photonic_Picasa_Processor extends Photonic_Processor {
+class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
+	function __construct() {
+		parent::__construct();
+		global $photonic_picasa_client_id, $photonic_picasa_client_secret;
+		$this->client_id = $photonic_picasa_client_id;
+		$this->client_secret = $photonic_picasa_client_secret;
+		$this->provider = 'picasa';
+		$this->oauth_version = '2.0';
+		$this->response_type = 'code';
+		$this->scope = 'https://picasaweb.google.com/data/';
+	}
+
 	/**
 	 *
 	 * user_id
@@ -83,6 +94,20 @@ class Photonic_Picasa_Processor extends Photonic_Processor {
 		$query_url .= 'imgmax=1600u';
 		//$query_url .= $crop_str;
 
+		global $photonic_picasa_login_shown, $photonic_picasa_allow_oauth, $photonic_picasa_oauth_done;
+		$ret = '';
+		if (!$photonic_picasa_login_shown && $photonic_picasa_allow_oauth && is_single() && !$photonic_picasa_oauth_done) {
+			$post_id = get_the_ID();
+			$ret .= $this->get_login_box($post_id);
+			$photonic_picasa_login_shown = true;
+		}
+
+		return $ret.$this->make_call($query_url, $display, $view, $attr);
+	}
+
+	function make_call($query_url, $display, $view, $attr) {
+		global $photonic_picasa_position;
+		extract($attr);
 		$response = wp_remote_request($query_url);
 		if (is_wp_error($response)) {
 			$rss = '';
@@ -366,7 +391,7 @@ class Photonic_Picasa_Processor extends Photonic_Processor {
 	 * @return string
 	 */
 	public function access_token_URL() {
-		// TODO: Implement access_token_URL() method.
+		return 'https://accounts.google.com/o/oauth2/token';
 	}
 
 	/**
@@ -393,7 +418,7 @@ class Photonic_Picasa_Processor extends Photonic_Processor {
 	 * @return string
 	 */
 	public function request_token_URL() {
-		// TODO: Implement request_Token_URL() method.
+		return 'https://accounts.google.com/o/oauth2/auth?response_type=token';
 	}
 
 	public function end_point() {
@@ -406,6 +431,10 @@ class Photonic_Picasa_Processor extends Photonic_Processor {
 
 	public function check_access_token_method() {
 		// TODO: Implement check_access_token_method() method.
+	}
+
+	public function authentication_url() {
+		return 'https://accounts.google.com/o/oauth2/auth';
 	}
 }
 ?>
