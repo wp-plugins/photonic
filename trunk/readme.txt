@@ -3,7 +3,7 @@ Contributors: sayontan
 Donate link: http://aquoid.com/news/plugins/photonic/
 Tags: gallery, flickr, picasa, 500px, smugmug, fancybox, colorbox, prettyphoto, slideshow, jquery, shortcode
 Requires at least: WP 3.1
-Tested up to: WP 3.4.1
+Tested up to: WP 3.4.2
 Stable tag: trunk
 License: GPLv3 or later
 
@@ -117,6 +117,12 @@ Yes, but only for the plugin front-end. The admin panel is not translated at thi
 in the third-party JS scripts are not translated.
 
 == Changelog ==
+
+= 1.25 =
+
+*	Added support for displaying single photos in 500px.com.
+*	Changed some code so that not being connected to the web doesn't throw an error for 500px.
+*	Fixed an issue that was preventing 500px photos from being shown on certain servers.
 
 = 1.24 =
 

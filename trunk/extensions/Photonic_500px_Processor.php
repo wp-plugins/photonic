@@ -38,7 +38,7 @@ class Photonic_500px_Processor extends Photonic_OAuth1_Processor {
 
 		$attr = array_merge(array(
 			'style' => 'default',
-			'date_to'   => strftime("%F",PHP_INT_MAX), // date format yyyy-mm-dd
+			'date_to'   => strftime("%F", time() + 86400), // date format yyyy-mm-dd
 			'date_from'   => '',
 			//		'feature' => ''  // popular | upcoming | editors | fresh_today | fresh_yesterday | fresh_week
 			// Defaults from WP ...
@@ -199,18 +199,24 @@ class Photonic_500px_Processor extends Photonic_OAuth1_Processor {
 			$all_photos_found = false;
 
 			foreach ($photos as $photo) {
-				if (($timestamp = strtotime($photo->created_at)) !== false) {
-					if (($date_from = strtotime($date_from_string)) === false) {
+				$timestamp = strtotime($photo->created_at);
+				if ($timestamp !== false) {
+					$date_from = strtotime($date_from_string);
+					if ($date_from === false) {
 						$date_from = 1;
 					}
 					if ($timestamp < $date_from) {
 						$all_photos_found = true;
 						continue;
 					}
-					if (($date_to = strtotime($date_to_string)) === false) {
-						$date_to = PHP_INT_MAX;
+
+					$date_to = strtotime($date_to_string);
+					if ($date_to === false) {
+						$date_to = gettimeofday();
+						$date_to = $date_to['sec'] + 86400; // tomorrow's date
 					}
 					if ($timestamp > $date_to) {
+						$all_photos_found = true;
 						continue;
 					}
 				}
@@ -325,6 +331,9 @@ class Photonic_500px_Processor extends Photonic_OAuth1_Processor {
 	}
 
 	public function is_access_token_valid($response) {
+		if (is_wp_error($response)) {
+			return false;
+		}
 		$response = $response['response'];
 
 		if ($response['code'] == 200) {
