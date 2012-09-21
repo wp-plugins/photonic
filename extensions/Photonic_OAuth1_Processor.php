@@ -313,5 +313,4 @@ abstract class Photonic_OAuth1_Processor extends Photonic_Processor {
 		}
 		return $parameters;
 	}
-
 }
