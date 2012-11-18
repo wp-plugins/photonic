@@ -3,13 +3,13 @@
  * Plugin Name: Photonic Gallery for Flickr, Picasa, SmugMug and 500px
  * Plugin URI: http://aquoid.com/news/plugins/photonic/
  * Description: Extends the native gallery shortcode to support Flickr, Picasa, SmugMug and 500px. JS libraries like Fancybox, Colorbox and PrettyPhoto are supported. The plugin also helps convert a regular WP gallery into a slideshow.
- * Version: 1.25
+ * Version: 1.26
  * Author: Sayontan Sinha
  * Author URI: http://mynethome.net/blog
  * License: GNU General Public License (GPL), v3 (or newer)
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
  *
- * Copyright (c) 2009 - 2012 Sayontan Sinha. All rights reserved.
+ * Copyright (c) 2009 - 2013 Sayontan Sinha. All rights reserved.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
@@ -20,7 +20,7 @@ class Photonic {
 	function Photonic() {
 		global $photonic_options, $photonic_setup_options, $photonic_is_ie6;
 		if (!defined('PHOTONIC_VERSION')) {
-			define('PHOTONIC_VERSION', '1.25');
+			define('PHOTONIC_VERSION', '1.26');
 		}
 
 		if (!defined('PHOTONIC_PATH')) {
@@ -80,7 +80,7 @@ class Photonic {
 		$this->registered_extensions = array();
 		$this->add_extensions();
 
-//		add_action('template_redirect', array(&$this, 'get_oauth2_access_token'));
+		add_action('template_redirect', array(&$this, 'get_oauth2_access_token'));
 
 		add_action('wp_ajax_photonic_authenticate', array(&$this, 'authenticate'));
 		add_action('wp_ajax_nopriv_photonic_authenticate', array(&$this, 'authenticate'));
@@ -275,7 +275,8 @@ class Photonic {
 				wp_enqueue_style("photonic-slideshow", get_template_directory_uri().'/scripts/colorbox/colorbox.css', array(), $this->version);
 			}
 			else {
-				wp_enqueue_style("photonic-slideshow", plugins_url('include/scripts/colorbox/colorbox.css', __FILE__), array(), $this->version);
+				global $photonic_cbox_theme;
+				wp_enqueue_style("photonic-slideshow", plugins_url('include/scripts/colorbox/style-'.$photonic_cbox_theme.'/colorbox.css', __FILE__), array(), $this->version);
 			}
 		}
 		else if ($photonic_slideshow_library == 'prettyphoto') {
@@ -1010,8 +1011,8 @@ class Photonic {
 			return;
 		}
 
-		global $photonic_flickr_oauth_done, $photonic_500px_oauth_done, $photonic_smug_oauth_done, $photonic_picasa_oauth_done;
-		$photonic_flickr_oauth_done = $photonic_500px_oauth_done = $photonic_smug_oauth_done = $photonic_picasa_oauth_done = false;
+		global $photonic_flickr_oauth_done, $photonic_500px_oauth_done, $photonic_smug_oauth_done;
+		$photonic_flickr_oauth_done = $photonic_500px_oauth_done = $photonic_smug_oauth_done = false;
 
 		$cookie = Photonic::parse_cookie();
 		if ($photonic_flickr_allow_oauth && isset($cookie['flickr']) && isset($cookie['flickr']['oauth_token']) && isset($cookie['flickr']['oauth_token_secret'])) {
@@ -1089,21 +1090,12 @@ class Photonic {
 				$photonic_smug_oauth_done = $photonic_smugmug_gallery->is_access_token_valid($access_token_response);
 			}
 		}
-//print_r($cookie);
+
 		if (isset($photonic_picasa_allow_oauth)) {
-			if ($photonic_picasa_allow_oauth && isset($cookie['picasa']) && isset($cookie['picasa']['oauth_token']) && isset($cookie['picasa']['oauth_token_secret'])) {
+			if ($photonic_picasa_allow_oauth && isset($cookie['picasa']) && isset($cookie['picasa']['oauth_token']) && isset($cookie['picasa']['oauth_refresh_token'])) { // OAuth2, so no Access token secret
 				global $photonic_picasa_gallery;
 				if (!isset($photonic_picasa_gallery)) {
 					$photonic_picasa_gallery = new Photonic_Picasa_Processor();
-				}
-				$current_token = array(
-					'oauth_token' => $cookie['picasa']['oauth_token'],
-					'oauth_token_secret' => $cookie['picasa']['oauth_token_secret'],
-				);
-
-				if (!$photonic_picasa_oauth_done &&
-					((isset($cookie['picasa']['oauth_token_type']) && $cookie['picasa']['oauth_token_type'] == 'request') || !isset($cookie['smug']['oauth_token_type']))) {
-					//	$new_token = $photonic_picasa_gallery->get_access_token($current_token);
 				}
 			}
 		}
@@ -1129,7 +1121,7 @@ class Photonic {
 			'smug' => 'oauth1',
 			'picasa' => 'oauth2',
 		);
-		$cookie_keys = array('oauth_token', 'oauth_token_secret', 'oauth_token_type', 'access_token', 'access_token_type');
+		$cookie_keys = array('oauth_token', 'oauth_token_secret', 'oauth_token_type', 'access_token', 'access_token_type', 'oauth_token_created', 'oauth_token_expires', 'oauth_refresh_token');
 		foreach ($cookie as $provider => $cookies) {
 			$orig_secret = $auth_types[$provider] == 'oauth1' ? 'photonic_'.$provider.'_api_secret' : 'photonic_'.$provider.'_client_secret';
 			global $$orig_secret; //echo "$provider - ".$$orig_secret."<br/>";
@@ -1188,15 +1180,6 @@ class Photonic {
 					$authorize_url = $photonic_smugmug_gallery->get_authorize_URL($request_token);
 					echo $authorize_url.'&Access=Full&Permissions=Read';
 					die;
-
-				case 'picasa':
-					global $photonic_picasa_gallery;
-					if (!isset($photonic_picasa_gallery)) {
-						$photonic_picasa_gallery = new Photonic_Picasa_Processor();
-					}
-					$authentication_response =  $photonic_picasa_gallery->authorize();
-					echo $authentication_response;
-					die;
 			}
 		}
 	}
@@ -1205,34 +1188,14 @@ class Photonic {
 		$parameters = Photonic_Processor::parse_parameters($_SERVER['QUERY_STRING']);
 		global $photonic_picasa_client_secret;
 		if ((isset($parameters['code']) || isset($parameters['token']) && isset($parameters['state']))) {
-			$url = remove_query_arg(array('token', 'code', 'state'));
-			if (md5($photonic_picasa_client_secret.'picasa') == $parameters['state']) {
-				$code = isset($parameters['code']) ? $parameters['code'] : $parameters['token'];
-				$secret = md5($photonic_picasa_client_secret, false);
-				setcookie('photonic-'.$secret.'-oauth-token', $code, time() + 365 * 60 * 60 * 24, COOKIEPATH);
-				setcookie('photonic-'.$secret.'-oauth-token-secret', $photonic_picasa_client_secret, time() + 365 * 60 * 60 * 24, COOKIEPATH);
-				setcookie('photonic-'.$secret.'-oauth-token-type', 'request', time() + 365 * 60 * 60 * 24, COOKIEPATH);
-
+			$state_args = explode('::', $parameters['state']);
+			if ($state_args[0] == md5($photonic_picasa_client_secret.'picasa')) { // Picasa response
 				global $photonic_picasa_gallery;
 				if (!isset($photonic_picasa_gallery)) {
 					$photonic_picasa_gallery = new Photonic_Picasa_Processor();
 				}
-				$response = Photonic::http($photonic_picasa_gallery->access_token_URL(), 'POST', array(
-					'code' => $code,
-					'client_id' => $photonic_picasa_gallery->client_id,
-					'client_secret' => $photonic_picasa_client_secret,
-					'redirect_uri' => $photonic_picasa_gallery->redirect_url(),
-					'grant_type' => 'authorization_code',
-				));
-
-//				$body = $response['body'];
-				$body = json_decode($response);
-				$body = json_encode($body);
-				$url = add_query_arg('body', $body, $url);
+				$photonic_picasa_gallery->get_access_token($parameters);
 			}
-
-			wp_redirect($url);
-			exit();
 		}
 	}
 }

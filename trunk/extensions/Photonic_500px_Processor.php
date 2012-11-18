@@ -56,9 +56,13 @@ class Photonic_500px_Processor extends Photonic_OAuth1_Processor {
 
 		$user_feature = false;
 		$base_query = 'https://api.500px.com/v1/photos';
-		if (isset($tag) || isset($term)) {
+		if (isset($view_id)) {
+			$base_query .= '/'.$view_id;
+		}
+		else if (isset($tag) || isset($term)) {
 			$base_query .= '/search';
 		}
+
 		$query_url = $base_query.'?consumer_key='.$photonic_500px_api_key;
 		if (isset($feature) && $feature != '') {
 			$feature = esc_html($feature);
@@ -174,92 +178,115 @@ class Photonic_500px_Processor extends Photonic_OAuth1_Processor {
 		else {
 			$content = $response['body'];
 			$content = json_decode($content);
-			$photos = $content->photos;
-			if ($page_number === 1) {
-				$ret = "<ul>";
-			}
-			else {
-				$ret = '';
-			}
-			if (!isset($columns)) {
-				$columns = 'auto';
-			}
-			if ($columns == 'auto') {
-				if ($photonic_500px_photos_per_row_constraint == 'padding') {
-					$pad_class = 'photonic-pad-photos';
-				}
-				else {
-					$pad_class = 'photonic-gallery-'.$photonic_500px_photos_constrain_by_count.'c';
-				}
-			}
-			else {
-				$pad_class = 'photonic-gallery-'.$columns.'c';
-			}
-
-			$all_photos_found = false;
-
-			foreach ($photos as $photo) {
-				$timestamp = strtotime($photo->created_at);
-				if ($timestamp !== false) {
-					$date_from = strtotime($date_from_string);
-					if ($date_from === false) {
-						$date_from = 1;
-					}
-					if ($timestamp < $date_from) {
-						$all_photos_found = true;
-						continue;
-					}
-
-					$date_to = strtotime($date_to_string);
-					if ($date_to === false) {
-						$date_to = gettimeofday();
-						$date_to = $date_to['sec'] + 86400; // tomorrow's date
-					}
-					if ($timestamp > $date_to) {
-						$all_photos_found = true;
-						continue;
-					}
-				}
-				if ($number_of_photos_to_go <= 0) {
-					continue;
-				}
-
-				$image = $photo->image_url;
-				$first = substr($image, 0, strrpos($image, '/'));
-				$last = substr($image, strrpos($image, '/'));
-				$extension = substr($last, stripos($last, '.'));
-				$ret .= "<li class='photonic-500px-image $pad_class'>";
-				$a_start = $photonic_500px_disable_title_link == 'on' ? "" : "<a href=\"http://500px.com/photo/".$photo->id."\">";
-				$a_end = $photonic_500px_disable_title_link == 'on' ? "" : "</a>";
-				if ($photonic_slideshow_library == 'prettyphoto') {
-					$rel = "photonic-prettyPhoto[photonic-500px-stream-$photonic_500px_position]";
-				}
-				else {
-					$rel = "photonic-500px-stream-$photonic_500px_position";
-				}
-				$ret .= "<a href='$first/$main_size$extension' class='launch-gallery-$photonic_slideshow_library $photonic_slideshow_library' rel='$rel' title='$a_start".esc_attr($photo->name)."$a_end'>";
-				$ret .= "<img src='$first/$thumb_size$extension' alt='".esc_attr($photo->name)."' />";
-				$ret .= "</a>";
-
-				if ($photonic_500px_photo_title_display == 'below') {
-					$ret .= "<span class='photonic-photo-title'>".$photo->name."</span>";
-				}
-
-				$ret .= "</li>";
-				$number_of_photos_to_go--;
-			}
-			if ($number_of_photos_to_go > 0 && $all_photos_found != true && count($photos) >= $number_per_page ) {
-				$ret .= $this->process_response($url, $thumb_size, $main_size, $columns, $date_from_string, $date_to_string, $number_of_photos_to_go, $number_per_page, $page_number + 1);
-			}
-			if ($ret != "<ul>") {
+			if (isset($content->photos)) {
+				$photos = $content->photos;
 				if ($page_number === 1) {
-					$ret .= "</ul>";
+					$ret = "<ul>";
 				}
+				else {
+					$ret = '';
+				}
+				if (!isset($columns)) {
+					$columns = 'auto';
+				}
+				if ($columns == 'auto') {
+					if ($photonic_500px_photos_per_row_constraint == 'padding') {
+						$pad_class = 'photonic-pad-photos';
+					}
+					else {
+						$pad_class = 'photonic-gallery-'.$photonic_500px_photos_constrain_by_count.'c';
+					}
+				}
+				else {
+					$pad_class = 'photonic-gallery-'.$columns.'c';
+				}
+
+				$all_photos_found = false;
+
+				foreach ($photos as $photo) {
+					$timestamp = strtotime($photo->created_at);
+					if ($timestamp !== false) {
+						$date_from = strtotime($date_from_string);
+						if ($date_from === false) {
+							$date_from = 1;
+						}
+						if ($timestamp < $date_from) {
+							$all_photos_found = true;
+							continue;
+						}
+
+						$date_to = strtotime($date_to_string);
+						if ($date_to === false) {
+							$date_to = gettimeofday();
+							$date_to = $date_to['sec'] + 86400; // tomorrow's date
+						}
+						if ($timestamp > $date_to) {
+							$all_photos_found = true;
+							continue;
+						}
+					}
+					if ($number_of_photos_to_go <= 0) {
+						continue;
+					}
+
+					$image = $photo->image_url;
+					$first = substr($image, 0, strrpos($image, '/'));
+					$last = substr($image, strrpos($image, '/'));
+					$extension = substr($last, stripos($last, '.'));
+					$ret .= "<li class='photonic-500px-image $pad_class'>";
+					$a_start = $photonic_500px_disable_title_link == 'on' ? "" : "<a href=\"http://500px.com/photo/".$photo->id."\">";
+					$a_end = $photonic_500px_disable_title_link == 'on' ? "" : "</a>";
+					if ($photonic_slideshow_library == 'prettyphoto') {
+						$rel = "photonic-prettyPhoto[photonic-500px-stream-$photonic_500px_position]";
+					}
+					else {
+						$rel = "photonic-500px-stream-$photonic_500px_position";
+					}
+					$ret .= "<a href='$first/$main_size$extension' class='launch-gallery-$photonic_slideshow_library $photonic_slideshow_library' rel='$rel' title='$a_start".esc_attr($photo->name)."$a_end'>";
+					$ret .= "<img src='$first/$thumb_size$extension' alt='".esc_attr($photo->name)."' />";
+					$ret .= "</a>";
+
+					if ($photonic_500px_photo_title_display == 'below') {
+						$ret .= "<span class='photonic-photo-title'>".$photo->name."</span>";
+					}
+
+					$ret .= "</li>";
+					$number_of_photos_to_go--;
+				}
+				if ($number_of_photos_to_go > 0 && $all_photos_found != true && count($photos) >= $number_per_page ) {
+					$ret .= $this->process_response($url, $thumb_size, $main_size, $columns, $date_from_string, $date_to_string, $number_of_photos_to_go, $number_per_page, $page_number + 1);
+				}
+				if ($ret != "<ul>") {
+					if ($page_number === 1) {
+						$ret .= "</ul>";
+					}
+				}
+				else {
+					$ret = "";
+				}
+				return $ret;
+			}
+			else if (isset($content->photo)) {
+				$photo = $content->photo;
+				$ret = '';
+				if (isset($photo->name) && !empty($photo->title)) {
+					$ret .= '<h3 class="photonic-single-photo-header photonic-single-500px-photo-header">'.$photo->name.'</h3>';
+				}
+				$img = '<img src="'.$photo->image_url.'" alt="'.esc_attr($photo->name).'">';
+				if (isset($photo->description) && !empty($photo->description)) {
+					$ret .= '<div class="wp-caption">';
+					$ret .= $img;
+					$ret .= '<div class="wp-caption-text">'.$photo->description.'</div>';
+					$ret .='</div>';
+				}
+				else {
+					$ret .= $img;
+				}
+				return $ret;
 			}
 			else {
-				$ret = "";
+				return '';
 			}
-			return $ret;
 		}
 	}
 

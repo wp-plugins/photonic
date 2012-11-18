@@ -11,7 +11,7 @@
  */
 
 abstract class Photonic_Processor {
-	public $library, $thumb_size, $full_size, $api_key, $api_secret, $provider, $nonce, $oauth_timestamp, $signature_parameters, $oauth_version;
+	public $library, $thumb_size, $full_size, $api_key, $api_secret, $provider, $nonce, $oauth_timestamp, $signature_parameters, $oauth_version, $oauth_done;
 
 	function __construct() {
 		global $photonic_slideshow_library;
@@ -194,7 +194,13 @@ abstract class Photonic_Processor {
 		else {
 			$login_button = wp_specialchars_decode($login_button, ENT_QUOTES);
 		}
-		$ret .= "<p class='photonic-auth-button'><a href='#' class='auth-button auth-button-{$this->provider}' rel='auth-button-single-$post_id'>".$login_button."</a></p>";
+		$url = '#';
+		$target = '';
+		if ($this->provider == 'picasa') {
+			$url = $this->get_authorization_url();
+			$target = 'target="_blank"';
+		}
+		$ret .= "<p class='photonic-auth-button'><a href='$url' $target class='auth-button auth-button-{$this->provider}' rel='auth-button-single-$post_id'>".$login_button."</a></p>";
 		$ret .= '</div>';
 		return $ret;
 	}
