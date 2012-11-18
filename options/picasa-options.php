@@ -2,14 +2,19 @@
 global $photonic_picasa_options;
 
 $photonic_picasa_options = array(
-/*	array("name" => "Picasa settings",
+	array("name" => "Picasa settings",
 		"desc" => "Control settings for Picasa",
 		"category" => "picasa-settings",
 		"type" => "section",),
 
 	array("name" => "Google Client ID",
 		"desc" => "Enter your Google Client ID. You can get / create one from Google's <a href='https://code.google.com/apis/console#access'>API Console</a>.
-			You only need this if you have private photos that you want people to login to see.",
+			While setting up your Google Client ID from the API Console:
+			<ol>
+				<li>Use the option for 'Client ID for web applications'.</li>
+				<li>Make sure that you add ".site_url()." as your Redirect URI. <strong>Without that your authentication will not work.</strong></li>
+			</ol>
+			<strong>You only need this if you have private photos that you want people to login to see.</strong>",
 		"id" => "picasa_client_id",
 		"grouping" => "picasa-settings",
 		"type" => "text",
@@ -27,7 +32,7 @@ $photonic_picasa_options = array(
 		"id" => "picasa_allow_oauth",
 		"grouping" => "picasa-settings",
 		"type" => "checkbox",
-		"std" => ""),*/
+		"std" => ""),
 
 	array("name" => "Picasa Photos - \"In-page\" View",
 		"desc" => "Control settings for Picasa Photos when displayed in your page",

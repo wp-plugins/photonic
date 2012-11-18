@@ -109,6 +109,20 @@ $photonic_generic_options = array(
 		),
 		"std" => "inside"),
 
+	array("name" => "Colorbox Theme",
+		"desc" => "Colorbox lets you pick one of the following themes:",
+		"id" => "cbox_theme",
+		"grouping" => "fbox-settings",
+		"type" => "radio",
+		"options" => array(
+			"1" => "Default",
+			"2" => "Style 2",
+			"3" => "Style 3",
+			"4" => "Style 4",
+			"5" => "Style 5",
+		),
+		"std" => "1"),
+
 	array("name" => "PrettyPhoto Theme",
 		"desc" => "PrettyPhoto lets you pick one of the following themes:",
 		"id" => "pphoto_theme",

@@ -1,8 +1,13 @@
+Version 1.26 - 17th Nov 2012
+============================
+1.	Added support for displaying single photos in 500px.com.
+2.	Added authentication support for Picasa.
+3.	Added more skins for Colorbox.
+
 Version 1.25 - 20th Sep 2012
 ============================
 1.	Changed some code so that not being connected to the web doesn't throw an error for 500px.
 2.	Fixed an issue that was preventing 500px photos from being shown on certain servers.
-3.	Added support for displaying single photos in 500px.com.
 
 Version 1.24 - 1st Sep 2012
 ============================

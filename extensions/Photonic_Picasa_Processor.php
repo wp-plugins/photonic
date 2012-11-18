@@ -16,6 +16,28 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 		$this->oauth_version = '2.0';
 		$this->response_type = 'code';
 		$this->scope = 'https://picasaweb.google.com/data/';
+
+		$cookie = Photonic::parse_cookie();
+		global $photonic_picasa_allow_oauth;
+		$this->oauth_done = false;
+		if ($photonic_picasa_allow_oauth && isset($cookie['picasa']) && isset($cookie['picasa']['oauth_token']) && isset($cookie['picasa']['oauth_refresh_token'])) { // OAuth2, so no Access token secret
+			if ($this->is_token_expired($cookie['picasa'])) {
+				$this->refresh_token($cookie['picasa']['oauth_refresh_token']);
+				$cookie = Photonic::parse_cookie(); // Refresh the cookie object based on the results of the refresh token
+				if ($this->is_token_expired($cookie['picasa'])) { // Tried refreshing, but didn't work
+					$this->oauth_done = false;
+				}
+				else {
+					$this->oauth_done = true;
+				}
+			}
+			else {
+				$this->oauth_done = true;
+			}
+		}
+		else if (!isset($cookie['picasa']) || !isset($cookie['picasa']['oauth_token']) || !isset($cookie['picasa']['oauth_refresh_token'])) {
+			$this->oauth_done = false;
+		}
 	}
 
 	/**
@@ -52,6 +74,13 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 		}
 
 		$query_url = 'http://picasaweb.google.com/data/feed/api/user/'.$user_id;
+		global $photonic_picasa_allow_oauth;
+		if (isset($photonic_picasa_allow_oauth) && $photonic_picasa_allow_oauth && $this->oauth_done) {
+			if (isset($_COOKIE['photonic-' . md5($this->client_secret) . '-oauth-token'])) {
+				$query_url = str_replace('http://', 'https://', $query_url);
+			}
+		}
+
 		if (isset($album) && trim($album) != '') {
 			$query_url .= '/album/'.urlencode($album);
 		}
@@ -92,11 +121,10 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 		}
 
 		$query_url .= 'imgmax=1600u';
-		//$query_url .= $crop_str;
 
-		global $photonic_picasa_login_shown, $photonic_picasa_allow_oauth, $photonic_picasa_oauth_done;
+		global $photonic_picasa_login_shown, $photonic_picasa_allow_oauth;
 		$ret = '';
-		if (!$photonic_picasa_login_shown && $photonic_picasa_allow_oauth && is_single() && !$photonic_picasa_oauth_done) {
+		if (!$photonic_picasa_login_shown && $photonic_picasa_allow_oauth && is_single() && !$this->oauth_done) {
 			$post_id = get_the_ID();
 			$ret .= $this->get_login_box($post_id);
 			$photonic_picasa_login_shown = true;
@@ -106,17 +134,36 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 	}
 
 	function make_call($query_url, $display, $view, $attr) {
-		global $photonic_picasa_position;
+		global $photonic_picasa_position, $photonic_picasa_allow_oauth;
 		extract($attr);
-		$response = wp_remote_request($query_url);
-		if (is_wp_error($response)) {
-			$rss = '';
-		}
-		else if (200 != $response['response']['code']) {
-			$rss = '';
+		if (isset($photonic_picasa_allow_oauth) && $photonic_picasa_allow_oauth && $this->oauth_done) {
+			if (isset($_COOKIE['photonic-' . md5($this->client_secret) . '-oauth-token'])) {
+				$query_url = add_query_arg('access_token', $_COOKIE['photonic-' . md5($this->client_secret) . '-oauth-token'], $query_url);
+				$cert = trailingslashit(PHOTONIC_PATH).'include/misc/cacert.crt';
+
+				$ch = curl_init();
+
+				curl_setopt($ch, CURLOPT_URL, $query_url);
+				curl_setopt($ch, CURLOPT_HEADER, 0); // Don’t return the header, just the html
+				curl_setopt($ch, CURLOPT_CAINFO, $cert); // Set the location of the CA-bundle
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); // Return contents as a string
+
+				$response = curl_exec ($ch);
+				curl_close($ch);
+				$rss = $response;
+			}
 		}
 		else {
-			$rss = $response['body'];
+			$response = wp_remote_request($query_url);
+			if (is_wp_error($response)) {
+				$rss = '';
+			}
+			else if (200 != $response['response']['code']) {
+				$rss = '';
+			}
+			else {
+				$rss = $response['body'];
+			}
 		}
 
 		$photonic_picasa_position++;
@@ -394,47 +441,19 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 		return 'https://accounts.google.com/o/oauth2/token';
 	}
 
-	/**
-	 * Authenticate URL
-	 *
-	 * @return string
-	 */
-	public function authenticate_URL() {
-		// TODO: Implement authenticate_URL() method.
-	}
-
-	/**
-	 * Authorize URL
-	 *
-	 * @return string
-	 */
-	public function authorize_URL() {
-		// TODO: Implement authorize_URL() method.
-	}
-
-	/**
-	 * Request Token URL
-	 *
-	 * @return string
-	 */
-	public function request_token_URL() {
-		return 'https://accounts.google.com/o/oauth2/auth?response_type=token';
-	}
-
-	public function end_point() {
-		// TODO: Implement end_point() method.
+	public function authentication_url() {
+		return 'https://accounts.google.com/o/oauth2/auth';
 	}
 
 	function parse_token($response) {
-		// TODO: Implement parse_token() method.
-	}
-
-	public function check_access_token_method() {
-		// TODO: Implement check_access_token_method() method.
-	}
-
-	public function authentication_url() {
-		return 'https://accounts.google.com/o/oauth2/auth';
+		$body = $response['body'];
+		$body = json_decode($body);
+		$token = array();
+		$token['oauth_token'] =  $body->access_token;
+		$token['oauth_token_type'] =  $body->token_type;
+		$token['oauth_token_created'] =  time();
+		$token['oauth_token_expires'] =  $body->expires_in;
+		return $token;
 	}
 }
 ?>

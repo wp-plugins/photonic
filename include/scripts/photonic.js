@@ -438,7 +438,7 @@ $j(document).ready(function() {
 		});
 	}
 
-	$j('.auth-button').click(function (){
+	$j('.auth-button').not('.auth-button-picasa').click(function (){
 		var provider = '';
 		if ($j(this).hasClass('auth-button-flickr')) {
 			provider = 'flickr';
@@ -448,9 +448,6 @@ $j(document).ready(function() {
 		}
 		else if ($j(this).hasClass('auth-button-smug')) {
 			provider = 'smug';
-		}
-		else if ($j(this).hasClass('auth-button-picasa')) {
-			provider = 'picasa'
 		}
 		var callbackId = $j(this).attr('rel');
 
@@ -462,9 +459,6 @@ $j(document).ready(function() {
 				window.location.replace(data);
 			}
 			else if (provider == 'smug') {
-				window.open(data);
-			}
-			else if (provider == 'picasa') {
 				window.open(data);
 			}
 		});

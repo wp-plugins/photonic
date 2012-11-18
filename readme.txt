@@ -118,9 +118,14 @@ in the third-party JS scripts are not translated.
 
 == Changelog ==
 
-= 1.25 =
+= 1.26 =
 
 *	Added support for displaying single photos in 500px.com.
+*	Added authentication support for Picasa.
+*	Added more skins for Colorbox.
+
+= 1.25 =
+
 *	Changed some code so that not being connected to the web doesn't throw an error for 500px.
 *	Fixed an issue that was preventing 500px photos from being shown on certain servers.
 
