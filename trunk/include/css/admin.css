@@ -51,6 +51,7 @@ ul.photonic-options-header-bar li a { text-decoration: none; font-weight: bold; 
 #photonic-options-picasa .icon { background-position: 0 -32px; }
 #photonic-options-500px .icon { background-position: 0 -48px; }
 #photonic-options-smugmug .icon { background-position: 0 -64px; }
+#photonic-options-instagram .icon { background-position: 0 -80px; }
 
 .fix:after { content:"."; display:block; height:0; clear:both; visibility:hidden; }
 .fix { display:block; }

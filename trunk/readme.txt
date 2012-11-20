@@ -118,6 +118,10 @@ in the third-party JS scripts are not translated.
 
 == Changelog ==
 
+= 1.27 =
+
+*	Fixed a minor issue with the displaying of the login box for Picasa.
+
 = 1.26 =
 
 *	Added support for displaying single photos in 500px.com.

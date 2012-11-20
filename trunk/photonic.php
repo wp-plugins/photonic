@@ -3,7 +3,7 @@
  * Plugin Name: Photonic Gallery for Flickr, Picasa, SmugMug and 500px
  * Plugin URI: http://aquoid.com/news/plugins/photonic/
  * Description: Extends the native gallery shortcode to support Flickr, Picasa, SmugMug and 500px. JS libraries like Fancybox, Colorbox and PrettyPhoto are supported. The plugin also helps convert a regular WP gallery into a slideshow.
- * Version: 1.26
+ * Version: 1.27
  * Author: Sayontan Sinha
  * Author URI: http://mynethome.net/blog
  * License: GNU General Public License (GPL), v3 (or newer)
@@ -20,7 +20,7 @@ class Photonic {
 	function Photonic() {
 		global $photonic_options, $photonic_setup_options, $photonic_is_ie6;
 		if (!defined('PHOTONIC_VERSION')) {
-			define('PHOTONIC_VERSION', '1.26');
+			define('PHOTONIC_VERSION', '1.27');
 		}
 
 		if (!defined('PHOTONIC_PATH')) {
@@ -1092,11 +1092,9 @@ class Photonic {
 		}
 
 		if (isset($photonic_picasa_allow_oauth)) {
-			if ($photonic_picasa_allow_oauth && isset($cookie['picasa']) && isset($cookie['picasa']['oauth_token']) && isset($cookie['picasa']['oauth_refresh_token'])) { // OAuth2, so no Access token secret
-				global $photonic_picasa_gallery;
-				if (!isset($photonic_picasa_gallery)) {
-					$photonic_picasa_gallery = new Photonic_Picasa_Processor();
-				}
+			global $photonic_picasa_gallery;
+			if (!isset($photonic_picasa_gallery)) {
+				$photonic_picasa_gallery = new Photonic_Picasa_Processor();
 			}
 		}
 	}
@@ -1205,4 +1203,3 @@ function photonic_init() {
 	global $photonic;
 	$photonic = new Photonic();
 }
-?>

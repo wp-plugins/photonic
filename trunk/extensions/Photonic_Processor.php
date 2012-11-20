@@ -180,7 +180,7 @@ abstract class Photonic_Processor {
 	 * @param $post_id
 	 * @return string
 	 */
-	public function get_login_box($post_id) {
+	public function get_login_box($post_id = '') {
 		$login_box_option = 'photonic_'.$this->provider.'_login_box';
 		$login_button_option = 'photonic_'.$this->provider.'_login_button';
 		global $$login_box_option, $$login_button_option;
@@ -200,7 +200,14 @@ abstract class Photonic_Processor {
 			$url = $this->get_authorization_url();
 			$target = 'target="_blank"';
 		}
-		$ret .= "<p class='photonic-auth-button'><a href='$url' $target class='auth-button auth-button-{$this->provider}' rel='auth-button-single-$post_id'>".$login_button."</a></p>";
+
+		if (!empty($post_id)) {
+			$rel = "rel='auth-button-single-$post_id'";
+		}
+		else {
+			$rel = '';
+		}
+		$ret .= "<p class='photonic-auth-button'><a href='$url' $target class='auth-button auth-button-{$this->provider}' $rel>".$login_button."</a></p>";
 		$ret .= '</div>';
 		return $ret;
 	}

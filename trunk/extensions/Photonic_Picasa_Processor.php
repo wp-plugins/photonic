@@ -124,7 +124,7 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 
 		global $photonic_picasa_login_shown, $photonic_picasa_allow_oauth;
 		$ret = '';
-		if (!$photonic_picasa_login_shown && $photonic_picasa_allow_oauth && is_single() && !$this->oauth_done) {
+		if (!$photonic_picasa_login_shown && $photonic_picasa_allow_oauth && !$this->oauth_done) {
 			$post_id = get_the_ID();
 			$ret .= $this->get_login_box($post_id);
 			$photonic_picasa_login_shown = true;
@@ -456,4 +456,3 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 		return $token;
 	}
 }
-?>
