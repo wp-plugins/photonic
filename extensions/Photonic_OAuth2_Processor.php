@@ -113,11 +113,7 @@ abstract class Photonic_OAuth2_Processor extends Photonic_Processor {
 			$cookie_expiration = 365 * 24 * 60 * 60;
 			setcookie('photonic-' . $secret . '-oauth-token', $body->access_token, time() + $cookie_expiration, COOKIEPATH);
 			if (!isset($_COOKIE['photonic-' . $secret . '-oauth-refresh-token']) && isset($body->refresh_token)) {
-				echo "Setting refresh token";
 				setcookie('photonic-' . $secret . '-oauth-refresh-token', $body->refresh_token, time() + $cookie_expiration, COOKIEPATH);
-			}
-			else {
-				echo "Not Setting refresh token";
 			}
 			setcookie('photonic-' . $secret . '-oauth-token-type', $body->token_type, time() + $cookie_expiration, COOKIEPATH);
 			setcookie('photonic-' . $secret . '-oauth-token-created', time(), time() + $cookie_expiration, COOKIEPATH);
