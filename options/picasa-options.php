@@ -34,6 +34,20 @@ $photonic_picasa_options = array(
 		"type" => "checkbox",
 		"std" => ""),
 
+	array("name" => "Login Box Text",
+		"desc" => "If private photos are enabled, this is the text users will see before the login button (you can use HTML tags here)",
+		"id" => "picasa_login_box",
+		"grouping" => "picasa-settings",
+		"type" => "textarea",
+		"std" => "Some features that you are trying to access may be visible to logged in users of Picasa only. Please login if you want to see them."),
+
+	array("name" => "Login Button Text",
+		"desc" => "If private photos are enabled, this is the text users will see before the login button (you can use HTML tags other than &lt;a&gt; here)",
+		"id" => "picasa_login_button",
+		"grouping" => "picasa-settings",
+		"type" => "text",
+		"std" => "Login"),
+
 	array("name" => "Picasa Photos - \"In-page\" View",
 		"desc" => "Control settings for Picasa Photos when displayed in your page",
 		"category" => "picasa-photos",

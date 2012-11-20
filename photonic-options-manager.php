@@ -4,13 +4,14 @@ class Photonic_Options_Manager {
 	var $option_structure, $previous_displayed_section, $file, $tab_name;
 
 	function Photonic_Options_Manager($file) {
-		global $photonic_setup_options, $photonic_generic_options, $photonic_flickr_options, $photonic_picasa_options, $photonic_500px_options, $photonic_smugmug_options;
+		global $photonic_setup_options, $photonic_generic_options, $photonic_flickr_options, $photonic_picasa_options, $photonic_500px_options, $photonic_smugmug_options, $photonic_instagram_options;
 		$options_page_array = array(
 			'generic-options.php' => $photonic_generic_options,
 			'flickr-options.php' => $photonic_flickr_options,
 			'picasa-options.php' => $photonic_picasa_options,
 			'500px-options.php' => $photonic_500px_options,
 			'smugmug-options.php' => $photonic_smugmug_options,
+//			'instagram-options.php' => $photonic_instagram_options,
 		);
 
 		$tab_name_array = array(
@@ -19,6 +20,7 @@ class Photonic_Options_Manager {
 			'picasa-options.php' => 'Picasa Options',
 			'500px-options.php' => '500px Options',
 			'smugmug-options.php' => 'SmugMug Options',
+//			'instagram-options.php' => 'Instagram Options',
 		);
 
 		$this->file = $file;
@@ -103,6 +105,7 @@ class Photonic_Options_Manager {
 						<li><a class='photonic-load-page <?php if ($this->tab == 'picasa-options.php') echo 'current-tab'; ?>' id='photonic-options-picasa' href='?page=photonic-options-manager&amp;tab=picasa-options.php'><span class="icon">&nbsp;</span> Picasa</a></li>
 						<li><a class='photonic-load-page <?php if ($this->tab == '500px-options.php') echo 'current-tab'; ?>' id='photonic-options-500px' href='?page=photonic-options-manager&amp;tab=500px-options.php'><span class="icon">&nbsp;</span> 500px</a></li>
 						<li><a class='photonic-load-page <?php if ($this->tab == 'smugmug-options.php') echo 'current-tab'; ?>' id='photonic-options-smugmug' href='?page=photonic-options-manager&amp;tab=smugmug-options.php'><span class="icon">&nbsp;</span> SmugMug</a></li>
+<!--						<li><a class='photonic-load-page --><?php //if ($this->tab == 'instagram-options.php') echo 'current-tab'; ?><!--' id='photonic-options-instagram' href='?page=photonic-options-manager&amp;tab=instagram-options.php'><span class="icon">&nbsp;</span> Instagram</a></li>-->
 					</ul>
 				</div>
 			</div>
