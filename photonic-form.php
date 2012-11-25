@@ -384,6 +384,24 @@ $fields = array(
 		'prelude' => __('You have to define your Consumer API Key under Settings &rarr; Photonic &rarr; 500px &rarr; 500px Settings', 'photonic'),
 		'fields' => array(
 			array(
+				'id' => 'view',
+				'name' => __('Display', 'photonic'),
+				'type' => 'select',
+				'options' => array(
+					'photos' => __('Photos', 'photonic'),
+					'collections' => __('Collections', 'photonic'),
+				),
+				'req' => true,
+			),
+
+			array(
+				'id' => 'view_id',
+				'name' => __('Object ID', 'photonic'),
+				'type' => 'text',
+				'hint' => __('Required if you are displaying collections or a single photo', 'photonic')
+			),
+
+			array(
 				'id' => 'feature',
 				'name' => __('Feature', 'photonic'),
 				'type' => 'select',
@@ -399,6 +417,7 @@ $fields = array(
 					'user_favorites' => __("Specified user's favourite photos", 'photonic'),
 				),
 				'req' => true,
+				'hint' => __('Required if you are displaying photos', 'photonic')
 			),
 
 			array(

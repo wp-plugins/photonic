@@ -36,7 +36,7 @@ The following Picasa concepts are supported in Photonic:
 *	<a href='http://aquoid.com/news/plugins/photonic/picasa/picasa-photos/'>Photos</a>
 *	<a href='http://aquoid.com/news/plugins/photonic/picasa/picasa-albums/'>Albums</a>
 
-For demos of Picasa support visit the <a href='http://aquoid.com/news/plugins/photonic/picasa/'>Picasa page</a>.
+Authentication for Picasa is supported as well. For demos of Picasa support visit the <a href='http://aquoid.com/news/plugins/photonic/picasa/'>Picasa page</a>.
 
 = SmugMug Support =
 
@@ -50,7 +50,8 @@ For demos of SmugMug support visit the <a href='http://aquoid.com/news/plugins/p
 
 = 500px Support =
 
-Photos on <a href='http://aquoid.com/news/plugins/photonic/500px/'>500px.com are supported in Photonic</a>.
+Photos on <a href='http://aquoid.com/news/plugins/photonic/500px/'>500px.com are supported in Photonic</a>. Sets (collections) are also
+supported, but there are <a href='https://github.com/500px/api-documentation/issues/17'>some quirks in 500px.com's API</a>.
 
 = Enhanced Native Galleries =
 Your existing gallery insertions are left intact. However you can add a <code>style</code> parameter to it for special effects. The permitted values for <code>style</code> are:
@@ -117,6 +118,17 @@ Yes, but only for the plugin front-end. The admin panel is not translated at thi
 in the third-party JS scripts are not translated.
 
 == Changelog ==
+
+= 1.29 =
+
+*	Added support for 500px.com collections.
+*	Fixed authentication problems in 500px.com.
+*	Added capability to show a different number of photos on an archive page than on the page for a single post/page
+*	Changed the Flickr API calls to be PHP-based instead of JS-based.
+
+= 1.28 =
+
+*	Removed some debugging statements.
 
 = 1.27 =
 

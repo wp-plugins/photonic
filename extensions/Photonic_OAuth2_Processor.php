@@ -60,7 +60,7 @@ abstract class Photonic_OAuth2_Processor extends Photonic_Processor {
 				if (isset($_COOKIE['photonic-' . $secret . '-oauth-token'])) {
 					unset($_COOKIE['photonic-' . $secret . '-oauth-token']);
 				}
-				if (isset($_COOKIE['photonic-' . $secret . '-oauth-refresh-token'])) {
+				if (isset($_COOKIE['photonic-' . $secret . '-oauth-refresh-token']) && isset($body->refresh_token)) {
 					unset($_COOKIE['photonic-' . $secret . '-oauth-refresh-token']);
 				}
 				if (isset($_COOKIE['photonic-' . $secret . '-oauth-token-type'])) {
@@ -74,7 +74,9 @@ abstract class Photonic_OAuth2_Processor extends Photonic_Processor {
 				}
 				$cookie_expiration = 365 * 24 * 60 * 60;
 				setcookie('photonic-' . $secret . '-oauth-token', $body->access_token, time() + $cookie_expiration, COOKIEPATH);
-				setcookie('photonic-' . $secret . '-oauth-refresh-token', $body->refresh_token, time() + $cookie_expiration, COOKIEPATH);
+				if (isset($body->refresh_token)) {
+					setcookie('photonic-' . $secret . '-oauth-refresh-token', $body->refresh_token, time() + $cookie_expiration, COOKIEPATH);
+				}
 				setcookie('photonic-' . $secret . '-oauth-token-type', $body->token_type, time() + $cookie_expiration, COOKIEPATH);
 				setcookie('photonic-' . $secret . '-oauth-token-created', time(), time() + $cookie_expiration, COOKIEPATH);
 				setcookie('photonic-' . $secret . '-oauth-token-expires', $body->expires_in, time() + $cookie_expiration, COOKIEPATH);
@@ -112,7 +114,7 @@ abstract class Photonic_OAuth2_Processor extends Photonic_Processor {
 			}
 			$cookie_expiration = 365 * 24 * 60 * 60;
 			setcookie('photonic-' . $secret . '-oauth-token', $body->access_token, time() + $cookie_expiration, COOKIEPATH);
-			if (!isset($_COOKIE['photonic-' . $secret . '-oauth-refresh-token']) && isset($body->refresh_token)) {
+			if (isset($body->refresh_token)) {
 				setcookie('photonic-' . $secret . '-oauth-refresh-token', $body->refresh_token, time() + $cookie_expiration, COOKIEPATH);
 			}
 			setcookie('photonic-' . $secret . '-oauth-token-type', $body->token_type, time() + $cookie_expiration, COOKIEPATH);

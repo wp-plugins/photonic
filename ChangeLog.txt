@@ -1,3 +1,14 @@
+Version 1.29 - 25th Nov 2012
+============================
+1.	Added support for 500px.com collections.
+2.	Fixed authentication problems in 500px.com.
+3.	Added capability to show a different number of photos on an archive page than on the page for a single post/page
+4.	Changed the Flickr API calls to be PHP-based instead of JS-based.
+
+Version 1.28 - 19th Nov 2012
+============================
+1.	Removed some debugging statements.
+
 Version 1.27 - 19th Nov 2012
 ============================
 1.	Fixed a minor issue with the displaying of the login box for Picasa.
