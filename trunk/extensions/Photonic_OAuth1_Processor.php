@@ -161,7 +161,7 @@ abstract class Photonic_OAuth1_Processor extends Photonic_Processor {
 
 		$secret = 'photonic_'.$this->provider.'_api_secret';
 		global $$secret;
-		// We will has the secret to store the cookie. Otherwise the cookie for the visitor will have the secret for the app for the plugin user.
+		// We will hash the secret to store the cookie. Otherwise the cookie for the visitor will have the secret for the app for the plugin user.
 		$secret = md5($$secret, false);
 
 		if (isset($token['oauth_token']) && isset($token['oauth_token_secret'])) {
@@ -223,6 +223,9 @@ abstract class Photonic_OAuth1_Processor extends Photonic_Processor {
 			setcookie('photonic-'.$secret.'-oauth-token', $token['oauth_token'], time() + 365 * 60 * 60 * 24, COOKIEPATH);
 			setcookie('photonic-'.$secret.'-oauth-token-secret', $token['oauth_token_secret'], time() + 365 * 60 * 60 * 24, COOKIEPATH);
 			setcookie('photonic-'.$secret.'-oauth-token-type', 'access', time() + 365 * 60 * 60 * 24, COOKIEPATH);
+			if (isset($token['oauth_verifier'])) {
+				setcookie('photonic-'.$secret.'-oauth-verifier', $token['oauth_verifier'], time() + 365 * 60 * 60 * 24, COOKIEPATH);
+			}
 		}
 
 		return $token;

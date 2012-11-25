@@ -3,7 +3,7 @@
  * Plugin Name: Photonic Gallery for Flickr, Picasa, SmugMug and 500px
  * Plugin URI: http://aquoid.com/news/plugins/photonic/
  * Description: Extends the native gallery shortcode to support Flickr, Picasa, SmugMug and 500px. JS libraries like Fancybox, Colorbox and PrettyPhoto are supported. The plugin also helps convert a regular WP gallery into a slideshow.
- * Version: 1.28
+ * Version: 1.29
  * Author: Sayontan Sinha
  * Author URI: http://mynethome.net/blog
  * License: GNU General Public License (GPL), v3 (or newer)
@@ -20,7 +20,7 @@ class Photonic {
 	function Photonic() {
 		global $photonic_options, $photonic_setup_options, $photonic_is_ie6;
 		if (!defined('PHOTONIC_VERSION')) {
-			define('PHOTONIC_VERSION', '1.28');
+			define('PHOTONIC_VERSION', '1.29');
 		}
 
 		if (!defined('PHOTONIC_PATH')) {
@@ -1037,6 +1037,9 @@ class Photonic {
 			}
 			else if (isset($cookie['flickr']['oauth_token_type']) && $cookie['flickr']['oauth_token_type'] == 'access') {
 				$access_token_response = $photonic_flickr_gallery->check_access_token($current_token);
+				if (is_wp_error($access_token_response)) {
+					$photonic_flickr_gallery->is_server_down = true;
+				}
 				$photonic_flickr_oauth_done = $photonic_flickr_gallery->is_access_token_valid($access_token_response);
 			}
 		}
@@ -1064,6 +1067,9 @@ class Photonic {
 			}
 			else if (isset($cookie['500px']['oauth_token_type']) && $cookie['500px']['oauth_token_type'] == 'access') {
 				$access_token_response = $photonic_500px_gallery->check_access_token($current_token);
+				if (is_wp_error($access_token_response)) {
+					$photonic_500px_gallery->is_server_down = true;
+				}
 				$photonic_500px_oauth_done = $photonic_500px_gallery->is_access_token_valid($access_token_response);
 			}
 		}
@@ -1082,11 +1088,17 @@ class Photonic {
 				$new_token = $photonic_smugmug_gallery->get_access_token($current_token);
 				if (isset($new_token['oauth_token']) && isset($new_token['oauth_token_secret'])) {
 					$access_token_response = $photonic_smugmug_gallery->check_access_token($new_token);
+					if (is_wp_error($access_token_response)) {
+						$photonic_smugmug_gallery->is_server_down = true;
+					}
 					$photonic_smug_oauth_done = $photonic_smugmug_gallery->is_access_token_valid($access_token_response);
 				}
 			}
 			else if (isset($cookie['smug']['oauth_token_type']) && $cookie['smug']['oauth_token_type'] == 'access') {
 				$access_token_response = $photonic_smugmug_gallery->check_access_token($current_token);
+				if (is_wp_error($access_token_response)) {
+					$photonic_smugmug_gallery->is_server_down = true;
+				}
 				$photonic_smug_oauth_done = $photonic_smugmug_gallery->is_access_token_valid($access_token_response);
 			}
 		}

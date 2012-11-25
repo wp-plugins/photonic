@@ -67,6 +67,28 @@ $photonic_generic_options = array(
 		"std" => "default"
 	),
 
+	array("name" => "Layouts",
+		"desc" => "Set up your layouts",
+		"category" => "layout-settings",
+		"type" => "section",),
+
+	array("name" => "Archive View Thumbnails",
+		"desc" => "How many images do you want to show per gallery at the most on archive views (e.g. Blog page, Category, Date, Tag or Author views)? All thumbnails will be visible when the post is viewed in full.",
+		"id" => "archive_thumbs",
+		"grouping" => "layout-settings",
+		"type" => "text",
+		"std" => "",
+		"hint" => "Leave blank or 0 to not restrict the number",
+	),
+
+	array("name" => "Link to see remaining photos",
+		"desc" => "Hide the button to show remaining photos from the archive page",
+		"id" => "archive_link_more",
+		"grouping" => "layout-settings",
+		"type" => "checkbox",
+		"std" => "",
+	),
+
 	array("name" => "Native WP Galleries",
 		"desc" => "Control settings for native WP gallieries, invoked by <code>[gallery id='abc']</code>",
 		"category" => "wp-settings",

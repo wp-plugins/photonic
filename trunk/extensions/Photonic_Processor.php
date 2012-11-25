@@ -11,7 +11,7 @@
  */
 
 abstract class Photonic_Processor {
-	public $library, $thumb_size, $full_size, $api_key, $api_secret, $provider, $nonce, $oauth_timestamp, $signature_parameters, $oauth_version, $oauth_done;
+	public $library, $thumb_size, $full_size, $api_key, $api_secret, $provider, $nonce, $oauth_timestamp, $signature_parameters, $oauth_version, $oauth_done, $show_more_link, $is_server_down, $is_more_required;
 
 	function __construct() {
 		global $photonic_slideshow_library;
@@ -19,6 +19,9 @@ abstract class Photonic_Processor {
 		$this->nonce = Photonic_Processor::nonce();
 		$this->oauth_timestamp = time();
 		$this->oauth_version = '1.0';
+		$this->show_more_link = false;
+		$this->is_server_down = false;
+		$this->is_more_required = true;
 	}
 
 	/**
@@ -187,28 +190,42 @@ abstract class Photonic_Processor {
 		$login_box = $$login_box_option;
 		$login_button = $$login_button_option;
 		$ret = '<div id="photonic-login-box-'.$this->provider.'" class="photonic-login-box photonic-login-box-'.$this->provider.'">';
-		$ret .= wp_specialchars_decode($login_box, ENT_QUOTES);
-		if (trim($login_button) == '') {
-			$login_button = 'Login';
+		if ($this->is_server_down) {
+			$ret .= __("The authentication server is down. Please try after some time.", 'photonic');
 		}
 		else {
-			$login_button = wp_specialchars_decode($login_button, ENT_QUOTES);
-		}
-		$url = '#';
-		$target = '';
-		if ($this->provider == 'picasa') {
-			$url = $this->get_authorization_url();
-			$target = 'target="_blank"';
-		}
+			$ret .= wp_specialchars_decode($login_box, ENT_QUOTES);
+			if (trim($login_button) == '') {
+				$login_button = 'Login';
+			}
+			else {
+				$login_button = wp_specialchars_decode($login_button, ENT_QUOTES);
+			}
+			$url = '#';
+			$target = '';
+			if ($this->provider == 'picasa') {
+				$url = $this->get_authorization_url();
+				$target = 'target="_blank"';
+			}
 
-		if (!empty($post_id)) {
-			$rel = "rel='auth-button-single-$post_id'";
+			if (!empty($post_id)) {
+				$rel = "rel='auth-button-single-$post_id'";
+			}
+			else {
+				$rel = '';
+			}
+			$ret .= "<p class='photonic-auth-button'><a href='$url' $target class='auth-button auth-button-{$this->provider}' $rel>".$login_button."</a></p>";
 		}
-		else {
-			$rel = '';
-		}
-		$ret .= "<p class='photonic-auth-button'><a href='$url' $target class='auth-button auth-button-{$this->provider}' $rel>".$login_button."</a></p>";
 		$ret .= '</div>';
 		return $ret;
+	}
+
+	function more_link_button($link_to = '') {
+		global $photonic_archive_link_more;
+		if (empty($photonic_archive_link_more) && $this->is_more_required) {
+			return "<div class='photonic-more-link-container'><a href='$link_to' class='photonic-more-button more-button-{$this->provider}'>See the rest</a></div>";
+		}
+		$this->is_more_required = true;
+		return '';
 	}
 }
