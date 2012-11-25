@@ -166,7 +166,7 @@ class Photonic_500px_Processor extends Photonic_OAuth1_Processor {
 		$ret = '';
 
 		global $photonic_500px_login_shown, $photonic_500px_allow_oauth, $photonic_500px_oauth_done;
-		if (!$photonic_500px_login_shown && $photonic_500px_allow_oauth && is_single() && !$photonic_500px_oauth_done) {
+		if (!$photonic_500px_login_shown && $photonic_500px_allow_oauth && !$photonic_500px_oauth_done) {
 			$post_id = get_the_ID();
 			$ret .= $this->get_login_box($post_id);
 			$photonic_500px_login_shown = true;
