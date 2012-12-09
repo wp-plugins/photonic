@@ -211,4 +211,119 @@ input[type="text"].color { padding: 5px; background-image: url(../images/color_w
 	height: 200px;
 }
 
+h3.photonic-helper-header {
+	border-width: 1px 0;
+	border-style: solid;
+	border-color: #c0c0c0;
+	font-size: 1.4em;
+	background: #d8d8d8;
+	color: #333;
+	font-style: normal;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	padding: 0.5em;
+	display: inline-block;
+	width: 100%;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+	margin-bottom: 5px;
+}
 
+.photonic-helper-box {
+	width: 48%;
+	margin: 10px 4% 10px 0;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	padding: 10px;
+	float: left;
+	background: #eee;
+	background: -moz-linear-gradient(center top, #eee 20%, #fff 100%) repeat scroll 0 0 transparent;
+	background: -webkit-linear-gradient(center top, #eee 20%, #fff 100%) repeat scroll 0 0 transparent;
+}
+
+.photonic-helper-box.right {
+	margin-right: 0;
+}
+
+.photonic-helper-box input[type="text"] {
+	width: 300px;
+	height: 2.5em;
+}
+.photonic-helper-box .photonic-helper-button {
+	display: block;
+	width: 100px;
+	padding: 8px 12px;
+	text-align: center;
+	text-decoration: none;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	font-size: 14px;
+	font-weight: bold;
+	background: #6af;
+	background: -moz-linear-gradient(center top, #336699 20%, #224477 100%) repeat scroll 0 0 transparent;
+	background: -webkit-linear-gradient(center top, #336699 20%, #224477 100%) repeat scroll 0 0 transparent;
+	color: #fff;
+	border-radius: 3px;
+}
+.photonic-helper-box .photonic-helper-button:hover {
+	color: #fff;
+	cursor: pointer;
+}
+.photonic-helper-box .result {
+	/*height: 2.5em;*/
+	width: 100%;
+	display: inline-block;
+	margin: 10px 0;
+}
+.photonic-helper-box .found-id-text {
+	font-weight: bold;
+}
+.photonic-helper-box .location-fields {
+	min-width: 300px;
+	width: 90%;
+	text-align: justify;
+	-ms-text-justify: distribute;
+	text-justify: distribute;
+}
+.photonic-helper-box .location {
+	display: inline-block;
+	vertical-align: top;
+	float: none;
+	width: 30%;
+}
+.photonic-helper-box .fs-separator {
+	border-left: 1px dotted #444;
+	display: inline-block;
+	height: 2.5em;
+	width: 0;
+	margin: 2em 1em 0 0;
+}
+.photonic-helper-box .fs-separator span {
+	bottom: 1.5em;
+	right: 1em;
+	position: relative;
+	font-style: italic;
+}
+.photonic-helper-box .location-fields input {
+	width: 90%;
+}
+.photonic-waiting {
+	background: #fff;
+	opacity: 0.8;
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	text-align: center;
+	display: none;
+}
+.photonic-waiting img {
+	vertical-align: middle;
+	margin-top: 300px;
+}
+.photonic-wrap {
+	width: 80%;
+	max-width: 1000px;
+	min-width: 800px;
+}

@@ -28,7 +28,7 @@ foreach ($photonic_smugmug_options as $option) {
 	$photonic_setup_options[] = $option;
 }
 
-/*require_once(plugin_dir_path(__FILE__) . "/instagram-options.php");
+require_once(plugin_dir_path(__FILE__) . "/instagram-options.php");
 foreach ($photonic_instagram_options as $option) {
 	$photonic_setup_options[] = $option;
-}*/
+}

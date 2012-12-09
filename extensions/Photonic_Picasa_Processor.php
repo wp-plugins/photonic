@@ -56,7 +56,6 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 	 * @return string
 	 */
 	function get_gallery_images($attr = array()) {
-		global $photonic_picasa_position;
 		$attr = array_merge(array(
 			'style' => 'default',
 			'show_captions' => false,
@@ -128,10 +127,6 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 		else if (isset($max_results)) {
 			$query_url .= '&max-results='.$max_results.'&';
 		}
-
-/*		if (isset($max_results) && trim($max_results) != '') {
-			$query_url .= 'max-results='.trim($max_results).'&';
-		}*/
 
 		if (isset($thumbsize) && trim($thumbsize) != '') {
 			$query_url .= 'thumbsize='.trim($thumbsize).'&';
@@ -306,9 +301,6 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 
 			if (isset($thumb) && isset($href) && isset($gphotoid)) {
 				// Set image caption
-/*				if (!isset($caption) || (isset($caption) && trim($caption) == "")) {
-					$caption = $filename;
-				}*/
 				if (!isset($caption)) {
 					$caption = '';
 				}

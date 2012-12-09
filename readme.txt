@@ -2,19 +2,19 @@
 Contributors: sayontan
 Donate link: http://aquoid.com/news/plugins/photonic/
 Tags: gallery, flickr, picasa, 500px, smugmug, fancybox, colorbox, prettyphoto, slideshow, jquery, shortcode
-Requires at least: WP 3.1
+Requires at least: WP 3.2
 Tested up to: WP 3.4.2
 Stable tag: trunk
 License: GPLv3 or later
 
-WordPress galleries on steroids! A stylish plugin for beautiful galleries of your public and private Flickr, Picasa, SmugMug and 500px photos.
+Galleries on steroids! A stylish plugin for beautiful galleries of your public and private WP, Flickr, Picasa, SmugMug, 500px & Instagram photos.
 
 == Description ==
 
 Photonic lets you use the WordPress <code>gallery</code> shortcode and ramps it up with a lot of added functionality. It adds support for
 several new parameters to enhance your galleries. It supports Flickr photos, Photosets, Galleries and Collections, along with Picasa photos and albums,
-SmugMug albums and images, and 500px photos. You can also enable authentication for your site visitors that will let them see private and protected
-photos from each provider.
+SmugMug albums and images, 500px photos and collections, and Instagram photos and users. You can also enable authentication for your site visitors that will
+let them see private and protected photos from each provider.
 
 = Flickr Support =
 
@@ -52,6 +52,12 @@ For demos of SmugMug support visit the <a href='http://aquoid.com/news/plugins/p
 
 Photos on <a href='http://aquoid.com/news/plugins/photonic/500px/'>500px.com are supported in Photonic</a>. Sets (collections) are also
 supported, but there are <a href='https://github.com/500px/api-documentation/issues/17'>some quirks in 500px.com's API</a>.
+
+= Instagram Support =
+
+Instagram photos and users <a href='http://aquoid.com/news/plugins/photonic/instagram/'>are supported in Photonic</a>. You can
+display photos based on popularity, tags, and location-based searches. You can also show thumbnails of users following you or those
+followed by you. Some user features require authentication.
 
 = Enhanced Native Galleries =
 Your existing gallery insertions are left intact. However you can add a <code>style</code> parameter to it for special effects. The permitted values for <code>style</code> are:
@@ -118,6 +124,18 @@ Yes, but only for the plugin front-end. The admin panel is not translated at thi
 in the third-party JS scripts are not translated.
 
 == Changelog ==
+
+= 1.35 =
+
+*	Added Instagram support
+*	Gave Photonic its own menu item
+*	Added some helpers to let people find their Flickr and Instagram IDs
+*	Fixed a bug that was preventing Flickr Galleries from showing their overlaid popups
+*	Added capability to display external links in a new tab
+
+= 1.30 =
+
+*	Removed singular check for 500px.com
 
 = 1.29 =
 

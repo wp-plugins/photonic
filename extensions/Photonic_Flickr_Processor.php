@@ -31,7 +31,7 @@ class Photonic_Flickr_Processor extends Photonic_OAuth1_Processor {
 	 * Galleries
 	 * - gallery_id
 	 * Photos
-	 * - user_id: can be obtained from http://idgettr.com
+	 * - user_id: can be obtained from the Helpers page
 	 * - tags: comma-separated list of tags
 	 * - tag_mode: any | all, tells whether any tag should be used or all
 	 * - text: string for text search
@@ -418,6 +418,13 @@ class Photonic_Flickr_Processor extends Photonic_OAuth1_Processor {
 				}
 			}
 
+			if (isset($_POST['gallery_id'])) {
+				$gallery_id = $_POST['gallery_id'];
+				if ($gallery_id != '') {
+					$query .= '&gallery_id='.$gallery_id;
+				}
+			}
+
 			if ($photonic_flickr_oauth_done) {
 				$end_point = Photonic_Processor::get_normalized_http_url($query);
 				if (strstr($query, $end_point) > -1) {
@@ -501,7 +508,7 @@ class Photonic_Flickr_Processor extends Photonic_OAuth1_Processor {
 					case 'flickr.galleries.getList':
 						if (isset($body->galleries)) {
 							$galleries = $body->galleries;
-							$ret .= $this->process_galleries($galleries, $columns);
+							$ret .= $this->process_galleries($galleries, $columns, $user);
 						}
 						break;
 
@@ -524,13 +531,20 @@ class Photonic_Flickr_Processor extends Photonic_OAuth1_Processor {
 	 * @return string
 	 */
 	function process_photo($photo) {
-		global $photonic_flickr_main_size;
+		global $photonic_flickr_main_size, $photonic_external_links_in_new_tab;
 		$ret = '';
 		$main_size = $photonic_flickr_main_size == 'none' ? '' : '_'.$photonic_flickr_main_size;
 		$orig = "http://farm".$photo->farm.".static.flickr.com/".$photo->server."/".$photo->id."_".$photo->secret.$main_size.".jpg";
 		$ret .= "<img src='".$orig."'>";
+		if (!empty($photonic_external_links_in_new_tab)) {
+			$target = ' target="_blank" ';
+		}
+		else {
+			$target = '';
+		}
+
 		if (isset($photo->urls) && isset($photo->urls->url) && count($photo->urls->url) > 0) {
-			$ret = "<a href='".$photo->urls->url[0]->_content."'>".$ret."</a>";
+			$ret = "<a href='".$photo->urls->url[0]->_content."' $target>".$ret."</a>";
 		}
 		if (isset($photo->description) && $photo->description->_content != '') {
 			$ret = "<div class='wp-caption'>".$ret."<div class='wp-caption-text'>".$photo->description->_content."</div></div>";
@@ -575,6 +589,13 @@ class Photonic_Flickr_Processor extends Photonic_OAuth1_Processor {
 
 		$ret = '';
 		$photonic_flickr_view = __('View in Flickr', 'photonic');
+		global $photonic_external_links_in_new_tab;
+		if (!empty($photonic_external_links_in_new_tab)) {
+			$target = " target='_blank' ";
+		}
+		else {
+			$target = '';
+		}
 
 		$counter = 0;
 		foreach ($photos as $photo) {
@@ -586,7 +607,8 @@ class Photonic_Flickr_Processor extends Photonic_OAuth1_Processor {
 			$url = "http://www.flickr.com/photos/".$owner."/".$photo->id;
 			$orig = $photonic_slideshow_library == 'none' ? $url : $orig;
 			$original_title = esc_attr($photo->title);
-			$flickr_view = "<a href='".$url."'>".$photonic_flickr_view."</a>";
+
+			$flickr_view = "<a href='".$url."' $target>".$photonic_flickr_view."</a>";
 			$title = $photonic_slideshow_library == 'none' ? $original_title : ($original_title == '' ? $flickr_view : $original_title.' | '.$flickr_view);
 			$shown_title = '';
 			if ($photonic_flickr_photo_title_display == 'below') {
@@ -612,13 +634,19 @@ class Photonic_Flickr_Processor extends Photonic_OAuth1_Processor {
 	 * @return string
 	 */
 	function process_photoset_header($photoset) {
-		global $photonic_flickr_thumb_size, $photonic_flickr_hide_set_thumbnail, $photonic_flickr_hide_set_title, $photonic_flickr_hide_set_photo_count, $photonic_flickr_position;
+		global $photonic_flickr_thumb_size, $photonic_flickr_hide_set_thumbnail, $photonic_flickr_hide_set_title, $photonic_flickr_hide_set_photo_count, $photonic_flickr_position, $photonic_external_links_in_new_tab;
 		$owner = $photoset->owner;
 		$thumb = "http://farm".$photoset->farm.".static.flickr.com/".$photoset->server."/".$photoset->primary."_".$photoset->secret."_".$photonic_flickr_thumb_size.".jpg";
 		$title = esc_attr($photoset->title->_content);
 		$image = '<img src="'.$thumb.'" alt="'.$title.'" />';
 		$flickr_link = 'http://www.flickr.com/photos/'.$owner.'/sets/'.$photoset->id;
-		$anchor = "<a href='".$flickr_link."' class='photonic-header-thumb photonic-flickr-set-solo-thumb' title='".$title."'>".$image."</a>";
+		if (!empty($photonic_external_links_in_new_tab)) {
+			$target = ' target="_blank" ';
+		}
+		else {
+			$target = '';
+		}
+		$anchor = "<a href='".$flickr_link."' class='photonic-header-thumb photonic-flickr-set-solo-thumb' title='".$title."' $target>".$image."</a>";
 
 		$ret = '';
 		if (!($photonic_flickr_hide_set_thumbnail && $photonic_flickr_hide_set_title && $photonic_flickr_hide_set_photo_count)) {
@@ -631,7 +659,7 @@ class Photonic_Flickr_Processor extends Photonic_OAuth1_Processor {
 			if (!($photonic_flickr_hide_set_title && $photonic_flickr_hide_set_photo_count)) {
 				$ret .= "<div class='photonic-header-details photonic-set-details'>";
 				if (!$photonic_flickr_hide_set_title) {
-					$ret .= "<div class='photonic-header-title photonic-set-title'><a href='".$flickr_link."'>".$title.'</a></div>';
+					$ret .= "<div class='photonic-header-title photonic-set-title'><a href='".$flickr_link."' $target>".$title.'</a></div>';
 				}
 				if (!$photonic_flickr_hide_set_photo_count) {
 					$photo_count = sprintf(__('%s photos', 'photonic'), $photoset->photos);
@@ -701,15 +729,21 @@ class Photonic_Flickr_Processor extends Photonic_OAuth1_Processor {
 	 * @return string
 	 */
 	function process_gallery_header($gallery) {
-		global $photonic_flickr_thumb_size, $photonic_flickr_hide_gallery_thumbnail, $photonic_flickr_hide_gallery_title, $photonic_flickr_hide_gallery_photo_count;
+		global $photonic_flickr_thumb_size, $photonic_flickr_hide_gallery_thumbnail, $photonic_flickr_hide_gallery_title, $photonic_flickr_hide_gallery_photo_count, $photonic_external_links_in_new_tab;
 		$ret = '';
 
 		$thumb = "http://farm".$gallery->primary_photo_farm.".static.flickr.com/".$gallery->primary_photo_server."/".$gallery->primary_photo_id."_".$gallery->primary_photo_secret."_".$photonic_flickr_thumb_size.".jpg";
 		$title = esc_attr($gallery->title->_content);
 
+		if (!empty($photonic_external_links_in_new_tab)) {
+			$target = ' target="_blank" ';
+		}
+		else {
+			$target = '';
+		}
 		$image = "<img src='".$thumb."' alt='".$title."' />";
 		$flickr_link = $gallery->url.'/';
-		$anchor = "<a href='".$flickr_link."' class='photonic-header-thumb photonic-flickr-gallery-solo-thumb' ".$title."'>".$image."</a>";
+		$anchor = "<a href='".$flickr_link."' class='photonic-header-thumb photonic-flickr-gallery-solo-thumb' ".$title."' $target>".$image."</a>";
 
 		if (!($photonic_flickr_hide_gallery_thumbnail && $photonic_flickr_hide_gallery_title && $photonic_flickr_hide_gallery_photo_count)) {
 			$ret .= "<li class='photonic-flickr-gallery'>";
@@ -719,7 +753,7 @@ class Photonic_Flickr_Processor extends Photonic_OAuth1_Processor {
 			if (!($photonic_flickr_hide_gallery_title && $photonic_flickr_hide_gallery_photo_count)) {
 				$ret .= "<div class='photonic-header-details photonic-gallery-details'>";
 				if (!$photonic_flickr_hide_gallery_title) {
-					$ret .= "<div class='photonic-header-title photonic-gallery-title'><a href='".$flickr_link."'>".$title.'</a></div>';
+					$ret .= "<div class='photonic-header-title photonic-gallery-title'><a href='".$flickr_link."' $target>".$title.'</a></div>';
 				}
 				if (!$photonic_flickr_hide_gallery_photo_count) {
 					$photo_count = sprintf(__('%s photos', 'photonic'), $gallery->count_photos);
@@ -737,9 +771,10 @@ class Photonic_Flickr_Processor extends Photonic_OAuth1_Processor {
 	 *
 	 * @param $galleries
 	 * @param $columns
+	 * @param $user
 	 * @return string
 	 */
-	function process_galleries($galleries, $columns) {
+	function process_galleries($galleries, $columns, $user) {
 		global $photonic_flickr_thumb_size, $photonic_flickr_position, $photonic_flickr_galleries_per_row_constraint, $photonic_flickr_galleries_constrain_by_count, $photonic_flickr_gallery_title_display, $photonic_flickr_hide_gallery_photos_count_display;
 		$ret = '';
 
@@ -759,7 +794,7 @@ class Photonic_Flickr_Processor extends Photonic_OAuth1_Processor {
 			$title = esc_attr($gallery->title->_content);
 
 			$image = "<img src='".$thumb."' alt='".$title."' />";
-			$anchor = "<a href='".$gallery->url."/' class='photonic-flickr-gallery-thumb' id='photonic-flickr-gallery-thumb-".$id.'-'.$photonic_flickr_position.'-'.$gallery->id."' title='".$title."'>".$image."</a>";
+			$anchor = "<a href='".$gallery->url."/' class='photonic-flickr-gallery-thumb photonic-flickr-gallery-thumb-user-$user' id='photonic-flickr-gallery-thumb-".$id.'-'.$photonic_flickr_position.'-'.$gallery->id."' title='".$title."'>".$image."</a>";
 			$text = '';
 
 			if ($photonic_flickr_gallery_title_display == 'below') {

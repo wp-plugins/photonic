@@ -52,6 +52,14 @@ $photonic_generic_options = array(
 		"std" => ""
 	),
 
+	array("name" => "External Link Handling",
+		"desc" => "Let the links to external sites (like Flickr or Instagram) open in a new tab/window.",
+		"id" => "external_links_in_new_tab",
+		"grouping" => "generic-settings",
+		"type" => "checkbox",
+		"std" => ""
+	),
+
 	array("name" => "Default Gallery Type",
 		"desc" => "If no gallery type is specified, the following selection will be used:",
 		"id" => "default_gallery_type",
@@ -62,7 +70,8 @@ $photonic_generic_options = array(
 			"flickr" => "Flickr",
 			"picasa" => "Picasa",
 			"smugmug" => "SmugMug",
-			"500px" => "500px.com"
+			"500px" => "500px.com",
+			"instagram" => "Instagram",
 		),
 		"std" => "default"
 	),
