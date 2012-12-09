@@ -11,7 +11,7 @@ class Photonic_Options_Manager {
 			'picasa-options.php' => $photonic_picasa_options,
 			'500px-options.php' => $photonic_500px_options,
 			'smugmug-options.php' => $photonic_smugmug_options,
-//			'instagram-options.php' => $photonic_instagram_options,
+			'instagram-options.php' => $photonic_instagram_options,
 		);
 
 		$tab_name_array = array(
@@ -20,7 +20,7 @@ class Photonic_Options_Manager {
 			'picasa-options.php' => 'Picasa Options',
 			'500px-options.php' => '500px Options',
 			'smugmug-options.php' => 'SmugMug Options',
-//			'instagram-options.php' => 'Instagram Options',
+			'instagram-options.php' => 'Instagram Options',
 		);
 
 		$this->file = $file;
@@ -73,9 +73,6 @@ class Photonic_Options_Manager {
 				}
 			}
 		}
-
-		add_action('wp_ajax_photonic_admin_upload_file', array(&$this, 'admin_upload_file'));
-		add_action('wp_ajax_photonic_authenticate_oauth', array(&$this, 'authenticate_oauth'));
 	}
 
 	function render_options_page() {
@@ -90,8 +87,8 @@ class Photonic_Options_Manager {
 							<input type="hidden" name="cmd" value="_s-xclick"/>
 							<input type="hidden" name="hosted_button_id" value="9018267"/>
 							<ul>
-								<li class='announcements'><a href='http://www.aquoid.com/news'>Announcements</a></li>
-								<li class='support'><a href='http://www.aquoid.com/forum'>Support Forum</a></li>
+								<li class='announcements'><a href='http://aquoid.com/news'>Announcements</a></li>
+								<li class='support'><a href='http://aquoid.com/forum'>Support Forum</a></li>
 								<li class='coffee'><input type='submit' name='submit' value='Like Photonic? Buy me a coffee!' /></li>
 							</ul>
 							<img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1"/>
@@ -105,7 +102,7 @@ class Photonic_Options_Manager {
 						<li><a class='photonic-load-page <?php if ($this->tab == 'picasa-options.php') echo 'current-tab'; ?>' id='photonic-options-picasa' href='?page=photonic-options-manager&amp;tab=picasa-options.php'><span class="icon">&nbsp;</span> Picasa</a></li>
 						<li><a class='photonic-load-page <?php if ($this->tab == '500px-options.php') echo 'current-tab'; ?>' id='photonic-options-500px' href='?page=photonic-options-manager&amp;tab=500px-options.php'><span class="icon">&nbsp;</span> 500px</a></li>
 						<li><a class='photonic-load-page <?php if ($this->tab == 'smugmug-options.php') echo 'current-tab'; ?>' id='photonic-options-smugmug' href='?page=photonic-options-manager&amp;tab=smugmug-options.php'><span class="icon">&nbsp;</span> SmugMug</a></li>
-<!--						<li><a class='photonic-load-page --><?php //if ($this->tab == 'instagram-options.php') echo 'current-tab'; ?><!--' id='photonic-options-instagram' href='?page=photonic-options-manager&amp;tab=instagram-options.php'><span class="icon">&nbsp;</span> Instagram</a></li>-->
+						<li><a class='photonic-load-page <?php if ($this->tab == 'instagram-options.php') echo 'current-tab'; ?>' id='photonic-options-instagram' href='?page=photonic-options-manager&amp;tab=instagram-options.php'><span class="icon">&nbsp;</span> Instagram</a></li>
 					</ul>
 				</div>
 			</div>
@@ -133,6 +130,99 @@ class Photonic_Options_Manager {
 		</div><!-- /#photonic-tabbed-options -->
 	</div>
 <?php
+	}
+
+	function render_helpers() { ?>
+	<div class="photonic-wrap">
+		<div class="photonic-tabbed-options" style='position: relative; display: inline-block; '>
+			<div class="photonic-waiting"><img src="<?php echo plugins_url('/include/images/downloading-dots.gif', __FILE__); ?>" alt='waiting'/></div>
+			<form method="post" id="photonic-helper-form">
+				<div class="photonic-header-nav">
+					<div class="photonic-header-nav-top fix">
+						<h2 class='photonic-header-1'>Photonic</h2>
+					</div>
+				</div>
+				<h3 class="photonic-helper-header">Flickr</h3>
+				<div class="photonic-helper-box left">
+					<?php $this->display_flickr_id_helper(); ?>
+				</div>
+				<div class="photonic-helper-box right">
+					<?php $this->display_flickr_group_helper(); ?>
+				</div>
+				<h3 class="photonic-helper-header">Instagram</h3>
+				<div class="photonic-helper-box left">
+					<?php $this->display_instagram_id_helper(); ?>
+				</div>
+				<div class="photonic-helper-box right">
+					<?php $this->display_instagram_location_helper(); ?>
+				</div>
+			</form>
+		</div>
+	</div>
+	<?php
+	}
+
+	function display_flickr_id_helper() {
+		global $photonic_flickr_api_key;
+		if (!isset($photonic_flickr_api_key)) {
+			_e('Please set up your Flickr API Key under <em>Photonic &rarr; Settings &rarr; Flickr &rarr; Flickr Settings</em>', 'photonic');
+		}
+		else {
+			_e('<h3>Flickr User ID Finder</h3>', 'photonic');
+			_e('<label>Enter your Flickr photostream URL and click "Find"', 'photonic');
+			echo '<input type="text" value="http://www.flickr.com/photos/username/" id="photonic-flickr-user" name="photonic-flickr-user"/>';
+			echo '</label>';
+			echo '<input type="button" value="'.__('Find', 'photonic').'" id="photonic-flickr-user-find" class="photonic-helper-button"/>';
+			echo '<div class="result">&nbsp;</div>';
+		}
+	}
+
+	function display_flickr_group_helper() {
+		global $photonic_flickr_api_key;
+		if (!isset($photonic_flickr_api_key)) {
+			_e('Please set up your Flickr API Key under <em>Photonic &rarr; Settings &rarr; Flickr &rarr; Flickr Settings</em>', 'photonic');
+		}
+		else {
+			_e('<h3>Flickr Group ID Finder</h3>', 'photonic');
+			_e('<label>Enter your Flickr group URL and click "Find"', 'photonic');
+			echo '<input type="text" value="http://www.flickr.com/groups/groupname/" id="photonic-flickr-group" name="photonic-flickr-group"/>';
+			echo '</label>';
+			echo '<input type="button" value="'.__('Find', 'photonic').'" id="photonic-flickr-group-find" class="photonic-helper-button"/>';
+			echo '<div class="result">&nbsp;</div>';
+		}
+	}
+
+	function display_instagram_id_helper() {
+		global $photonic_instagram_client_id;
+		if (!isset($photonic_instagram_client_id)) {
+			_e('Please set up your Instagram Client ID under <em>Photonic &rarr; Settings &rarr; Instagram &rarr; Instagram Settings</em>', 'photonic');
+		}
+		else {
+			_e('<h3>Instagram ID Finder</h3>', 'photonic');
+			_e('<label>Enter your Instagram login id and click "Find"', 'photonic');
+			echo '<input type="text" value="login-id" id="photonic-instagram-user" name="photonic-instagram-user"/>';
+			echo '</label>';
+			echo '<input type="button" value="'.__('Find', 'photonic').'" id="photonic-instagram-user-find" class="photonic-helper-button"/>';
+			echo '<div class="result">&nbsp;</div>';
+		}
+	}
+
+	function display_instagram_location_helper() {
+		global $photonic_instagram_client_id;
+		if (!isset($photonic_instagram_client_id)) {
+			_e('Please set up your Instagram Client ID under <em>Photonic &rarr; Settings &rarr; Instagram &rarr; Instagram Settings</em>', 'photonic');
+		}
+		else {
+			_e('<h3>Instagram Location Finder</h3>', 'photonic');
+			echo '<div class="location-fields">';
+			echo '<div class="location"><label>'.__('Latitude', 'photonic').'<br/><input type="text" id="photonic-instagram-lat" name="photonic-instagram-lat"></label></div>';
+			echo '<div class="location"><label>'.__('Longitude', 'photonic').'<br/><input type="text" id="photonic-instagram-lng" name="photonic-instagram-lng"></label></div>';
+			echo '<div class="fs-separator"><span>'.__('OR', 'photonic').'</span></div>';
+			echo '<div class="location"><label>'.__('FourSquare ID', 'photonic').'<br/><input type="text" id="photonic-instagram-fsid" name="photonic-instagram-fsid"></label></div>';
+			echo '</div>';
+			echo '<input type="button" value="'.__('Find', 'photonic').'" id="photonic-instagram-location-find" class="photonic-helper-button"/>';
+			echo '<div class="result">&nbsp;</div>';
+		}
 	}
 
 	function init() {
@@ -1073,59 +1163,136 @@ class Photonic_Options_Manager {
 		if ($hint != null) {
 			echo " &laquo; ".$hint."<br />\n";
 		}
-
-		echo '<div class="upload-buttons">';
-		$hide = empty($upload) ? '' : 'hidden';
-		echo '<span class="button image_upload_button '.$hide.'" id="upload_'.$id.'">Upload Image</span>';
-
-		$hide = !empty($upload) ? '' : 'hidden';
-		echo '<span class="button image_reset_button '. $hide.'" id="reset_'.$id.'">Reset</span>';
-		echo '</div>' . "\n";
-
-		if(!empty($upload)){
-			echo "<div id='photonic-preview-$id'>\n";
-			echo "<p><strong>Preview:</strong></p>\n";
-		    echo '<img class="photonic-option-image" id="image_'.$id.'" src="'.$upload.'" alt="" />';
-			echo "</div>";
-		}
 	}
 
-	/**
-	 * Called when you upload a file for option type "upload". This is an AJAX call.
-	 *
-	 * @return void
-	 */
-	function admin_upload_file() {
-		$save_type = $_POST['type'];
-		if ($save_type == 'upload') {
-			$data = $_POST['data']; // Acts as the name
-			$filename = $_FILES[$data];
-			$filename['name'] = preg_replace('/[^a-zA-Z0-9._\-]/', '', $filename['name']);
+	function invoke_helper() {
+		if (isset($_POST['helper']) && !empty($_POST['helper'])) {
+			$helper = $_POST['helper'];
+			$photonic_options = get_option('photonic_options');
+			switch ($helper) {
+				case 'photonic-flickr-user-find':
+					$flickr_api_key = $photonic_options['flickr_api_key'];
+					$user = isset($_POST['photonic-flickr-user']) ? $_POST['photonic-flickr-user'] : '';
+					$url = 'http://api.flickr.com/services/rest/?format=json&nojsoncallback=1&api_key='.$flickr_api_key.'&method=flickr.urls.lookupUser&url='.$user;
+					$this->execute_query('flickr', $url, 'flickr.urls.lookupUser');
+					break;
 
-			$override['test_form'] = false;
-			$override['action'] = 'wp_handle_upload';
-			$uploaded_file = wp_handle_upload($filename, $override);
+				case 'photonic-flickr-group-find':
+					$flickr_api_key = $photonic_options['flickr_api_key'];
+					$group = isset($_POST['photonic-flickr-group']) ? $_POST['photonic-flickr-group'] : '';
+					$url = 'http://api.flickr.com/services/rest/?format=json&nojsoncallback=1&api_key='.$flickr_api_key.'&method=flickr.urls.lookupGroup&url='.$group;
+					$this->execute_query('flickr', $url, 'flickr.urls.lookupGroup');
+					break;
 
-			$image_id = substr($data, 7);
+				case 'photonic-instagram-user-find':
+					$instagram_client_id = $photonic_options['instagram_client_id'];
+					$user = isset($_POST['photonic-instagram-user']) ? $_POST['photonic-instagram-user'] : '';
+					$url = 'https://api.instagram.com/v1/users/search?client_id='.$instagram_client_id.'&q='.$user;
+					$this->execute_query('instagram', $url, 'users/search');
+					break;
 
-			if (!empty($uploaded_file['error'])) {
-				echo 'Upload Error: ' . $uploaded_file['error'];
+				case 'photonic-instagram-location-find':
+					$instagram_client_id = $photonic_options['instagram_client_id'];
+					$lat = isset($_POST['photonic-instagram-lat']) ? $_POST['photonic-instagram-lat'] : '';
+					$lng = isset($_POST['photonic-instagram-lng']) ? $_POST['photonic-instagram-lng'] : '';
+					$fs_id = isset($_POST['photonic-instagram-fsid']) ? $_POST['photonic-instagram-fsid'] : '';
+					$url = 'https://api.instagram.com/v1/locations/search?client_id='.$instagram_client_id.'&lat='.$lat.'&lng='.$lng.'&foursquare_v2_id='.$fs_id;
+					$this->execute_query('instagram', $url, 'locations/search');
+					break;
 			}
-			else {
-				$this->options[$image_id] = $uploaded_file['url'];
-				echo $uploaded_file['url'];
-			}
-		}
-		elseif ($save_type == 'image_reset') {
-			$data = $_POST['data'];
-			$image_id = substr($data, 6);
-			if (isset($this->options[$image_id])) unset($this->options[$image_id]);
 		}
 		die();
 	}
 
-	function authenticate_oauth() {
-		//
+	function execute_query($where, $url, $method) {
+		$response = wp_remote_request($url, array('sslverify' => false));
+		if (!is_wp_error($response)) {
+			if (isset($response['response']) && isset($response['response']['code'])) {
+				if ($response['response']['code'] == 200) {
+					if (isset($response['body'])) {
+						if ($where == 'flickr') {
+							$this->execute_flickr_query($response['body'], $method);
+						}
+						else if ($where == 'instagram') {
+							$this->execute_instagram_query($response['body'], $method);
+						}
+					}
+					else {
+						_e('<span class="found-id-text">No response from server!</span>', 'photonic');
+					}
+				}
+				else {
+					echo '<span class="found-id-text">'.$response['response']['message'].'</span>';
+				}
+			}
+			else {
+				_e('<span class="found-id-text">No response from server!</span>', 'photonic');
+			}
+		}
+		else {
+			_e('<span class="found-id-text">Cannot connect to the server. Please try later.</span>', 'photonic');
+		}
+	}
+
+	function execute_flickr_query($body, $method) {
+		$body = json_decode($body);
+		if (isset($body->stat) && $body->stat == 'fail') {
+			echo '<span class="found-id-text">'.$body->message.'</span>';
+		}
+		else {
+			if ($method == 'flickr.urls.lookupUser') {
+				if (isset($body->user)) {
+					echo '<span class="found-id-text">'.__('User ID:', 'photonic').'</span> <span class="found-id"><code>'.$body->user->id.'</code></span>';
+				}
+			}
+			else if ($method == 'flickr.urls.lookupGroup') {
+				if (isset($body->group)) {
+					echo '<span class="found-id-text">'.__('Group ID:', 'photonic').'</span> <span class="found-id"><code>'.$body->group->id.'</code></span>';
+				}
+			}
+		}
+	}
+
+	function execute_instagram_query($body, $method) {
+		$body = json_decode($body);
+		if (isset($body->meta) && isset($body->meta->code) && $body->meta->code == 200 && isset($body->data)) {
+			$data = $body->data;
+			if (count($data) == 0) {
+				if ($method == 'users/search') {
+					_e('<span class="found-id-text">User not found</span>', 'photonic');
+				}
+				else if ($method = 'locations/search') {
+					_e('<span class="found-id-text">Location not found</span>', 'photonic');
+				}
+			}
+			else if (count($data) == 1) {
+				if ($method == 'users/search') {
+					$user = $data[0];
+					$text = '<code>'.$user->id.'</code> ('.(!empty($user->full_name) ? $user->full_name : $user->username).')';
+					echo '<span class="found-id-text">'.__('User ID:', 'photonic').'</span> <span class="found-id">'.$text.'</span>';
+				}
+				else if ($method == 'locations/search') {
+					$location = $data[0];
+					$text = '<code>'.$location->id.'</code> ('.(!empty($location->name) ? $location->name : __('Name not available', 'photonic')).')';
+					echo '<span class="found-id-text">'.__('Location ID:', 'photonic').'</span> <span class="found-id">'.$text.'</span>';
+				}
+			}
+			else if (count($data) > 1) {
+				if ($method == 'users/search') {
+					$text = array();
+					foreach ($data as $user) {
+						$text[] = '<code>'.$user->id.'</code> ('.(!empty($user->full_name) ? $user->full_name : $user->username).')';
+					}
+					echo '<span class="found-id-text">'.__('Matching users:', 'photonic').'</span> <span class="found-id">'.implode(', ', $text).'</span>';
+				}
+				else if ($method == 'locations/search') {
+					$text = array();
+					foreach ($data as $location) {
+						$text[] = '<code>'.$location->id.'</code> ('.(!empty($location->name) ? $location->name : __('Name not available', 'photonic')).')';
+					}
+					echo '<span class="found-id-text">'.__('Matching locations:', 'photonic').'</span> <span class="found-id">'.implode(', ', $text).'</span>';
+				}
+			}
+		}
 	}
 }
-?>

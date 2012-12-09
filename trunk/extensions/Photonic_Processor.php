@@ -203,7 +203,7 @@ abstract class Photonic_Processor {
 			}
 			$url = '#';
 			$target = '';
-			if ($this->provider == 'picasa') {
+			if ($this->provider == 'picasa' || $this->provider == 'instagram') {
 				$url = $this->get_authorization_url();
 				$target = 'target="_blank"';
 			}

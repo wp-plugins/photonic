@@ -1,14 +1,14 @@
 <?php
 /**
  * Creates a form in the "Add Media" screen under the new "Photonic" tab. This form lets you insert the gallery shortcode with
- * the right arguments for native WP galleries, Flickr, Picasa, SmugMug and 500px.
+ * the right arguments for native WP galleries, Flickr, Picasa, SmugMug, 500px and Instagram.
  *
  * @package Photonic
  * @subpackage UI
  */
 
 $selected_tab = isset($_GET['photonic-tab']) ? esc_attr($_GET['photonic-tab']) : 'default';
-if (!in_array($selected_tab, array('default', 'flickr', 'picasa', 'smugmug', '500px'))) {
+if (!in_array($selected_tab, array('default', 'flickr', 'picasa', 'smugmug', '500px', 'instagram'))) {
 	$selected_tab = 'default';
 }
 
@@ -176,13 +176,14 @@ $fields = array(
 	),
 	'flickr' => array(
 		'name' => __('Flickr', 'photonic'),
-		'prelude' => __('You have to define your Flickr API Key under Settings &rarr; Photonic &rarr; Flickr &rarr; Flickr Settings', 'photonic'),
+		'prelude' => __('You have to define your Flickr API Key under Photonic &rarr; Settings &rarr; Flickr &rarr; Flickr Settings', 'photonic'),
 		'fields' => array(
 			array(
 				'id' => 'user_id',
-				'name' => "<a href='http://idgettr.com/' target='_blank'>".__('User ID', 'photonic')."</a>",
+				'name' => __('User ID', 'photonic'),
 				'type' => 'text',
 				'req' => true,
+				'hint' => __('Find your user ID from Photonic &rarr; Helpers.', 'photonic')
 			),
 
 			array(
@@ -344,7 +345,7 @@ $fields = array(
 	),
 	'smugmug' => array(
 		'name' => __('SmugMug', 'photonic'),
-		'prelude' => __('You have to define your SmugMug API Key under Settings &rarr; Photonic &rarr; SmugMug &rarr; SmugMug Settings', 'photonic'),
+		'prelude' => __('You have to define your SmugMug API Key under Photonic &rarr; Settings &rarr; SmugMug &rarr; SmugMug Settings', 'photonic'),
 		'fields' => array(
 			array(
 				'id' => 'view',
@@ -381,7 +382,7 @@ $fields = array(
 	),
 	'500px' => array(
 		'name' => __('500px', 'photonic'),
-		'prelude' => __('You have to define your Consumer API Key under Settings &rarr; Photonic &rarr; 500px &rarr; 500px Settings', 'photonic'),
+		'prelude' => __('You have to define your Consumer API Key under Photonic &rarr; Settings &rarr; 500px &rarr; 500px Settings', 'photonic'),
 		'fields' => array(
 			array(
 				'id' => 'view',
@@ -580,6 +581,118 @@ $fields = array(
 			array(
 				'id' => 'columns',
 				'name' => __('Number of columns', 'photonic'),
+				'type' => 'text',
+			),
+
+		),
+	),
+
+	'instagram' => array(
+		'name' => __('Instagram', 'photonic'),
+		'prelude' => __('You have to define your Instagram Client ID under Photonic &rarr; Settings &rarr; Instagram &rarr; Instagram Settings', 'photonic'),
+		'fields' => array(
+			array(
+				'id' => 'view',
+				'name' => __('Display', 'photonic'),
+				'type' => 'select',
+				'options' => array(
+					'media' => __('Photos', 'photonic'),
+					'user' => __('Users', 'photonic'),
+					'tag' => __('Tag', 'photonic'),
+					'location' => __('Location', 'photonic'),
+					'photo' => __('Single Photo', 'photonic'),
+				),
+				'req' => true,
+			),
+
+			array(
+				'id' => 'kind',
+				'name' => __('Display classification', 'photonic'),
+				'type' => 'select',
+				'options' => array(
+					'popular' => __('Popular (If Display = Photos)', 'photonic'),
+					'search' => __('Search (If Display = Photos)', 'photonic'),
+
+					'recent' => __('Recent (If Display = Users)', 'photonic'),
+					'follows' => __('Follows (If Display = Users)', 'photonic'),
+					'followed-by' => __('Followed by (If Display = Users)', 'photonic'),
+				),
+				'req' => true,
+			),
+
+			array(
+				'id' => 'user_id',
+				'name' => __('User ID', 'photonic'),
+				'type' => 'text',
+				'hint' => __('Find your user ID from Photonic &rarr; Helpers.', 'photonic').'<br/>'.__('Required if "Display" is set to "Users"', 'photnic')
+			),
+
+			array(
+				'id' => 'media_id',
+				'name' => __('Media ID', 'photonic')."</a>",
+				'type' => 'text',
+				'hint' => __('Required if "Display" is set to "Single Photos".', 'photonic').'<br/>'.__('If your photo is at <code>http://instagram.com/p/ABcde5678fg/</code>, your media id is <code>ABcde5678fg</code>.', 'photonic')
+			),
+
+			array(
+				'id' => 'tag',
+				'name' => __('Tag', 'photonic')."</a>",
+				'type' => 'text',
+				'hint' => __('Required if "Display" is set to "Tag"', 'photonic')
+			),
+
+			array(
+				'id' => 'lat',
+				'name' => __('Latitude', 'photonic')."</a>",
+				'type' => 'text',
+				'hint' => __('Latitude and Longitude are required if "Display" = "Photos" and "Display Classification" = "Search"', 'photonic')
+			),
+
+			array(
+				'id' => 'lng',
+				'name' => __('Longitude', 'photonic')."</a>",
+				'type' => 'text',
+				'hint' => __('Latitude and Longitude are required if "Display" = "Photos" and "Display Classification" = "Search"', 'photonic')
+			),
+
+			array(
+				'id' => 'location_id',
+				'name' => __('Location ID', 'photonic')."</a>",
+				'type' => 'text',
+				'hint' => __('Required if "Display" is set to "Location".', 'photonic')
+			),
+
+			array(
+				'id' => 'thumb_size',
+				'name' => __('Thumbnail size', 'photonic'),
+				'type' => 'text',
+				'std' => 75,
+				'hint' => __('In pixels', 'photonic')
+			),
+
+			array(
+				'id' => 'min_id',
+				'name' => __('Min Photo ID', 'photonic')."</a>",
+				'type' => 'text',
+				'hint' => __('Use the min and max ID to reduce your matches for "Search" and "Tag" displays', 'photonic')
+			),
+
+			array(
+				'id' => 'max_id',
+				'name' => __('Max Photo ID', 'photonic')."</a>",
+				'type' => 'text',
+				'hint' => __('Use the min and max ID to reduce your matches for "Search" and "Tag" displays', 'photonic')
+			),
+
+			array(
+				'id' => 'columns',
+				'name' => __('Number of columns', 'photonic'),
+				'type' => 'text',
+			),
+
+			array(
+				'id' => 'count',
+				'name' => __('Number of photos to show', 'photonic')."</a>",
 				'type' => 'text',
 			),
 

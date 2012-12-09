@@ -1,3 +1,15 @@
+Version 1.35 - 09th Dec 2012
+============================
+1.	Added Instagram support
+2.	Gave Photonic its own menu item
+3.	Added some helpers to let people find their Flickr and Instagram IDs
+4.	Fixed a bug that was preventing Flickr Galleries from showing their overlaid popups
+5.	Added capability to display external links in a new tab
+
+Version 1.30 - 25th Nov 2012
+============================
+1.	Removed singular check for 500px.com
+
 Version 1.29 - 25th Nov 2012
 ============================
 1.	Added support for 500px.com collections.
