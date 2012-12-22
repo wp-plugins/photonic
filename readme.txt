@@ -1,9 +1,9 @@
-=== Photonic Gallery for Flickr, Picasa, SmugMug and 500px ===
+=== Photonic Gallery for Flickr, Picasa, SmugMug, 500px and Instagram ===
 Contributors: sayontan
 Donate link: http://aquoid.com/news/plugins/photonic/
-Tags: gallery, flickr, picasa, 500px, smugmug, fancybox, colorbox, prettyphoto, slideshow, jquery, shortcode
+Tags: gallery, flickr, picasa, 500px, smugmug, instagram, fancybox, colorbox, prettyphoto, slideshow, jquery, shortcode
 Requires at least: WP 3.2
-Tested up to: WP 3.4.2
+Tested up to: WP 3.5
 Stable tag: trunk
 License: GPLv3 or later
 
@@ -124,6 +124,14 @@ Yes, but only for the plugin front-end. The admin panel is not translated at thi
 in the third-party JS scripts are not translated.
 
 == Changelog ==
+
+= 1.36 =
+
+*	Rewrote the Picasa processor to be DOM-based instead of event-based.
+*	Added option to let users display the image title instead of the description.
+*	Fixed a problem with Flickr Collections that was causing nested collections to display repeatedly.
+*	Fixed a problem with Flickr Collections that was making the collections link to an invalid page.
+*	Picasa thumbnails in the popup now have the same dimensions as those in the main page.
 
 = 1.35 =
 

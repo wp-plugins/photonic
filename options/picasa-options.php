@@ -48,6 +48,18 @@ $photonic_picasa_options = array(
 		"type" => "text",
 		"std" => "Login"),
 
+	array("name" => "Photo titles",
+		"desc" => "Use the Picasa photo description instead of the title to show the photo title",
+		"id" => "picasa_use_desc",
+		"grouping" => "picasa-settings",
+		"type" => "select",
+		"options" => array(
+			"title" => "Always use the photo title",
+			"desc-title" => "Use the description instead of the title, if available",
+			"desc" => "Use the description even if blank",
+		),
+		"std" => "desc-title"),
+
 	array("name" => "Picasa Photos - \"In-page\" View",
 		"desc" => "Control settings for Picasa Photos when displayed in your page",
 		"category" => "picasa-photos",

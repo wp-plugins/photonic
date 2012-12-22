@@ -291,7 +291,6 @@ class Photonic_Flickr_Processor extends Photonic_OAuth1_Processor {
 					}
 				}
 
-//				$ret .= "<script type='text/javascript' src='".$merged_query."'></script>\n";
 				$ret .= $this->process_query($merged_query, $method, $columns, isset($user_id) ? $user_id : '');
 			}
 			if ((isset($view) && $view != 'photo') || !isset($view)) {
@@ -346,9 +345,15 @@ class Photonic_Flickr_Processor extends Photonic_OAuth1_Processor {
 							$collections = $feed->collections;
 							$collections = $collections->collection;
 							$ret = array();
+							$processed = array();
 							foreach ($collections as $collection) {
-								$iterative = $this->get_nested_collections($collection);
-								$ret = array_merge($ret, $iterative);
+								$collection_attrs = $collection->attributes();
+								if (isset($collection_attrs['id'])) {
+									if (!in_array($collection_attrs['id'], $processed)) {
+										$iterative = $this->get_nested_collections($collection, $processed);
+										$ret = array_merge($ret, $iterative);
+									}
+								}
 							}
 							return $ret;
 						}
@@ -364,11 +369,16 @@ class Photonic_Flickr_Processor extends Photonic_OAuth1_Processor {
 	 * a flattened array.
 	 *
 	 * @param $collection
+	 * @param $processed
 	 * @return array
 	 */
-	function get_nested_collections($collection) {
+	function get_nested_collections($collection, &$processed) {
 		$attributes = $collection->attributes();
 		$id = isset($attributes['id']) ? (string)$attributes['id'] : '';
+		if (in_array($id, $processed)) {
+			return array();
+		}
+		$processed[] = $id;
 		$id = substr($id, strpos($id, '-') + 1);
 		$title = isset($attributes['title']) ? (string)$attributes['title'] : '';
 		$description = isset($attributes['description']) ? (string)$attributes['description'] : '';
@@ -399,8 +409,10 @@ class Photonic_Flickr_Processor extends Photonic_OAuth1_Processor {
 		$inner_collections = $collection->collection;
 		if (count($inner_collections) > 0) {
 			foreach ($inner_collections as $inner_collection) {
-				$inner = $this->get_nested_collections($inner_collection);
-				$ret = array_merge($ret, $inner);
+				$inner_attribubtes = $inner_collection->attributes();
+				$processed[] = $inner_attribubtes['id'];
+//				$inner = $this->get_nested_collections($inner_collection);
+//				$ret = array_merge($ret, $inner);
 			}
 		}
 		return $ret;
@@ -704,7 +716,7 @@ class Photonic_Flickr_Processor extends Photonic_OAuth1_Processor {
 			$anchor = "<a href='http://www.flickr.com/photos/".$owner.'/sets/'.$photoset->id."' class='photonic-flickr-set-thumb' id='photonic-flickr-set-thumb-".$id.'-'.$photonic_flickr_position.'-'.$photoset->id."' title='".$title."'>".$image."</a>";
 			$text = '';
 			if ($photonic_flickr_collection_set_title_display == 'below') {
-				$text = "<span class='photonic-photoset-title'><a href='http://www.flickr.com/photos/".$owner.'/sets/'.$photoset->id."' title='".$title."'>".$title."</a></span>";
+				$text = "<span class='photonic-photoset-title'>".$title."</span>";
 				if (!$photonic_flickr_hide_collection_set_photos_count_display) {
 					$text .= '<span class="photonic-photoset-photo-count">'.sprintf(__('%s photos', 'photonic'), $photoset->photos).'</span>';
 				}
@@ -798,7 +810,7 @@ class Photonic_Flickr_Processor extends Photonic_OAuth1_Processor {
 			$text = '';
 
 			if ($photonic_flickr_gallery_title_display == 'below') {
-				$text = "<span class='photonic-gallery-title'><a href='".$gallery->url."/' title='".$title."'>".$title."</a></span>";
+				$text = "<span class='photonic-gallery-title'>".$title."</span>";
 				if (!$photonic_flickr_hide_gallery_photos_count_display) {
 					$text .= '<span class="photonic-photoset-photo-count">'.sprintf(__('%s photos', 'photonic'), $gallery->count_photos).'</span>';
 				}
@@ -818,8 +830,15 @@ class Photonic_Flickr_Processor extends Photonic_OAuth1_Processor {
 	 * @return string
 	 */
 	function process_collections($collections, $columns, $user) {
-		global $photonic_flickr_collection_set_per_row_constraint, $photonic_flickr_collection_set_constrain_by_count, $photonic_flickr_hide_collection_thumbnail, $photonic_flickr_hide_collection_title, $photonic_flickr_hide_collection_set_count, $photonic_flickr_thumb_size, $photonic_flickr_position, $photonic_flickr_collection_set_title_display, $photonic_flickr_hide_collection_set_photos_count_display;
+		global $photonic_flickr_hide_empty_collection_details, $photonic_external_links_in_new_tab, $photonic_flickr_collection_set_per_row_constraint, $photonic_flickr_collection_set_constrain_by_count, $photonic_flickr_hide_collection_thumbnail, $photonic_flickr_hide_collection_title, $photonic_flickr_hide_collection_set_count, $photonic_flickr_thumb_size, $photonic_flickr_position, $photonic_flickr_collection_set_title_display, $photonic_flickr_hide_collection_set_photos_count_display;
 		$ret = '';
+
+		if (!empty($photonic_external_links_in_new_tab)) {
+			$target = ' target="_blank" ';
+		}
+		else {
+			$target = '';
+		}
 
 		if ($columns != 'auto') {
 			$col_class = 'photonic-gallery-'.$columns.'c';
@@ -831,52 +850,61 @@ class Photonic_Flickr_Processor extends Photonic_OAuth1_Processor {
 			$col_class = 'photonic-gallery-'.$photonic_flickr_collection_set_constrain_by_count.'c';
 		}
 		foreach ($collections->collection as $collection) {
-			$id = $collection->id;
-			$collection_a = "http://www.flickr.com/photos/".$user."/collections/".$id;
-			$ret .= "<li class='photonic-flickr-image photonic-flickr-collection photonic-flickr-collection-".$id."' id='photonic-flickr-collection-".$id."'>";
-			if (!($photonic_flickr_hide_collection_thumbnail && $photonic_flickr_hide_collection_title && $photonic_flickr_hide_collection_set_count)) {
-				if (!$photonic_flickr_hide_collection_thumbnail) {
-					$ret .= "<a href='".$collection_a."' class='photonic-header-thumb photonic-flickr-collection-thumb'><img src='".$collection->iconsmall."' /></a>";
-				}
-				if (!($photonic_flickr_hide_collection_title && $photonic_flickr_hide_collection_set_count)) {
-					$ret .= "<div class='photonic-header-details photonic-collection-details'>";
-					if (!$photonic_flickr_hide_collection_title) {
-						$ret .= "<div class='photonic-header-title photonic-collection-title'><a href='".$collection_a."'>".$collection->title.'</a></div>';
-					}
-					if (!$photonic_flickr_hide_collection_set_count && isset($collection->set)) {
-						$photosets = $collection->set;
-						$ret .= "<span class='photonic-header-info photonic-collection-sets'>".sprintf(__('%s sets', 'photonic'), count($photosets)).'</span>';
-					}
-					$ret .= "</div><!-- .photonic-collection-details -->";
-				}
+			$dont_show = false;
+			if (empty($collection->set) && !empty($photonic_flickr_hide_empty_collection_details)) {
+				$dont_show = true;
 			}
-			$ret .= "</li>";
-
-			$photosets = $collection->set;
-			foreach ($photosets as $set) {
-				$set_url = 'http://api.flickr.com/services/rest/?format=json&nojsoncallback=1&&api_key='.$this->api_key.'&method=flickr.photosets.getInfo&photoset_id='.$set->id;
-				$set_response = wp_remote_request($set_url);
-				if (!is_wp_error($set_response) && isset($set_response['response']) && isset($set_response['response']['code']) && $set_response['response']['code'] == 200) {
-					$set_response = json_decode($set_response['body']);
-					if ($set_response->stat != 'fail' && isset($set_response->photoset)) {
-						$photoset = $set_response->photoset;
-						$id = $photoset->id;
-						$thumb = "http://farm".$photoset->farm.".static.flickr.com/".$photoset->server."/".$photoset->primary."_".$photoset->secret."_".$photonic_flickr_thumb_size.".jpg";
-						$title = esc_attr($photoset->title->_content);
-						$owner = $photoset->owner;
-
-						$image = "<img src='".$thumb."' alt='".$title."' />";
-						$anchor = "<a href='http://www.flickr.com/photos/".$owner.'/sets/'.$id."' class='photonic-flickr-set-thumb' id='photonic-flickr-set-thumb-".$id.'-'.$photonic_flickr_position.'-'.$photoset->id."' title='".$title."'>".$image."</a>";
-
-						$text = '';
-						if ($photonic_flickr_collection_set_title_display == 'below') {
-							$text = "<span class='photonic-photoset-title'><a href='http://www.flickr.com/photos/".$owner.'/sets/'.$id."' title='".$title."'>".$title."</a></span>";
-							if ($photonic_flickr_hide_collection_set_photos_count_display) {
-								$text .= '<span class="photonic-photoset-photo-count">'.sprintf(__('%s photos', 'photonic'), $photoset->photos).'</span>';
-							}
+			$id = $collection->id;
+			if (!$dont_show) {
+				$url_id = substr($id, stripos($id, '-') + 1);
+				$collection_a = "http://www.flickr.com/photos/".$user."/collections/".$url_id;
+				$ret .= "<li class='photonic-flickr-image photonic-flickr-collection photonic-flickr-collection-".$id."' id='photonic-flickr-collection-".$id."'>";
+				if (!($photonic_flickr_hide_collection_thumbnail && $photonic_flickr_hide_collection_title && $photonic_flickr_hide_collection_set_count)) {
+					if (!$photonic_flickr_hide_collection_thumbnail) {
+						$ret .= "<a href='".$collection_a."' class='photonic-header-thumb photonic-flickr-collection-thumb' $target><img src='".$collection->iconsmall."' /></a>";
+					}
+					if (!($photonic_flickr_hide_collection_title && $photonic_flickr_hide_collection_set_count)) {
+						$ret .= "<div class='photonic-header-details photonic-collection-details'>";
+						if (!$photonic_flickr_hide_collection_title) {
+							$ret .= "<div class='photonic-header-title photonic-collection-title'><a href='".$collection_a."'>".$collection->title.'</a></div>';
 						}
+						if (!$photonic_flickr_hide_collection_set_count && isset($collection->set)) {
+							$photosets = $collection->set;
+							$ret .= "<span class='photonic-header-info photonic-collection-sets'>".sprintf(__('%s sets', 'photonic'), count($photosets)).'</span>';
+						}
+						$ret .= "</div><!-- .photonic-collection-details -->";
+					}
+				}
+				$ret .= "</li>";
+			}
 
-						$ret .= "<li class='photonic-flickr-image photonic-flickr-set-thumb ".$col_class."' id='photonic-flickr-set-".$id.'-'.$photonic_flickr_position."-".$id."'>".$anchor.$text."</li>";
+			if (isset($collection->set) && !empty($collection->set)) {
+				$photosets = $collection->set;
+				foreach ($photosets as $set) {
+					$set_url = 'http://api.flickr.com/services/rest/?format=json&nojsoncallback=1&&api_key='.$this->api_key.'&method=flickr.photosets.getInfo&photoset_id='.$set->id;
+					$set_response = wp_remote_request($set_url);
+					if (!is_wp_error($set_response) && isset($set_response['response']) && isset($set_response['response']['code']) && $set_response['response']['code'] == 200) {
+						$set_response = json_decode($set_response['body']);
+						if ($set_response->stat != 'fail' && isset($set_response->photoset)) {
+							$photoset = $set_response->photoset;
+							$id = $photoset->id;
+							$thumb = "http://farm".$photoset->farm.".static.flickr.com/".$photoset->server."/".$photoset->primary."_".$photoset->secret."_".$photonic_flickr_thumb_size.".jpg";
+							$title = esc_attr($photoset->title->_content);
+							$owner = $photoset->owner;
+
+							$image = "<img src='".$thumb."' alt='".$title."' />";
+							$anchor = "<a href='http://www.flickr.com/photos/".$owner.'/sets/'.$id."' class='photonic-flickr-set-thumb' id='photonic-flickr-set-thumb-".$id.'-'.$photonic_flickr_position.'-'.$photoset->id."' title='".$title."'>".$image."</a>";
+
+							$text = '';
+							if ($photonic_flickr_collection_set_title_display == 'below') {
+								$text = "<span class='photonic-photoset-title'>".$title."</span>";
+								if ($photonic_flickr_hide_collection_set_photos_count_display) {
+									$text .= '<span class="photonic-photoset-photo-count">'.sprintf(__('%s photos', 'photonic'), $photoset->photos).'</span>';
+								}
+							}
+
+							$ret .= "<li class='photonic-flickr-image photonic-flickr-set-thumb ".$col_class."' id='photonic-flickr-set-".$id.'-'.$photonic_flickr_position."-".$id."'>".$anchor.$text."</li>";
+						}
 					}
 				}
 			}

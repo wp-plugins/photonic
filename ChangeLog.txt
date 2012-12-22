@@ -1,3 +1,11 @@
+Version 1.36 - 21st Dec 2012
+============================
+1.	Rewrote the Picasa processor to be DOM-based instead of event-based.
+2.	Added option to let users display the image title instead of the description.
+3.	Fixed a problem with Flickr Collections that was causing nested collections to display repeatedly.
+4.	Fixed a problem with Flickr Collections that was making the collections link to an invalid page.
+5.	Picasa thumbnails in the popup now have the same dimensions as those in the main page.
+
 Version 1.35 - 09th Dec 2012
 ============================
 1.	Added Instagram support
