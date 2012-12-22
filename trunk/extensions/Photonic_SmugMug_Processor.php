@@ -270,7 +270,7 @@ class Photonic_SmugMug_Processor extends Photonic_OAuth1_Processor {
 					$album_li .= "</a>";
 
 					if ($photonic_smug_albums_album_title_display == 'below') {
-						$album_li .= "<span class='photonic-album-title'><a href='{$album->URL}' title='" . esc_attr($album->Title) . "' >".esc_attr($album->Title)."</a></span>";
+						$album_li .= "<span class='photonic-album-title'>".esc_attr($album->Title)."</span>";
 						if ('on' != $photonic_smug_hide_albums_album_photos_count_display) {
 							$album_li .= "<span class='photonic-album-photo-count'>".sprintf(__('%s photos', 'photonic'), $album->ImageCount)."</span>";
 						}

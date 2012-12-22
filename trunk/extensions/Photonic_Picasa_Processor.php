@@ -62,6 +62,7 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 			'crop' => true,
 			'display' => 'page',
 			'max_results' => 1000,
+			'thumbsize' => 75,
 		), $attr);
 		extract($attr);
 
@@ -154,18 +155,17 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 		if (isset($photonic_picasa_allow_oauth) && $photonic_picasa_allow_oauth && $this->oauth_done) {
 			if (isset($_COOKIE['photonic-' . md5($this->client_secret) . '-oauth-token'])) {
 				$query_url = add_query_arg('access_token', $_COOKIE['photonic-' . md5($this->client_secret) . '-oauth-token'], $query_url);
-				$cert = trailingslashit(PHOTONIC_PATH).'include/misc/cacert.crt';
-
-				$ch = curl_init();
-
-				curl_setopt($ch, CURLOPT_URL, $query_url);
-				curl_setopt($ch, CURLOPT_HEADER, 0); // Don’t return the header, just the html
-				curl_setopt($ch, CURLOPT_CAINFO, $cert); // Set the location of the CA-bundle
-				curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); // Return contents as a string
-
-				$response = curl_exec ($ch);
-				curl_close($ch);
-				$rss = $response;
+				$response = $this->get_secure_curl_response($query_url);
+				if (strlen($response) == 0 || substr($response, 0, 1) != '<') {
+					$rss = '';
+					if (stripos($response, 'No album found') !== false) {
+//						$new_url = $this->get_google_plus_url($query_url);
+//						$response = $this->get_secure_curl_response($new_url);
+					}
+				}
+				else {
+					$rss = $response;
+				}
 			}
 		}
 		else {
@@ -196,7 +196,7 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 			$panel = null;
 		}
 
-		$out .= $this->picasa_parse_feed($rss, $view, $display, $columns, $panel);
+		$out .= $this->picasa_parse_feed($rss, $view, $display, $columns, $panel, $attr['thumbsize']);
 		$out .= "</div>";
 		return $out;
 	}
@@ -210,18 +210,21 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 	 * @param string $display
 	 * @param null $columns
 	 * @param null $panel
+	 * @param int $thumb_size
 	 * @return string
 	 */
-	function picasa_parse_feed($rss, $view = null, $display = 'page', $columns = null, $panel = null) {
+	function picasa_parse_feed($rss, $view = null, $display = 'page', $columns = null, $panel = null, $thumb_size = 75) {
 		global $photonic_picasa_position, $photonic_slideshow_library, $photonic_picasa_photo_title_display, $photonic_gallery_panel_items, $photonic_picasa_photo_pop_title_display;
 		global $photonic_picasa_photos_per_row_constraint, $photonic_picasa_photos_constrain_by_count, $photonic_picasa_photos_pop_per_row_constraint, $photonic_picasa_photos_pop_constrain_by_count;
 		if (!isset($photonic_gallery_panel_items) || $photonic_gallery_panel_items == '0' || $photonic_gallery_panel_items == 0) {
 			$photonic_gallery_panel_items = 20;
 		}
 
-		$p = xml_parser_create();
-		xml_parse_into_struct($p, $rss, $vals, $index);
-		xml_parser_free($p);
+//		$p = xml_parser_create();
+//		xml_parse_into_struct($p, $rss, $vals, $index);
+//		xml_parser_free($p);
+
+		$picasa_result = simplexml_load_string($rss);
 
 		$opened = false;
 		$picasa_title = "NULL";
@@ -235,6 +238,123 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 		}
 		$out .= "<ul $ul_class>";
 
+		if (is_a($picasa_result, 'SimpleXMLElement')) {
+			global $photonic_picasa_use_desc;
+			$album_user = '';
+			$album_photos = 0;
+
+			$gphoto_album = $picasa_result->children('gphoto', 1);
+			if (!empty($gphoto_album->user)) {
+				$album_user = $gphoto_album->user;
+			}
+			if (!empty($gphoto_album->numphotos)) {
+				$album_photos = $gphoto_album->numphotos;
+			}
+
+			if (isset($picasa_result->entry) && count($picasa_result->entry) > 0) {
+				if ($display == 'page') {
+					if ($columns == null) {
+						if ($photonic_picasa_photos_per_row_constraint == 'padding') {
+							$pad_class = 'photonic-pad-photos';
+						}
+						else {
+							$pad_class = 'photonic-gallery-'.$photonic_picasa_photos_constrain_by_count.'c';
+						}
+					}
+					else {
+						$pad_class = 'photonic-gallery-'.$columns.'c';
+					}
+				}
+				else {
+					if ($photonic_picasa_photos_pop_per_row_constraint == 'padding') {
+						$pad_class = 'photonic-pad-photos';
+					}
+					else {
+						$pad_class = 'photonic-gallery-'.$photonic_picasa_photos_pop_constrain_by_count.'c';
+					}
+				}
+
+				$library = '';
+				if ($photonic_slideshow_library != 'none') {
+					if ($view != 'album' || $display == 'popup') {
+						$library = 'launch-gallery-'.$photonic_slideshow_library.' '.$photonic_slideshow_library;
+					}
+					else {
+						$library = 'photonic-picasa-album-thumb photonic-picasa-album-thumb-'.$thumb_size;
+					}
+				}
+
+				$rel = '';
+				if (($view != 'album' || $display == 'popup') && $photonic_slideshow_library != 'prettyphoto') {
+					$rel = "rel='photonic-picasa-stream-$photonic_picasa_position'";
+				}
+				else if (($view != 'album' || $display == 'popup') && $photonic_slideshow_library == 'prettyphoto') {
+					if ($panel == null) {
+						$rel = "rel='photonic-prettyPhoto[photonic-picasa-stream-$photonic_picasa_position]'";
+					}
+					else {
+						$rel = "rel='photonic-prettyPhoto[$panel]'";
+					}
+				}
+
+				$a_pad_class = $display == 'popup' ? $pad_class : '';
+
+				foreach ($picasa_result->entry as $entry) {
+					$media_photo = $entry->children('media', 1);
+					$media_photo = $media_photo->group;
+					if (stripos($media_photo->content->attributes()->type, 'video') !== false) {
+						continue;
+					}
+					$count++;
+					$gphoto_photo = $entry->children('gphoto', 1);
+
+					$object_id = $gphoto_photo->id;
+					$object_user = $gphoto_photo->user;
+					if ($photonic_picasa_use_desc == 'desc' || ($photonic_picasa_use_desc == 'desc-title' && !empty($entry->summary))) {
+						$object_caption = esc_attr($entry->summary);
+					}
+					else {
+						$object_caption = esc_attr($entry->title);
+					}
+
+					$li_id = $view == 'album' ? "id='photonic-picasa-album-$object_user-$photonic_picasa_position-$object_id'" : '';
+					if ($display == 'page') {
+						$out .= "<li class='photonic-picasa-image $pad_class' $li_id>";
+					}
+					else if ($count % $photonic_gallery_panel_items == 1) {
+						$out .= "<li class='photonic-picasa-image'>";
+					}
+
+					$id = "id='photonic-picasa-album-thumb-$object_user-$photonic_picasa_position-$object_id'";
+
+					$object_thumb = $media_photo->thumbnail->attributes()->url;
+					$object_href = $media_photo->content->attributes()->url;
+
+					$out .= "<a class='$library $a_pad_class' title=\"".$object_caption."\" href='$object_href' $rel $id>";
+					$out .= "<img src='$object_thumb' alt=\"".$object_caption."\"/>";
+					if ($display == 'page' && $photonic_picasa_photo_title_display == 'below') {
+						$out .= "<span class='photonic-photo-title'>$object_caption</span>";
+					}
+					else if ($display == 'popup' && $photonic_picasa_photo_pop_title_display == 'below') {
+						$out .= "<span class='photonic-photo-title'>$object_caption</span>";
+					}
+					$out .= "</a>";
+					if ($display == 'page') {
+						$out .= "</li>";
+					}
+					else {
+						if ($count % $photonic_gallery_panel_items == 0) {
+							$out .= "</li>";
+						}
+					}
+
+					unset($gphoto_photo);
+					unset($media_photo);
+				}
+			}
+		}
+
+/*
 		foreach ($vals as $val) {
 			if (!$opened) {
 				switch ($val["tag"]) {
@@ -248,19 +368,12 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 						if ($picasa_title == "NULL") {
 							$picasa_title = $val["value"];
 						}
+						break;
 
 					case "GPHOTO:NUMPHOTOS":
 						if (!isset($numphotos) || (isset($numphotos) && !is_numeric($numphotos))) {
 							$numphotos = $val["value"];
 						}
-						break;
-
-					case "GPHOTO:ID":
-						$albumid = $val["value"];
-						break;
-
-					case "OPENSEARCH:TOTALRESULTS":
-						$result_count = $val["value"];
 						break;
 
 					case "GPHOTO:USER":
@@ -282,7 +395,6 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 
 					case "MEDIA:CONTENT":
 						$href = $val["attributes"]["URL"];
-						$filename = basename($href);
 						break;
 
 					case "SUMMARY":
@@ -315,7 +427,6 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 
 				if (($vidpos == "")) {
 					$li_id = $view == 'album' ? "id='photonic-picasa-album-$gphotouser-$photonic_picasa_position-$gphotoid'" : '';
-
 					if ($display == 'page') {
 						if ($columns == null) {
 							if ($photonic_picasa_photos_per_row_constraint == 'padding') {
@@ -399,6 +510,7 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 				unset($gphotoid);
 			}
 		}
+*/
 
 		if ($out != '<ul>') {
 			if (substr($out, -5) != "</li>") {
@@ -443,7 +555,11 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 		$user = substr($panel, 0, strpos($panel, '-'));
 		$album = substr($panel, strpos($panel, '-') + 1);
 		$album = substr($album, strpos($album, '-') + 1);
-		echo $this->get_gallery_images(array('user_id' => $user, 'albumid' => $album, 'view' => 'album', 'display' => 'popup', 'panel' => $panel));
+		$thumb_size = 75;
+		if (isset($_POST['thumb_size'])) {
+			$thumb_size = $_POST['thumb_size'];
+		}
+		echo $this->get_gallery_images(array('user_id' => $user, 'albumid' => $album, 'view' => 'album', 'display' => 'popup', 'panel' => $panel, 'thumbsize' => $thumb_size));
 		die();
 	}
 
@@ -469,5 +585,41 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 		$token['oauth_token_created'] =  time();
 		$token['oauth_token_expires'] =  $body->expires_in;
 		return $token;
+	}
+
+	function get_google_plus_url($query_url) {
+		// Try Google+
+		$url = Photonic_Processor::get_normalized_http_url($query_url);
+		$user_and_album = substr($url, strlen('https://picasaweb.google.com/data/feed/api/'));
+		$user_and_album = explode('/', $user_and_album);
+		foreach ($user_and_album as $key => $value) {
+			if ($value == 'user' && isset($user_and_album[$key + 1])) {
+				$user = $user_and_album[$key + 1];
+			}
+			else if ($value == 'album' && isset($user_and_album[$key + 1])) {
+				$album = $user_and_album[$key + 1];
+			}
+		}
+		$query_args = substr($query_url, strlen($url));
+		$new_url = '';
+		if (isset($user) && isset($album)) {
+			$new_url = 'https://plus.google.com/photos/'.$user.'/albums/'.$album.$query_args;
+		}
+		// https://plus.google.com/photos/104926144534698413096/albums/5818977512257357377
+		return $new_url;
+	}
+
+	function get_secure_curl_response($query_url) {
+		$cert = trailingslashit(PHOTONIC_PATH).'include/misc/cacert.crt';
+		$ch = curl_init();
+
+		curl_setopt($ch, CURLOPT_URL, $query_url);
+		curl_setopt($ch, CURLOPT_HEADER, 0); // Don’t return the header, just the html
+		curl_setopt($ch, CURLOPT_CAINFO, $cert); // Set the location of the CA-bundle
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); // Return contents as a string
+
+		$response = curl_exec ($ch);
+		curl_close($ch);
+		return $response;
 	}
 }

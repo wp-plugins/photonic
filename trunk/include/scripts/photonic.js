@@ -180,6 +180,8 @@ $j(document).ready(function() {
 	$j('.photonic-picasa-album-thumb').live('click', function(e) {
 		var thumb_id = this.id;
 		var href = this.href;
+		var classes = this.className;
+		classes = classes.split(' ');
 		var panel_id = thumb_id.substr(28);
 		var panel = '#photonic-picasa-panel-' + panel_id;
 
@@ -187,8 +189,15 @@ $j(document).ready(function() {
 		loading.className = 'photonic-loading';
 		$j(loading).appendTo($j('body')).show();
 
+		var thumb_size = 75;
+		for (var i=0; i<classes.length; i++) {
+			if (classes[i].indexOf('photonic-picasa-album-thumb-') > -1) {
+				thumb_size = classes[i].substr(28);
+			}
+		}
+
 		if ($j(panel).length == 0) {
-			$j.post(Photonic_JS.ajaxurl, "action=photonic_picasa_display_album&panel=" + thumb_id + "&href=" + href, function(data) {
+			$j.post(Photonic_JS.ajaxurl, "action=photonic_picasa_display_album&panel=" + thumb_id + "&href=" + href + '&thumb_size=' + thumb_size, function(data) {
 				var div = $j(data);
 				//div.id = 'photonic-picasa-panel-' + panel_id;
 
@@ -911,7 +920,6 @@ $j(document).ready(function() {
 	function modalOnPicasaShow(dialog) {
 		var s = this; // refers to the simplemodal object
 		$j('.photonic-picasa-album-thumb', dialog.data[0]).click(function () { // use the modal data context
-			//photonicDisplaySetPopup(this);
 			var id = '#photonic-picasa-panel-' + this.id.substr(21);
 
 			setTimeout(function () { // wait for 6/10ths of a second, then open the next dialog
