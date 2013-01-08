@@ -8,7 +8,7 @@
  */
 
 $selected_tab = isset($_GET['photonic-tab']) ? esc_attr($_GET['photonic-tab']) : 'default';
-if (!in_array($selected_tab, array('default', 'flickr', 'picasa', 'smugmug', '500px', 'instagram'))) {
+if (!in_array($selected_tab, array('default', 'flickr', 'picasa', 'smugmug', '500px', 'zenfolio', 'instagram'))) {
 	$selected_tab = 'default';
 }
 
@@ -202,28 +202,28 @@ $fields = array(
 
 			array(
 				'id' => 'photoset_id',
-				'name' => __('Photoset ID', 'photonic')."</a>",
+				'name' => __('Photoset ID', 'photonic'),
 				'type' => 'text',
 				'hint' => __('Will show a single photoset if "Display" is set to "Photosets"', 'photonic')
 			),
 
 			array(
 				'id' => 'gallery_id',
-				'name' => __('Gallery ID', 'photonic')."</a>",
+				'name' => __('Gallery ID', 'photonic'),
 				'type' => 'text',
 				'hint' => __('Will show a single gallery if "Display" is set to "Galleries"', 'photonic')
 			),
 
 			array(
 				'id' => 'collection_id',
-				'name' => __('Collection ID', 'photonic')."</a>",
+				'name' => __('Collection ID', 'photonic'),
 				'type' => 'text',
 				'hint' => __('Will show contents of a single collection if "Display" is set to "Collections"', 'photonic')
 			),
 
 			array(
 				'id' => 'photo_id',
-				'name' => __('Photo ID', 'photonic')."</a>",
+				'name' => __('Photo ID', 'photonic'),
 				'type' => 'text',
 				'hint' => __('Will show a single photo if "Display" is set to "Single Photo"', 'photonic')
 			),
@@ -274,13 +274,13 @@ $fields = array(
 
 			array(
 				'id' => 'group_id',
-				'name' => __('Group ID', 'photonic')."</a>",
+				'name' => __('Group ID', 'photonic'),
 				'type' => 'text',
 			),
 
 			array(
 				'id' => 'per_page',
-				'name' => __('Number of photos to show', 'photonic')."</a>",
+				'name' => __('Number of photos to show', 'photonic'),
 				'type' => 'text',
 			),
 
@@ -323,13 +323,13 @@ $fields = array(
 
 			array(
 				'id' => 'album',
-				'name' => __('Album', 'photonic')."</a>",
+				'name' => __('Album', 'photonic'),
 				'type' => 'text',
 			),
 
 			array(
 				'id' => 'max_results',
-				'name' => __('Number of photos to show', 'photonic')."</a>",
+				'name' => __('Number of photos to show', 'photonic'),
 				'type' => 'text',
 			),
 
@@ -368,7 +368,7 @@ $fields = array(
 
 			array(
 				'id' => 'album',
-				'name' => __('Album', 'photonic')."</a>",
+				'name' => __('Album', 'photonic'),
 				'type' => 'text',
 				'hint' => __('Required if you are showing "Single Album" above. If your gallery URL is http://nick-name.smugmug.com/gallery/<b>abcdefgh_123456</b>, this is <b>abcdefgh_123456</b>', 'photonic')
 			),
@@ -538,7 +538,7 @@ $fields = array(
 
 			array(
 				'id' => 'rpp',
-				'name' => __('Number of photos to show', 'photonic')."</a>",
+				'name' => __('Number of photos to show', 'photonic'),
 				'type' => 'text',
 				'std' => 20,
 			),
@@ -587,6 +587,129 @@ $fields = array(
 		),
 	),
 
+	'zenfolio' => array(
+		'name' => __('Zenfolio', 'photonic'),
+		'prelude' => __('You have to define your Instagram Client ID under Photonic &rarr; Settings &rarr; Instagram &rarr; Instagram Settings', 'photonic'),
+		'fields' => array(
+			array(
+				'id' => 'view',
+				'name' => __('Display', 'photonic'),
+				'type' => 'select',
+				'options' => array(
+					'photos' => __('Photos', 'photonic'),
+					'photosets' => __('Photosets', 'photonic'),
+					'hierarchy' => __('Group Hierarchy', 'photonic'),
+					'group' => __('Group', 'photonic'),
+				),
+				'req' => true,
+			),
+
+			array(
+				'id' => 'object_id',
+				'name' => __('Object ID', 'photonic'),
+				'type' => 'text',
+				'hint' => __('Can be set if "Display" is <code>Photos</code>, <code>Photosets</code> or <code>Group</code>.', 'photonic'),
+			),
+
+			array(
+				'id' => 'text',
+				'name' => __('Search by text', 'photonic'),
+				'type' => 'text',
+				'hint' => __('Can be set if "Display" is <code>Photos</code> or <code>Photosets</code>.', 'photonic'),
+			),
+
+			array(
+				'id' => 'category_code',
+				'name' => __('Search by category code', 'photonic'),
+				'type' => 'text',
+				'hint' => __('Can be set if "Display" is <code>Photos</code> or <code>Photosets</code>.', 'photonic').'<br/>'.__('See the list of categories from <em>Photonic &rarr; Helpers</em>.', 'photonic'),
+			),
+
+			array(
+				'id' => 'sort_order',
+				'name' => __('Search results sort order', 'photonic'),
+				'type' => 'select',
+				'options' => array(
+					'' => '',
+					'Date' => __('Date', 'photonic'),
+					'Popularity' => __('Popularity', 'photonic'),
+					'Rank' => __('Rank (for searching by text only)', 'photonic'),
+				),
+				'hint' => __('Can be set if "Display" is <code>Photos</code> or <code>Photosets</code>.', 'photonic').'<br/>'.__('For search results only.', 'photonic'),
+			),
+
+			array(
+				'id' => 'photoset_type',
+				'name' => __('Photoset type', 'photonic'),
+				'type' => 'select',
+				'options' => array(
+					'' => '',
+					'Gallery' => __('Gallery', 'photonic'),
+					'Collection' => __('Collection', 'photonic'),
+				),
+				'hint' => __('Mandatory if Display = Photosets and no Object ID is specified.', 'photonic'),
+			),
+
+			array(
+				'id' => 'kind',
+				'name' => __('Display classification', 'photonic'),
+				'type' => 'select',
+				'options' => array(
+					'' => '',
+					'popular' => __('Popular', 'photonic'),
+					'recent' => __('Recent', 'photonic'),
+				),
+				'hint' => __('Mandatory if "Display" is <code>Photos</code> or <code>Photosets</code>, and none of the other criteria above is specified.', 'photonic'),
+			),
+
+			array(
+				'id' => 'login_name',
+				'name' => __('Login name', 'photonic'),
+				'type' => 'text',
+				'hint' => __('Mandatory if Display = Hierarchy', 'photonic'),
+			),
+
+			array(
+				'id' => 'columns',
+				'name' => __('Number of columns', 'photonic'),
+				'type' => 'text',
+			),
+
+			array(
+				'id' => 'limit',
+				'name' => __('Number of results to show', 'photonic'),
+				'type' => 'text',
+			),
+
+			array(
+				'id' => 'thumb_size',
+				'name' => __('Thumbnail size', 'photonic'),
+				'type' => 'select',
+				'std' => 1,
+				"options" => array(
+					"1" => __("Square thumbnail, 60 x 60px, cropped square", 'photonic'),
+					"0" => __("Small thumbnail, upto 80 x 80px", 'photonic'),
+					"10" => __("Medium thumbnail, upto 120 x 120px", 'photonic'),
+					"11" => __("Large thumbnail, upto 120 x 120px", 'photonic'),
+					"2" => __("Small image, upto 400 x 400px", 'photonic'),
+				),
+			),
+
+			array(
+				'id' => 'columns',
+				'name' => __('Number of columns', 'photonic'),
+				'type' => 'text',
+			),
+
+			array(
+				'id' => 'limit',
+				'name' => __('Number of photos to show', 'photonic'),
+				'type' => 'text',
+			),
+
+		),
+	),
+
 	'instagram' => array(
 		'name' => __('Instagram', 'photonic'),
 		'prelude' => __('You have to define your Instagram Client ID under Photonic &rarr; Settings &rarr; Instagram &rarr; Instagram Settings', 'photonic'),
@@ -629,35 +752,35 @@ $fields = array(
 
 			array(
 				'id' => 'media_id',
-				'name' => __('Media ID', 'photonic')."</a>",
+				'name' => __('Media ID', 'photonic'),
 				'type' => 'text',
 				'hint' => __('Required if "Display" is set to "Single Photos".', 'photonic').'<br/>'.__('If your photo is at <code>http://instagram.com/p/ABcde5678fg/</code>, your media id is <code>ABcde5678fg</code>.', 'photonic')
 			),
 
 			array(
-				'id' => 'tag',
-				'name' => __('Tag', 'photonic')."</a>",
+				'id' => 'tag_name',
+				'name' => __('Tag', 'photonic'),
 				'type' => 'text',
 				'hint' => __('Required if "Display" is set to "Tag"', 'photonic')
 			),
 
 			array(
 				'id' => 'lat',
-				'name' => __('Latitude', 'photonic')."</a>",
+				'name' => __('Latitude', 'photonic'),
 				'type' => 'text',
 				'hint' => __('Latitude and Longitude are required if "Display" = "Photos" and "Display Classification" = "Search"', 'photonic')
 			),
 
 			array(
 				'id' => 'lng',
-				'name' => __('Longitude', 'photonic')."</a>",
+				'name' => __('Longitude', 'photonic'),
 				'type' => 'text',
 				'hint' => __('Latitude and Longitude are required if "Display" = "Photos" and "Display Classification" = "Search"', 'photonic')
 			),
 
 			array(
 				'id' => 'location_id',
-				'name' => __('Location ID', 'photonic')."</a>",
+				'name' => __('Location ID', 'photonic'),
 				'type' => 'text',
 				'hint' => __('Required if "Display" is set to "Location".', 'photonic')
 			),
@@ -672,14 +795,14 @@ $fields = array(
 
 			array(
 				'id' => 'min_id',
-				'name' => __('Min Photo ID', 'photonic')."</a>",
+				'name' => __('Min Photo ID', 'photonic'),
 				'type' => 'text',
 				'hint' => __('Use the min and max ID to reduce your matches for "Search" and "Tag" displays', 'photonic')
 			),
 
 			array(
 				'id' => 'max_id',
-				'name' => __('Max Photo ID', 'photonic')."</a>",
+				'name' => __('Max Photo ID', 'photonic'),
 				'type' => 'text',
 				'hint' => __('Use the min and max ID to reduce your matches for "Search" and "Tag" displays', 'photonic')
 			),
@@ -692,7 +815,7 @@ $fields = array(
 
 			array(
 				'id' => 'count',
-				'name' => __('Number of photos to show', 'photonic')."</a>",
+				'name' => __('Number of photos to show', 'photonic'),
 				'type' => 'text',
 			),
 

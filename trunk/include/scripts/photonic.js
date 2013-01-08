@@ -385,13 +385,124 @@ $j(document).ready(function() {
 		return false;
 	});
 
+	$j('.photonic-zenfolio-set-thumb').live('click', function(e) {
+		var thumb_id = this.id;
+		var href = this.href;
+		var panel_id = thumb_id.substr(28);
+
+		if ($j(this).hasClass('photonic-zenfolio-set-passworded')) {
+//			$j('#photonic-zenfolio-prompter-' + panel_id).dialog('open');
+			return false;
+		}
+
+		var classes = this.className;
+		classes = classes.split(' ');
+		var panel = '#photonic-zenfolio-panel-' + panel_id;
+
+		var loading = document.createElement('div');
+		loading.className = 'photonic-loading';
+		$j(loading).appendTo($j('body')).show();
+
+		var thumb_size = 1;
+		for (var i=0; i<classes.length; i++) {
+			if (classes[i].indexOf('photonic-zenfolio-set-thumb-') > -1) {
+				thumb_size = classes[i].substr(28);
+				break;
+			}
+		}
+
+		if ($j(panel).length == 0) {
+			$j.post(Photonic_JS.ajaxurl, "action=photonic_zenfolio_display_set&panel=" + thumb_id + "&href=" + href + '&thumb_size=' + thumb_size, function(data) {
+				var div = $j(data);
+				var ul = div.find('ul');
+				var screens = ul.find('li').length;
+				var prev = document.createElement('a');
+				prev.id = 'photonic-zenfolio-set-' + panel_id + '-prev';
+				prev.href = '#';
+				prev.className = 'panel-previous';
+				prev.innerHTML = '&nbsp;';
+
+				var next = document.createElement('a');
+				next.id = 'photonic-zenfolio-set-' + panel_id + '-next';
+				next.href = '#';
+				next.className = 'panel-next';
+				next.innerHTML = '&nbsp;';
+
+				$j(ul).first('li').waitForImages(function() {
+					div.attr('id', 'photonic-zenfolio-panel-' + panel_id).appendTo($j('#photonic-zenfolio-set-' + panel_id)).show();
+					if (screens > 1) {
+						$j(ul).before(prev)
+							.after(next)
+							.cycle({
+								timeout: 0,
+								slideResize: false,
+								prev: 'a#photonic-zenfolio-set-' + panel_id + '-prev',
+								next: 'a#photonic-zenfolio-set-' + panel_id + '-next',
+								sync: false
+							});
+					}
+					else {
+						$j(this).cycle({
+							timeout: 0,
+							slideResize: false,
+							sync: false
+						});
+					}
+
+					$j(panel).modal({
+						autoPosition: false,
+						dataCss: { width: '' + Photonic_JS.gallery_panel_width + 'px' },
+						overlayCss: { background: '#000' },
+						closeClass: 'photonic-zenfolio-panel-' + panel_id,
+						opacity: 90,
+						close: true,
+						escClose: false,
+						containerId: 'photonic-zenfolio-panel-container-' + panel_id,
+						onClose: function(dialog) { $j.modal.close(); $j('#photonic-zenfolio-panel-' + panel_id).css({ display: 'none' }) },
+						onOpen: modalOpen
+					});
+
+					var viewport = [$j(window).width(), $j(window).height(), $j(document).scrollLeft(), $j(document).scrollTop()];
+					var target = {};
+
+					target.top = parseInt(Math.max(viewport[3] - 20, viewport[3] + ((viewport[1] - $j('#photonic-zenfolio-panel-container-' + panel_id).height() - 40) * 0.5)), 10);
+					target.left = parseInt(Math.max(viewport[2] - 20, viewport[2] + ((viewport[0] - $j('#photonic-zenfolio-panel-container-' + panel_id).width() - 40) * 0.5)), 10);
+
+					$j('#photonic-zenfolio-panel-container-' + panel_id).css({top: target.top, left: target.left });
+					$j(loading).hide();
+				});
+			});
+		}
+		else {
+			$j(loading).hide();
+			$j(panel).modal({
+				autoPosition: false,
+				dataCss: { width: '' + Photonic_JS.gallery_panel_width + 'px' },
+				overlayCss: { background: '#000' },
+				opacity: 90,
+				close: true,
+				escClose: false,
+				containerId: 'photonic-zenfolio-panel-container-' + panel_id,
+				onClose: modalClose
+			});
+			var viewport = [$j(window).width(), $j(window).height(), $j(document).scrollLeft(), $j(document).scrollTop()];
+			var target = {};
+			target.top = parseInt(Math.max(viewport[3] - 20, viewport[3] + ((viewport[1] - $j('#photonic-zenfolio-panel-' + panel_id).height() - 40) * 0.5)), 10);
+			target.left = parseInt(Math.max(viewport[2] - 20, viewport[2] + ((viewport[0] - $j('#photonic-zenfolio-panel-' + panel_id).width() - 40) * 0.5)), 10);
+			$j('#' + 'photonic-zenfolio-panel-container-' + panel_id).css({top: target.top, left: target.left});
+			$j('.slideshow-grid-panel').cycle({timeout: 0, prev: 'a#photonic-zenfolio-set-' + panel_id + '-prev', next: 'a#photonic-zenfolio-set-' + panel_id + '-next'});
+		}
+
+		return false;
+	});
+
 	$j('a.modalCloseImg').live('click', function() {
 		var thisClass = this.className;
 		thisClass = thisClass.substr(14);
 		$j('#' + thisClass).hide();
 	});
 
-	$j('.photonic-flickr-stream a, a.photonic-flickr-set-thumb, a.photonic-flickr-gallery-thumb, .photonic-picasa-stream a, .photonic-post-gallery-nav a, .photonic-500px-stream a, .photonic-smug-stream a').each(function() {
+	$j('.photonic-flickr-stream a, a.photonic-flickr-set-thumb, a.photonic-flickr-gallery-thumb, .photonic-picasa-stream a, .photonic-post-gallery-nav a, .photonic-500px-stream a, .photonic-smug-stream a, .photonic-instagram-stream a, .photonic-zenfolio-stream a, a.photonic-zenfolio-set-thumb').each(function() {
 		if (!($j(this).parent().hasClass('photonic-header-title'))) {
 			$j(this).data('title', $j(this).attr('title'));
 			var tempTitle = $j(this).data('title');
@@ -408,6 +519,7 @@ $j(document).ready(function() {
 		Photonic_JS.wp_thumbnail_title_display == 'tooltip' ||
 		Photonic_JS.Dpx_photo_title_display == 'tooltip' ||
 		Photonic_JS.instagram_photo_title_display == 'tooltip' || Photonic_JS.instagram_user_title_display == 'tooltip' ||
+		Photonic_JS.zenfolio_photo_title_display == 'tooltip' ||
 		Photonic_JS.smug_photo_title_display == 'tooltip' || Photonic_JS.smug_photo_pop_title_display == 'tooltip' || Photonic_JS.smug_albums_album_title_display == 'tooltip'
 		) {
 		var tooltipObj = Photonic_JS.flickr_photo_title_display == 'tooltip' ? '.photonic-flickr-stream .photonic-flickr-photo a' : '';
@@ -433,6 +545,10 @@ $j(document).ready(function() {
 		tooltipObj += Photonic_JS.instagram_photo_title_display == 'tooltip' ? '.photonic-instagram-photo a' : '';
 		tooltipObj += (tooltipObj != '' && Photonic_JS.instagram_user_title_display == 'tooltip') ? ',' : '';
 		tooltipObj += Photonic_JS.instagram_user_title_display == 'tooltip' ? '.photonic-instagram-user a' : '';
+		tooltipObj += (tooltipObj != '' && Photonic_JS.zenfolio_photo_title_display == 'tooltip') ? ',' : '';
+		tooltipObj += Photonic_JS.zenfolio_photo_title_display == 'tooltip' ? '.photonic-zenfolio-photo a' : '';
+		tooltipObj += (tooltipObj != '' && Photonic_JS.zenfolio_set_title_display == 'tooltip') ? ',' : '';
+		tooltipObj += Photonic_JS.zenfolio_set_title_display == 'tooltip' ? 'a.photonic-zenfolio-set-thumb' : '';
 
 		$j(tooltipObj).each(function() {
 			if (!($j(this).parent().hasClass('photonic-header-title'))) {
@@ -481,6 +597,20 @@ $j(document).ready(function() {
 		});
 		return false;
 	});
+
+/*
+	$j('.photonic-password-prompter').dialog({
+		autoOpen: false,
+		height:	160,
+		width: 300,
+		modal: true,
+		dialogClass: 'photonic-jq'
+	});
+
+	$j('.photonic-password-form').ajaxForm({
+		dataType: 'json'
+	});
+*/
 
 	/**
 	 * Displays all photos in a Flickr Set. Invoked when the Set is being fetched for the first time for display in a popup.
@@ -962,7 +1092,7 @@ $j(document).ready(function() {
 			dialog.container.fadeIn(100, function () {
 				dialog.data.fadeIn(100);
 				var panel = dialog.data.attr('id');
-				$j('.slideshow-grid-panel').cycle({/*fx: 'scrollHorz', */timeout: 0, prev: 'a#' + panel + '-prev', next: 'a#' + panel + '-next'});
+				$j('.slideshow-grid-panel').cycle({timeout: 0, prev: 'a#' + panel + '-prev', next: 'a#' + panel + '-next'});
 			});
 		});
 	}
@@ -1087,5 +1217,20 @@ $j(document).ready(function() {
 		}
 
 		return false;
+	}
+
+	function photonicDisplayPasswordPrompt() {
+		var markup = "<div class='photonic-password'><h4>Enter Password</h4><input type='password' name='access_password' /><input type='button' name='submit_password' value='Go' /></div>";
+		$j(markup).modal({
+			autoPosition: false,
+//			dataCss: { width: '' + Photonic_JS.gallery_panel_width + 'px' },
+			overlayCss: { background: '#000' },
+			opacity: 90,
+			close: true,
+			escClose: false,
+//			containerId: containerId,
+//				onClose: function(dialog) { $j.modal.close(); $j(panel).css({ display: 'none' }) }
+			onClose: modalClose
+		});
 	}
 });

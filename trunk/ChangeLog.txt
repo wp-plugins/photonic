@@ -1,3 +1,11 @@
+Version 1.40 - 07th Jan 2013
+============================
+1.	Added Zenfolio support for public photos.
+2.	Fixed an issue with the shortcode generation for Instagram tags.
+3.	Added the 'photonic_register_extensions' action hook for registering more extensions.
+4.	Fixed some PHP notices that were showing up in debug mode when no options were set.
+5.	Fixed an option to prevent SmugMug album thumbnails and titles from linking to the SmugMug page.
+
 Version 1.36 - 21st Dec 2012
 ============================
 1.	Rewrote the Picasa processor to be DOM-based instead of event-based.

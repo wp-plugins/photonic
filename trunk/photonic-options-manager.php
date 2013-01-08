@@ -4,7 +4,7 @@ class Photonic_Options_Manager {
 	var $option_structure, $previous_displayed_section, $file, $tab_name;
 
 	function Photonic_Options_Manager($file) {
-		global $photonic_setup_options, $photonic_generic_options, $photonic_flickr_options, $photonic_picasa_options, $photonic_500px_options, $photonic_smugmug_options, $photonic_instagram_options;
+		global $photonic_setup_options, $photonic_generic_options, $photonic_flickr_options, $photonic_picasa_options, $photonic_500px_options, $photonic_smugmug_options, $photonic_instagram_options, $photonic_zenfolio_options;
 		$options_page_array = array(
 			'generic-options.php' => $photonic_generic_options,
 			'flickr-options.php' => $photonic_flickr_options,
@@ -12,6 +12,7 @@ class Photonic_Options_Manager {
 			'500px-options.php' => $photonic_500px_options,
 			'smugmug-options.php' => $photonic_smugmug_options,
 			'instagram-options.php' => $photonic_instagram_options,
+			'zenfolio-options.php' => $photonic_zenfolio_options,
 		);
 
 		$tab_name_array = array(
@@ -21,6 +22,7 @@ class Photonic_Options_Manager {
 			'500px-options.php' => '500px Options',
 			'smugmug-options.php' => 'SmugMug Options',
 			'instagram-options.php' => 'Instagram Options',
+			'zenfolio-options.php' => 'Zenfolio Options',
 		);
 
 		$this->file = $file;
@@ -103,6 +105,7 @@ class Photonic_Options_Manager {
 						<li><a class='photonic-load-page <?php if ($this->tab == '500px-options.php') echo 'current-tab'; ?>' id='photonic-options-500px' href='?page=photonic-options-manager&amp;tab=500px-options.php'><span class="icon">&nbsp;</span> 500px</a></li>
 						<li><a class='photonic-load-page <?php if ($this->tab == 'smugmug-options.php') echo 'current-tab'; ?>' id='photonic-options-smugmug' href='?page=photonic-options-manager&amp;tab=smugmug-options.php'><span class="icon">&nbsp;</span> SmugMug</a></li>
 						<li><a class='photonic-load-page <?php if ($this->tab == 'instagram-options.php') echo 'current-tab'; ?>' id='photonic-options-instagram' href='?page=photonic-options-manager&amp;tab=instagram-options.php'><span class="icon">&nbsp;</span> Instagram</a></li>
+						<li><a class='photonic-load-page <?php if ($this->tab == 'zenfolio-options.php') echo 'current-tab'; ?>' id='photonic-options-zenfolio' href='?page=photonic-options-manager&amp;tab=zenfolio-options.php'><span class="icon">&nbsp;</span> Zenfolio</a></li>
 					</ul>
 				</div>
 			</div>
@@ -155,6 +158,10 @@ class Photonic_Options_Manager {
 				</div>
 				<div class="photonic-helper-box right">
 					<?php $this->display_instagram_location_helper(); ?>
+				</div>
+				<h3 class="photonic-helper-header">Zenfolio</h3>
+				<div class="photonic-helper-box left">
+					<?php $this->display_zenfolio_category_helper(); ?>
 				</div>
 			</form>
 		</div>
@@ -223,6 +230,12 @@ class Photonic_Options_Manager {
 			echo '<input type="button" value="'.__('Find', 'photonic').'" id="photonic-instagram-location-find" class="photonic-helper-button"/>';
 			echo '<div class="result">&nbsp;</div>';
 		}
+	}
+
+	function display_zenfolio_category_helper() {
+		_e('<h3>Zenfolio Categories</h3>', 'photonic');
+		echo '<input type="button" value="'.__('List', 'photonic').'" id="photonic-zenfolio-categories-find" class="photonic-helper-button"/>';
+		echo '<div class="result">&nbsp;</div>';
 	}
 
 	function init() {
@@ -1199,6 +1212,11 @@ class Photonic_Options_Manager {
 					$url = 'https://api.instagram.com/v1/locations/search?client_id='.$instagram_client_id.'&lat='.$lat.'&lng='.$lng.'&foursquare_v2_id='.$fs_id;
 					$this->execute_query('instagram', $url, 'locations/search');
 					break;
+
+				case 'photonic-zenfolio-categories-find':
+					$url = 'https://api.zenfolio.com/api/1.6/zfapi.asmx/GetCategories';
+					$this->execute_query('zenfolio', $url, 'GetCategories');
+					break;
 			}
 		}
 		die();
@@ -1215,6 +1233,9 @@ class Photonic_Options_Manager {
 						}
 						else if ($where == 'instagram') {
 							$this->execute_instagram_query($response['body'], $method);
+						}
+						else if ($where == 'zenfolio') {
+							$this->execute_zenfolio_query($response['body'], $method);
 						}
 					}
 					else {
@@ -1292,6 +1313,20 @@ class Photonic_Options_Manager {
 					}
 					echo '<span class="found-id-text">'.__('Matching locations:', 'photonic').'</span> <span class="found-id">'.implode(', ', $text).'</span>';
 				}
+			}
+		}
+	}
+
+	function execute_zenfolio_query($body, $method) {
+		if ($method == 'GetCategories') {
+			$response = simplexml_load_string($body);
+			if (!empty($response->Category)) {
+				$categories = $response->Category;
+				echo "<ul class='photonic-scroll-panel'>\n";
+				foreach ($categories as $category) {
+					echo "<li>{$category->DisplayName} &ndash; {$category->Code}</li>\n";
+				}
+				echo "</ul>\n";
 			}
 		}
 	}

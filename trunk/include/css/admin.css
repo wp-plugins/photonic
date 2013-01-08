@@ -52,6 +52,7 @@ ul.photonic-options-header-bar li a { text-decoration: none; font-weight: bold; 
 #photonic-options-500px .icon { background-position: 0 -48px; }
 #photonic-options-smugmug .icon { background-position: 0 -64px; }
 #photonic-options-instagram .icon { background-position: 0 -80px; }
+#photonic-options-zenfolio .icon { background-position: 0 -96px; }
 
 .fix:after { content:"."; display:block; height:0; clear:both; visibility:hidden; }
 .fix { display:block; }
@@ -326,4 +327,8 @@ h3.photonic-helper-header {
 	width: 80%;
 	max-width: 1000px;
 	min-width: 800px;
+}
+.photonic-scroll-panel {
+	height: 200px;
+	overflow: auto;
 }

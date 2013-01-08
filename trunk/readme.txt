@@ -1,20 +1,20 @@
-=== Photonic Gallery for Flickr, Picasa, SmugMug, 500px and Instagram ===
+=== Photonic Gallery for Flickr, Picasa, SmugMug, 500px, Zenfolio and Instagram ===
 Contributors: sayontan
 Donate link: http://aquoid.com/news/plugins/photonic/
-Tags: gallery, flickr, picasa, 500px, smugmug, instagram, fancybox, colorbox, prettyphoto, slideshow, jquery, shortcode
+Tags: gallery, flickr, picasa, 500px, smugmug, zenfolio, instagram, fancybox, colorbox, prettyphoto, slideshow, jquery, shortcode
 Requires at least: WP 3.2
 Tested up to: WP 3.5
 Stable tag: trunk
 License: GPLv3 or later
 
-Galleries on steroids! A stylish plugin for beautiful galleries of your public and private WP, Flickr, Picasa, SmugMug, 500px & Instagram photos.
+Galleries on steroids! A stylish plugin for galleries of your public and private WP, Flickr, Picasa, SmugMug, 500px, Zenfolio & Instagram photos.
 
 == Description ==
 
-Photonic lets you use the WordPress <code>gallery</code> shortcode and ramps it up with a lot of added functionality. It adds support for
-several new parameters to enhance your galleries. It supports Flickr photos, Photosets, Galleries and Collections, along with Picasa photos and albums,
-SmugMug albums and images, 500px photos and collections, and Instagram photos and users. You can also enable authentication for your site visitors that will
-let them see private and protected photos from each provider.
+Photonic lets you use the WordPress <code>gallery</code> shortcode and super-charges it with a lot of added functionality. It adds support for
+several new parameters to enhance the content and look-and-feel of your galleries. It supports Flickr photos, Photosets, Galleries and Collections,
+along with Picasa photos and albums, SmugMug albums and images, 500px photos and collections, Zenfolio photos, Photosets and Groups, and Instagram photos and users.
+You can also enable authentication for your site visitors that will let them see private and protected photos from each provider.
 
 = Flickr Support =
 
@@ -53,6 +53,17 @@ For demos of SmugMug support visit the <a href='http://aquoid.com/news/plugins/p
 Photos on <a href='http://aquoid.com/news/plugins/photonic/500px/'>500px.com are supported in Photonic</a>. Sets (collections) are also
 supported, but there are <a href='https://github.com/500px/api-documentation/issues/17'>some quirks in 500px.com's API</a>.
 
+= Zenfolio Support =
+
+The following Zenfolio concepts are supported in Photonic:
+
+*	<a href='http://aquoid.com/news/plugins/photonic/zenfolio/photos/'>Photos</a>
+*	<a href='http://aquoid.com/news/plugins/photonic/zenfolio/photosets/'>PhotoSets</a>
+*	<a href='http://aquoid.com/news/plugins/photonic/zenfolio/groups/'>Groups</a>
+*	<a href='aquoid.com/news/plugins/photonic/zenfolio/group-hierarchy/'>Group Hierarchies</a>
+
+For demos of Zenfolio support visit the <a href='http://aquoid.com/news/plugins/photonic/zenfolio/'>Zenfolio page</a>.
+
 = Instagram Support =
 
 Instagram photos and users <a href='http://aquoid.com/news/plugins/photonic/instagram/'>are supported in Photonic</a>. You can
@@ -89,7 +100,7 @@ For the plugin in action see the <a href='http://aquoid.com/news/plugins/photoni
 
 1.	To insert the shortcode for Photonic through the "Add Media" options click on "Add an Image".
 2.	You will see a new tab for "Photonic".
-3.	Clicking on the "Photonic" tab will show you three new tabs, one for native WP Galleries, one for Flickr and one for Picasa. Fill out what you need and click "Insert into post"
+3.	Clicking on the "Photonic" tab will show you new tabs, one for each type of gallery. Fill out what you need and click "Insert into post"
 
 == Frequently Asked Questions ==
 
@@ -116,7 +127,7 @@ Yes, there are a couple dealing with tooltips. The plugin optionally uses the <a
 script to show image tooltips. The drawback is that for IE7 the native HTML tooltip and the custom tooltip are shown simultaneously.
 This is a bug with the thumbnail script.
 
-In addition, if you access a protected album in SmugMug in Photonic, you don't get the desired results.
+In addition, if you access a password-protected album in SmugMug in Photonic, you don't get the desired results.
 
 = Are translations supported? =
 
@@ -125,10 +136,18 @@ in the third-party JS scripts are not translated.
 
 == Changelog ==
 
+= 1.40 =
+
+*	Added Zenfolio support for public photos.
+*	Fixed an issue with the shortcode generation for Instagram tags.
+*	Added the 'photonic_register_extensions' action hook for registering more extensions.
+*	Fixed some PHP notices that were showing up in debug mode when no options were set.
+*	Fixed an option to prevent SmugMug album thumbnails and titles from linking to the SmugMug page.
+
 = 1.36 =
 
 *	Rewrote the Picasa processor to be DOM-based instead of event-based.
-*	Added option to let users display the image title instead of the description.
+*	Added option to let users display the Picasa image title instead of the description.
 *	Fixed a problem with Flickr Collections that was causing nested collections to display repeatedly.
 *	Fixed a problem with Flickr Collections that was making the collections link to an invalid page.
 *	Picasa thumbnails in the popup now have the same dimensions as those in the main page.

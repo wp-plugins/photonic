@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: Photonic Gallery for Flickr, Picasa, SmugMug, 500px and Instagram
+ * Plugin Name: Photonic Gallery for Flickr, Picasa, SmugMug, 500px, Zenfolio and Instagram
  * Plugin URI: http://aquoid.com/news/plugins/photonic/
- * Description: Extends the native gallery shortcode to support Flickr, Picasa, SmugMug, 500px and Instagram. JS libraries like Fancybox, Colorbox and PrettyPhoto are supported. The plugin also helps convert a regular WP gallery into a slideshow.
- * Version: 1.36
+ * Description: Extends the native gallery shortcode to support Flickr, Picasa, SmugMug, 500px, Zenfolio and Instagram. JS libraries like Fancybox, Colorbox and PrettyPhoto are supported. The plugin also helps convert a regular WP gallery into a slideshow.
+ * Version: 1.40
  * Author: Sayontan Sinha
  * Author URI: http://mynethome.net/blog
  * License: GNU General Public License (GPL), v3 (or newer)
@@ -21,7 +21,7 @@ class Photonic {
 	function Photonic() {
 		global $photonic_options, $photonic_setup_options, $photonic_is_ie6;
 		if (!defined('PHOTONIC_VERSION')) {
-			define('PHOTONIC_VERSION', '1.36');
+			define('PHOTONIC_VERSION', '1.40');
 		}
 
 		if (!defined('PHOTONIC_PATH')) {
@@ -69,11 +69,17 @@ class Photonic {
 		add_action('wp_ajax_photonic_flickr_sign', array(&$this, 'flickr_sign'));
 		add_action('wp_ajax_nopriv_photonic_flickr_sign', array(&$this, 'flickr_sign'));
 
+		add_action('wp_ajax_photonic_verify_password', array(&$this, 'verify_password'));
+		add_action('wp_ajax_nopriv_photonic_verify_password', array(&$this, 'verify_password'));
+
 		add_action('wp_ajax_photonic_picasa_display_album', array(&$this, 'picasa_display_album'));
 		add_action('wp_ajax_nopriv_photonic_picasa_display_album', array(&$this, 'picasa_display_album'));
 
 		add_action('wp_ajax_photonic_smug_display_album', array(&$this, 'smug_display_album'));
 		add_action('wp_ajax_nopriv_photonic_smug_display_album', array(&$this, 'smug_display_album'));
+
+		add_action('wp_ajax_photonic_zenfolio_display_set', array(&$this, 'zenfolio_display_set'));
+		add_action('wp_ajax_nopriv_photonic_zenfolio_display_set', array(&$this, 'zenfolio_display_set'));
 
 		add_filter('media_upload_tabs', array(&$this, 'media_upload_tabs'));
 		add_action('media_upload_photonic', array(&$this, 'media_upload_photonic'));
@@ -171,7 +177,9 @@ class Photonic {
 		global $photonic_500px_photos_per_row_constraint, $photonic_500px_photos_constrain_by_count, $photonic_500px_photos_pop_per_row_constraint, $photonic_500px_photos_pop_constrain_by_count, $photonic_500px_photo_title_display;
 		global $photonic_smug_photo_title_display, $photonic_smug_photo_pop_title_display, $photonic_smug_albums_album_title_display;
 		global $photonic_instagram_photo_title_display, $photonic_instagram_user_title_display;
+		global $photonic_zenfolio_photo_title_display, $photonic_zenfolio_set_title_display;
 
+		//wp_enqueue_script('photonic', plugins_url('include/scripts/photonic.js', __FILE__), array('jquery', 'jquery-ui-dialog', 'jquery-form'), $this->version);
 		wp_enqueue_script('photonic', plugins_url('include/scripts/photonic.js', __FILE__), array('jquery'), $this->version);
 		wp_deregister_script('jquery-cycle');
 		wp_enqueue_script('jquery-cycle', plugins_url('include/scripts/jquery.cycle.all.min.js', __FILE__), array('jquery'), $this->version);
@@ -254,6 +262,8 @@ class Photonic {
 			'smug_albums_album_title_display' => $photonic_smug_albums_album_title_display,
 			'instagram_photo_title_display' => $photonic_instagram_photo_title_display,
 			'instagram_user_title_display' => $photonic_instagram_user_title_display,
+			'zenfolio_photo_title_display' => $photonic_zenfolio_photo_title_display,
+			'zenfolio_set_title_display' => $photonic_zenfolio_set_title_display,
 
 			'slideshow_library' => $photonic_slideshow_library,
 			'slideshow_mode' => (isset($photonic_slideshow_mode) && $photonic_slideshow_mode == 'on') ? true : false,
@@ -319,6 +329,8 @@ class Photonic {
 		global $photonic_flickr_collection_set_constrain_by_padding, $photonic_flickr_photos_constrain_by_padding, $photonic_flickr_photos_pop_constrain_by_padding, $photonic_flickr_galleries_constrain_by_padding;
 		global $photonic_picasa_photos_pop_constrain_by_padding, $photonic_picasa_photos_constrain_by_padding, $photonic_wp_slide_align, $photonic_500px_photos_constrain_by_padding;
 		global $photonic_smug_photos_constrain_by_padding, $photonic_smug_photos_pop_constrain_by_padding, $photonic_smug_albums_album_constrain_by_padding, $photonic_instagram_photos_constrain_by_padding, $photonic_instagram_users_constrain_by_padding;
+		global $photonic_zenfolio_photos_constrain_by_padding, $photonic_zenfolio_sets_constrain_by_padding;
+
 		$css = '<style type="text/css">'."\n";
 		$css .= ".photonic-pad-photosets { margin: {$photonic_flickr_collection_set_constrain_by_padding}px; }\n";
 		$css .= ".photonic-pad-galleries { margin: {$photonic_flickr_galleries_constrain_by_padding}px; }\n";
@@ -330,6 +342,11 @@ class Photonic {
 
 		$css .= ".photonic-500px-stream .photonic-pad-photos { margin: 0 {$photonic_500px_photos_constrain_by_padding}px; }\n";
 		$css .= ".photonic-500px-stream img { ".$this->get_border_css('photonic_500px_photo_thumb_border').$this->get_padding_css('photonic_500px_photo_thumb_padding')." }\n";
+
+		$css .= ".photonic-zenfolio-stream .photonic-pad-photos { margin: 0 {$photonic_zenfolio_photos_constrain_by_padding}px; }\n";
+		$css .= ".photonic-zenfolio-stream .photonic-pad-photosets { margin: 0 {$photonic_zenfolio_sets_constrain_by_padding}px; }\n";
+		$css .= ".photonic-zenfolio-photo img { ".$this->get_border_css('photonic_zenfolio_photo_thumb_border').$this->get_padding_css('photonic_zenfolio_photo_thumb_padding')." }\n";
+		$css .= ".photonic-zenfolio-set-thumb img { ".$this->get_border_css('photonic_zenfolio_sets_set_thumb_border').$this->get_padding_css('photonic_zenfolio_sets_set_thumb_padding')." }\n";
 
 		$css .= ".photonic-instagram-stream .photonic-pad-photos { margin: 0 {$photonic_instagram_photos_constrain_by_padding}px; }\n";
 		$css .= ".photonic-instagram-photo img { ".$this->get_border_css('photonic_instagram_photo_thumb_border').$this->get_padding_css('photonic_instagram_photo_thumb_padding')." }\n";
@@ -388,6 +405,8 @@ class Photonic {
 		$this->register_extension('Photonic_500px_Processor', plugin_dir_path(__FILE__)."/extensions/Photonic_500px_Processor.php");
 		$this->register_extension('Photonic_SmugMug_Processor', plugin_dir_path(__FILE__)."/extensions/Photonic_SmugMug_Processor.php");
 		$this->register_extension('Photonic_Instagram_Processor', plugin_dir_path(__FILE__)."/extensions/Photonic_Instagram_Processor.php");
+		$this->register_extension('Photonic_Zenfolio_Processor', plugin_dir_path(__FILE__)."/extensions/Photonic_Zenfolio_Processor.php");
+		do_action('photonic_register_extensions');
 	}
 
 	public function register_extension($extension, $path) {
@@ -409,7 +428,7 @@ class Photonic {
 	 * @return string
 	 */
 	function modify_gallery($content, $attr = array()) {
-		global $post, $photonic_flickr_gallery, $photonic_picasa_gallery, $photonic_native_gallery, $photonic_500px_gallery, $photonic_smugmug_gallery, $photonic_default_gallery_type, $photonic_nested_shortcodes, $photonic_instagram_gallery;
+		global $post, $photonic_flickr_gallery, $photonic_picasa_gallery, $photonic_native_gallery, $photonic_500px_gallery, $photonic_smugmug_gallery, $photonic_default_gallery_type, $photonic_nested_shortcodes, $photonic_instagram_gallery, $photonic_zenfolio_gallery;
 		if ($attr == null) {
 			$attr = array();
 		}
@@ -463,6 +482,13 @@ class Photonic {
 					$photonic_instagram_gallery = new Photonic_Instagram_Processor();
 				}
 				$images = $photonic_instagram_gallery->get_gallery_images($attr);
+				break;
+
+			case 'zenfolio':
+				if (!isset($photonic_zenfolio_gallery)) {
+					$photonic_zenfolio_gallery = new Photonic_Zenfolio_Processor();
+				}
+				$images = $photonic_zenfolio_gallery->get_gallery_images($attr);
 				break;
 
 			case 'default':
@@ -586,7 +612,7 @@ class Photonic {
 
 					var thisId = this.id;
 					$j(this).cycle({
-						pause: 1,
+						pause: <?php if (empty($pause)) echo 0; else echo 1; ?>,
 						fit: 1,
 						width: '100%',
 						<?php if (isset($fx)) { ?>
@@ -681,6 +707,20 @@ class Photonic {
 		$photonic_smugmug_gallery->display_album();
 	}
 
+	/**
+	 * If a Zenfolio set thumbnail is being displayed on a page, clicking on the thumbnail should launch a popup displaying all
+	 * set photos. This function handles the click event and the subsequent invocation of the popup.
+	 *
+	 * @return void
+	 */
+	function zenfolio_display_set() {
+		global $photonic_zenfolio_gallery;
+		if (!isset($photonic_zenfolio_gallery)) {
+			$photonic_zenfolio_gallery = new Photonic_Zenfolio_Processor();
+		}
+		$photonic_zenfolio_gallery->display_set();
+	}
+
 	function flickr_sign() {
 		global $photonic_flickr_gallery;
 		if (!isset($photonic_flickr_gallery)) {
@@ -740,7 +780,7 @@ class Photonic {
 		}
 		$bg_string = "";
 		$bg_rgba_string = "";
-		if ($option_val['colortype'] == 'transparent') {
+		if (!isset($option_val['colortype']) || $option_val['colortype'] == 'transparent') {
 			$bg_string .= " transparent ";
 		}
 		else {
@@ -783,7 +823,7 @@ class Photonic {
 				$bg_string .= $rgb_string;
 			}
 		}
-		if (trim($option_val['image']) != '') {
+		if (isset($option_val['image']) && trim($option_val['image']) != '') {
 			$bg_string .= " url(".$option_val['image'].") ";
 			$bg_string .= $option_val['position']." ".$option_val['repeat'];
 
@@ -1261,6 +1301,21 @@ class Photonic {
 		$photonic_options_manager = new Photonic_Options_Manager(__FILE__);
 		$photonic_options_manager->init();
 		$photonic_options_manager->invoke_helper();
+	}
+
+	function verify_password() {
+		if (isset($_REQUEST['photonic-zenfolio-password'])) {
+			global $photonic_zenfolio_gallery;
+			if (!isset($photonic_zenfolio_gallery)) {
+				$photonic_zenfolio_gallery = new Photonic_Zenfolio_Processor();
+			}
+			$response = $photonic_zenfolio_gallery->verify_password();
+			if ($response == 'Success') {
+				//
+			}
+			echo $response;
+		}
+		die();
 	}
 }
 

@@ -158,6 +158,13 @@ $photonic_smugmug_options = array(
 		"grouping" => "smug-photos",
 		"type" => "blurb",),
 
+	array("name" => "Disable header thumbnail/title linking",
+		"desc" => "Check this to disable linking the album title and/or thumbnail to the SmugMug page.",
+		"id" => "smug_disable_title_link",
+		"grouping" => "smug-photos",
+		"type" => "checkbox",
+		"std" => ""),
+
 	array("name" => "Photo Title Display",
 		"desc" => "How do you want the title of the photos?",
 		"id" => "smug_photo_title_display",
@@ -169,13 +176,6 @@ $photonic_smugmug_options = array(
 			"tooltip" => "Using the <a href='http://bassistance.de/jquery-plugins/jquery-plugin-tooltip/'>JQuery Tooltip</a> plugin",
 		),
 		"std" => "tooltip"),
-
-	array("name" => "Disable popup linking",
-		"desc" => "Check this to disable linking the photo title in the popup to the original photo page on SmugMug.",
-		"id" => "smug_disable_title_link",
-		"grouping" => "smug-photos",
-		"type" => "checkbox",
-		"std" => ""),
 
 	array("name" => "Constrain Photos Per Row",
 		"desc" => "How do you want the control the number of photo thumbnails per row? This can be overridden by adding the '<code>columns</code>' parameter to the '<code>gallery</code>' shortcode.",
