@@ -1,5 +1,5 @@
 <?php
-global $photonic_setup_options, $photonic_generic_options, $photonic_flickr_options, $photonic_picasa_options, $photonic_smugmug_options, $photonic_500px_options, $photonic_instagram_options;
+global $photonic_setup_options, $photonic_generic_options, $photonic_flickr_options, $photonic_picasa_options, $photonic_smugmug_options, $photonic_500px_options, $photonic_instagram_options, $photonic_zenfolio_options;
 
 $photonic_setup_options = array();
 
@@ -30,5 +30,10 @@ foreach ($photonic_smugmug_options as $option) {
 
 require_once(plugin_dir_path(__FILE__) . "/instagram-options.php");
 foreach ($photonic_instagram_options as $option) {
+	$photonic_setup_options[] = $option;
+}
+
+require_once(plugin_dir_path(__FILE__) . "/zenfolio-options.php");
+foreach ($photonic_zenfolio_options as $option) {
 	$photonic_setup_options[] = $option;
 }

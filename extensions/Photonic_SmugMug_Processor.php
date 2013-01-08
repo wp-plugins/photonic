@@ -156,10 +156,21 @@ class Photonic_SmugMug_Processor extends Photonic_OAuth1_Processor {
 						$insert = '';
 						$insert .= "<div class='photonic-smug-stream'>";
 						$insert .= "<div class='photonic-smug-album'>";
-						$insert .= "<a class='photonic-header-thumb photonic-smug-album-solo-thumb' href='{$album->URL}'><img class='random-image' src='https://secure.smugmug.com/photos/random.mg?AlbumID={$album->id}&AlbumKey={$album->Key}&Size=75x75&rand=$rand' /></a>";
+						global $photonic_smug_disable_title_link;
+						if (empty($photonic_smug_disable_title_link)) {
+							$insert .= "<a class='photonic-header-thumb photonic-smug-album-solo-thumb' href='{$album->URL}'><img class='random-image' src='https://secure.smugmug.com/photos/random.mg?AlbumID={$album->id}&AlbumKey={$album->Key}&Size=75x75&rand=$rand' /></a>";
+						}
+						else {
+							$insert .= "<div class='photonic-header-thumb photonic-smug-album-solo-thumb'><img class='random-image' src='https://secure.smugmug.com/photos/random.mg?AlbumID={$album->id}&AlbumKey={$album->Key}&Size=75x75&rand=$rand' /></div>";
+						}
 						$insert .= "<div class='photonic-header-details photonic-smug-album-details'>";
 						$insert .= "<div class='photonic-header-title photonic-smug-album-title'>";
-						$insert .= "<a href='{$album->URL}'>".$album->Title."</a>";
+						if (empty($photonic_smug_disable_title_link)) {
+							$insert .= "<a href='{$album->URL}'>".$album->Title."</a>";
+						}
+						else {
+							$insert .= $album->Title;
+						}
 						$insert .= "</div>";
 						$insert .= "<span class='photonic-header-info photonic-set-pop-info'>".sprintf(__('%s photos', 'photonic'), $album->ImageCount)."</span>";
 						$insert .= "</div>";
