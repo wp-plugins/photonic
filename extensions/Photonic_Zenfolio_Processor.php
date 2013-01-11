@@ -666,24 +666,36 @@ class Photonic_Zenfolio_Processor extends Photonic_Processor {
 		if (is_array($response->Photos)) {
 			global $photonic_zenfolio_link_set_page, $photonic_zenfolio_hide_set_thumbnail, $photonic_zenfolio_hide_set_title, $photonic_zenfolio_hide_set_photo_count;
 
-			$ret .= $this->process_object_header(
-				$response,
-				'set',
-				array(
-					'thumbnail' => !empty($photonic_zenfolio_hide_set_thumbnail),
-					'title' => !empty($photonic_zenfolio_hide_set_title),
-					'counter' => !empty($photonic_zenfolio_hide_set_photo_count),
-				),
-				array(
-					'photos' => $response->ImageCount,
-				),
-				!empty($photonic_zenfolio_link_set_page),
-				$display,
-				$thumb_size
-			);
+			$header = $this->get_header_object($response, $thumb_size);
+			$hidden = array('thumbnail' => !empty($photonic_zenfolio_hide_set_thumbnail), 'title' => !empty($photonic_zenfolio_hide_set_title), 'counter' => !empty($photonic_zenfolio_hide_set_photo_count));
+			$counters = array('photos' => $response->ImageCount);
+
+			global $photonic;
+			$ret .= $photonic->printer->process_object_header('zenfolio', $header, 'set', $hidden, $counters, empty($photonic_zenfolio_link_set_page), $display);
 			$ret .= $this->process_photos($response->Photos, $columns, $display, $thumb_size);
 		}
 		return $ret;
+	}
+
+	/**
+	 * Takes a Zenfolio response object and converts it into an associative array with a title, a thumbnail URL and a link URL.
+	 *
+	 * @param $object
+	 * @param $thumb_size
+	 * @return array
+	 */
+	public function get_header_object($object, $thumb_size) {
+		$header = array();
+
+		if (!empty($object->Title)) {
+			$header['title'] = $object->Title;
+			if (!empty($object->TitlePhoto)) {
+				$photo = $object->TitlePhoto;
+				$header['thumb_url'] = 'http://' . $photo->UrlHost . $photo->UrlCore . '-' . $thumb_size . '.jpg';
+				$header['link_url'] = $object->PageUrl;
+			}
+		}
+		return $header;
 	}
 
 	/**
@@ -758,123 +770,26 @@ class Photonic_Zenfolio_Processor extends Photonic_Processor {
 		global $photonic_zenfolio_hide_empty_groups;
 		if (!empty($group->Title) && ($image_count > 0 || empty($photonic_zenfolio_hide_empty_groups))) {
 			global $photonic_zenfolio_link_group_page, $photonic_zenfolio_hide_group_title, $photonic_zenfolio_hide_group_photo_count, $photonic_zenfolio_hide_group_group_count, $photonic_zenfolio_hide_group_set_count;
-			$ret .= $this->process_object_header(
-				$group,
-				'group',
-				array(
-					'thumbnail' => true,
-					'title' => !empty($photonic_zenfolio_hide_group_title),
-					'counter' => !(empty($photonic_zenfolio_hide_group_photo_count) || empty($photonic_zenfolio_hide_group_group_count) || empty($photonic_zenfolio_hide_group_set_count)),
-				),
-				array(
-					'sets' => empty($photonic_zenfolio_hide_group_set_count) ? count($photosets) : 0,
-					'groups' => empty($photonic_zenfolio_hide_group_group_count) ? count($groups) : 0,
-					'photos' => empty($photonic_zenfolio_hide_group_photo_count)? $image_count : 0,
-				),
-				!empty($photonic_zenfolio_link_group_page),
-				$display,
-				$thumb_size
+			$header = $this->get_header_object($group, $thumb_size);
+			$hidden = array(
+				'thumbnail' => true,
+				'title' => !empty($photonic_zenfolio_hide_group_title),
+				'counter' => !(empty($photonic_zenfolio_hide_group_photo_count) || empty($photonic_zenfolio_hide_group_group_count) || empty($photonic_zenfolio_hide_group_set_count)),
 			);
+			$counters = array(
+				'sets' => empty($photonic_zenfolio_hide_group_set_count) ? count($photosets) : 0,
+				'groups' => empty($photonic_zenfolio_hide_group_group_count) ? count($groups) : 0,
+				'photos' => empty($photonic_zenfolio_hide_group_photo_count)? $image_count : 0,
+			);
+
+			global $photonic;
+			$ret .= $photonic->printer->process_object_header('zenfolio', $header, 'set', $hidden, $counters, empty($photonic_zenfolio_link_group_page), $display);
 		}
 
 		$ret .= $this->process_sets($photosets, $columns, $thumb_size);
 
 		foreach ($groups as $group) {
 			$ret .= $this->process_group($group, $columns, $display, $thumb_size);
-		}
-
-		return $ret;
-	}
-
-	/**
-	 * Displays the header for a Group or a Photoset, with a thumbnail (if available), a title and photo/photoset/group counts as available.
-	 *
-	 * @param $object
-	 * @param string $type
-	 * @param array $hidden
-	 * @param array $counters
-	 * @param $link
-	 * @param string $display
-	 * @param int $thumb_size
-	 * @return string
-	 */
-	function process_object_header($object, $type = 'group', $hidden = array(), $counters = array(), $link, $display = 'in-page', $thumb_size = 1) {
-		$ret = '';
-		if (!empty($object->Title)) {
-			global $photonic_external_links_in_new_tab;
-			$title = esc_attr($object->Title);
-			if (!empty($photonic_external_links_in_new_tab)) {
-				$target = ' target="_blank" ';
-			}
-			else {
-				$target = '';
-			}
-
-			$anchor = '';
-			if (!empty($object->TitlePhoto)) {
-				$photo = $object->TitlePhoto;
-				$thumb = 'http://'.$photo->UrlHost.$photo->UrlCore.'-'.$thumb_size.'.jpg';
-				$image = '<img src="'.$thumb.'" alt="'.$title.'" />';
-
-				if ($link) {
-					$anchor = "<a href='".$object->PageUrl."' class='photonic-header-thumb photonic-zenfolio-$type-solo-thumb' title='".$title."' $target>".$image."</a>";
-				}
-				else {
-					$anchor = "<div class='photonic-header-thumb photonic-zenfolio-$type-solo-thumb'>$image</div>";
-				}
-			}
-
-			if (empty($hidden['thumbnail']) || empty($hidden['title']) || empty($hidden['counter'])) {
-				$ret .= "<div class='photonic-zenfolio-$type'>";
-
-				if (empty($hidden['thumbnail'])) {
-					$ret .= $anchor;
-				}
-				if (empty($hidden['title']) || empty($hidden['counter'])) {
-					$ret .= "<div class='photonic-header-details photonic-$type-details'>";
-					if (empty($hidden['title'])) {
-						if ($link) {
-							$ret .= "<div class='photonic-header-title photonic-$type-title'><a href='".$object->PageUrl."' $target>".$title.'</a></div>';
-						}
-						else {
-							$ret .= "<div class='photonic-header-title photonic-$type-title'>".$title.'</div>';
-						}
-					}
-					if (empty($hidden['counter'])) {
-						$counter_texts = array();
-						if (!empty($counters['groups'])) {
-							if ($counters['groups'] == 1) {
-								$counter_texts[] = __('1 group', 'photonic');
-							}
-							else {
-								$counter_texts[] = sprintf(__('%s groups', 'photonic'), $counters['groups']);
-							}
-						}
-						if (!empty($counters['sets'])) {
-							if ($counters['sets'] == 1) {
-								$counter_texts[] = __('1 set', 'photonic');
-							}
-							else {
-								$counter_texts[] = sprintf(__('%s sets', 'photonic'), $counters['sets']);
-							}
-						}
-						if (!empty($counters['photos'])) {
-							if ($counters['photos'] == 1) {
-								$counter_texts[] = __('1 photo', 'photonic');
-							}
-							else {
-								$counter_texts[] = sprintf(__('%s photos', 'photonic'), $counters['photos']);
-							}
-						}
-
-						if (!empty($counter_texts)) {
-							$ret .= "<span class='photonic-header-info photonic-$type-photos'>".implode(', ', $counter_texts).'</span>';
-						}
-					}
-					$ret .= "</div><!-- .photonic-$type-details -->";
-				}
-				$ret .= "</div>";
-			}
 		}
 
 		return $ret;

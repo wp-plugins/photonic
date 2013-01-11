@@ -598,6 +598,18 @@ $j(document).ready(function() {
 		return false;
 	});
 
+	$j('.photonic-login-box-flickr:not(:first)').remove();
+	$j('.photonic-login-box-flickr').attr({id: 'photonic-login-box-flickr'});
+	$j('.photonic-login-box-picasa:not(:first)').remove();
+	$j('.photonic-login-box-picasa').attr({id: 'photonic-login-box-picasa'});
+	$j('.photonic-login-box-500px:not(:first)').remove();
+	$j('.photonic-login-box-500px').attr({id: 'photonic-login-box-500px'});
+	$j('.photonic-login-box-smugmug:not(:first)').remove();
+	$j('.photonic-login-box-smugmug').attr({id: 'photonic-login-box-smugmug'});
+	$j('.photonic-login-box-zenfolio:not(:first)').remove();
+	$j('.photonic-login-box-zenfolio').attr({id: 'photonic-login-box-zenfolio'});
+	$j('.photonic-login-box-instagram:not(:first)').remove();
+	$j('.photonic-login-box-instagram').attr({id: 'photonic-login-box-instagram'});
 /*
 	$j('.photonic-password-prompter').dialog({
 		autoOpen: false,

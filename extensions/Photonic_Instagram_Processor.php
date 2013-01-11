@@ -187,12 +187,11 @@ class Photonic_Instagram_Processor extends Photonic_OAuth2_Processor {
 			}
 		}
 
-		global $photonic_instagram_login_shown, $photonic_instagram_allow_oauth;
+		global $photonic_instagram_allow_oauth;
 		$ret = '';
-		if (!$photonic_instagram_login_shown && $photonic_instagram_allow_oauth && !$this->oauth_done && $auth_required) {
-			$post_id = get_the_ID();
+		$post_id = get_the_ID();
+		if (!empty($photonic_instagram_allow_oauth) && !$this->oauth_done && $auth_required) {
 			$ret .= $this->get_login_box($post_id);
-			$photonic_instagram_login_shown = true;
 		}
 
 		return $ret.$this->make_call($query_url, $display_what, $columns, $thumb_size, $auth_required);

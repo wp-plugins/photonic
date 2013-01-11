@@ -65,6 +65,13 @@ $fields = array(
 			),
 
 			array(
+				'id' => 'ids',
+				'name' => __('Image IDs', 'photonic'),
+				'type' => 'text',
+				'hint' => __('Comma-separated. You can specify this if there is no Gallery ID specified.', 'photonic'),
+			),
+
+			array(
 				'id' => 'style',
 				'name' => __('Display Style', 'photonic'),
 				'type' => 'select',

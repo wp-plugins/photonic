@@ -11,7 +11,7 @@
  */
 
 abstract class Photonic_Processor {
-	public $library, $thumb_size, $full_size, $api_key, $api_secret, $provider, $nonce, $oauth_timestamp, $signature_parameters, $oauth_version, $oauth_done, $show_more_link, $is_server_down, $is_more_required;
+	public $library, $thumb_size, $full_size, $api_key, $api_secret, $provider, $nonce, $oauth_timestamp, $signature_parameters, $oauth_version, $oauth_done, $show_more_link, $is_server_down, $is_more_required, $login_shown, $login_box_counter;
 
 	function __construct() {
 		global $photonic_slideshow_library;
@@ -22,6 +22,8 @@ abstract class Photonic_Processor {
 		$this->show_more_link = false;
 		$this->is_server_down = false;
 		$this->is_more_required = true;
+		$this->login_shown = false;
+		$this->login_box_counter = 0;
 	}
 
 	/**
@@ -189,7 +191,8 @@ abstract class Photonic_Processor {
 		global $$login_box_option, $$login_button_option;
 		$login_box = $$login_box_option;
 		$login_button = $$login_button_option;
-		$ret = '<div id="photonic-login-box-'.$this->provider.'" class="photonic-login-box photonic-login-box-'.$this->provider.'">';
+		$this->login_box_counter++;
+		$ret = '<div id="photonic-login-box-'.$this->provider.'-'.$this->login_box_counter.'" class="photonic-login-box photonic-login-box-'.$this->provider.'">';
 		if ($this->is_server_down) {
 			$ret .= __("The authentication server is down. Please try after some time.", 'photonic');
 		}

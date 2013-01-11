@@ -138,12 +138,11 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 
 		$query_url .= 'imgmax=1600u';
 
-		global $photonic_picasa_login_shown, $photonic_picasa_allow_oauth;
+		global $photonic_picasa_allow_oauth;
 		$ret = '';
-		if (!$photonic_picasa_login_shown && $photonic_picasa_allow_oauth && !$this->oauth_done) {
+		if ($photonic_picasa_allow_oauth && !$this->oauth_done) {
 			$post_id = get_the_ID();
 			$ret .= $this->get_login_box($post_id);
-			$photonic_picasa_login_shown = true;
 		}
 
 		return $ret.$this->make_call($query_url, $display, $view, $attr);

@@ -1,3 +1,9 @@
+Version 1.41 - 10th Jan 2013
+============================
+1.	Resolved a conflict between JetPack "Publicize" and protected access. The login box was not showing up.
+2.	Added the "ids" parameter to the shortcode insertion UI.
+3.	Added options to control thumbnail, title and photo count display in SmugMug album headers
+
 Version 1.40 - 07th Jan 2013
 ============================
 1.	Added Zenfolio support for public photos.
