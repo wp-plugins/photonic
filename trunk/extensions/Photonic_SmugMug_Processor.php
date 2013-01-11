@@ -93,11 +93,10 @@ class Photonic_SmugMug_Processor extends Photonic_OAuth1_Processor {
 		}
 
 		$ret = '';
-		global $photonic_smug_login_shown, $photonic_smug_allow_oauth, $photonic_smug_oauth_done;
-		if (!$photonic_smug_login_shown && $photonic_smug_allow_oauth && is_single() && !$photonic_smug_oauth_done) {
+		global $photonic_smug_allow_oauth, $photonic_smug_oauth_done;
+		if ($photonic_smug_allow_oauth && is_single() && !$photonic_smug_oauth_done) {
 			$post_id = get_the_ID();
 			$ret .= $this->get_login_box($post_id);
-			$photonic_smug_login_shown = true;
 		}
 
 		return $ret.$this->make_chained_calls($chained_calls, $args, $attr);
@@ -152,30 +151,21 @@ class Photonic_SmugMug_Processor extends Photonic_OAuth1_Processor {
 						if (isset($album->Passworded) && $album->Passworded && !isset($album->Password) && !isset($signed_args['Password'])) {
 							$passworded = true;
 						}
+						$header_object = array();
 						$rand = rand(1000, 9999);
-						$insert = '';
-						$insert .= "<div class='photonic-smug-stream'>";
-						$insert .= "<div class='photonic-smug-album'>";
-						global $photonic_smug_disable_title_link;
-						if (empty($photonic_smug_disable_title_link)) {
-							$insert .= "<a class='photonic-header-thumb photonic-smug-album-solo-thumb' href='{$album->URL}'><img class='random-image' src='https://secure.smugmug.com/photos/random.mg?AlbumID={$album->id}&AlbumKey={$album->Key}&Size=75x75&rand=$rand' /></a>";
-						}
-						else {
-							$insert .= "<div class='photonic-header-thumb photonic-smug-album-solo-thumb'><img class='random-image' src='https://secure.smugmug.com/photos/random.mg?AlbumID={$album->id}&AlbumKey={$album->Key}&Size=75x75&rand=$rand' /></div>";
-						}
-						$insert .= "<div class='photonic-header-details photonic-smug-album-details'>";
-						$insert .= "<div class='photonic-header-title photonic-smug-album-title'>";
-						if (empty($photonic_smug_disable_title_link)) {
-							$insert .= "<a href='{$album->URL}'>".$album->Title."</a>";
-						}
-						else {
-							$insert .= $album->Title;
-						}
-						$insert .= "</div>";
-						$insert .= "<span class='photonic-header-info photonic-set-pop-info'>".sprintf(__('%s photos', 'photonic'), $album->ImageCount)."</span>";
-						$insert .= "</div>";
-						$insert .= "</div>";
-						$insert .= "</div>";
+						$header_object['thumb_url'] = "https://secure.smugmug.com/photos/random.mg?AlbumID={$album->id}&AlbumKey={$album->Key}&Size=75x75&rand=$rand";
+						$header_object['title'] = $album->Title;
+						$header_object['link_url'] = $album->URL;
+
+						global $photonic, $photonic_smug_disable_title_link, $photonic_smug_hide_album_thumbnail, $photonic_smug_hide_album_title, $photonic_smug_hide_album_photo_count;
+						$hidden = array(
+							'thumbnail' => !empty($photonic_smug_hide_album_thumbnail),
+							'title' => !empty($photonic_smug_hide_album_title),
+							'counter' => !empty($photonic_smug_hide_album_photo_count),
+						);
+						$counters = array('photos' => $album->ImageCount);
+						$insert = $photonic->printer->process_object_header('smug', $header_object, 'album', $hidden, $counters, empty($photonic_smug_disable_title_link));
+
 						if (isset($shortcode_attr['display']) && $shortcode_attr['display'] == 'popup') {
 							// Do nothing. We will insert this into the popup.
 						}

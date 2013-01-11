@@ -3,7 +3,7 @@
  * Plugin Name: Photonic Gallery for Flickr, Picasa, SmugMug, 500px, Zenfolio and Instagram
  * Plugin URI: http://aquoid.com/news/plugins/photonic/
  * Description: Extends the native gallery shortcode to support Flickr, Picasa, SmugMug, 500px, Zenfolio and Instagram. JS libraries like Fancybox, Colorbox and PrettyPhoto are supported. The plugin also helps convert a regular WP gallery into a slideshow.
- * Version: 1.40
+ * Version: 1.41
  * Author: Sayontan Sinha
  * Author URI: http://mynethome.net/blog
  * License: GNU General Public License (GPL), v3 (or newer)
@@ -17,11 +17,11 @@
  */
 
 class Photonic {
-	var $version, $registered_extensions, $defaults, $plugin_name, $options_page_name, $settings_page, $helper_page;
+	var $version, $registered_extensions, $defaults, $plugin_name, $options_page_name, $settings_page, $helper_page, $printer;
 	function Photonic() {
 		global $photonic_options, $photonic_setup_options, $photonic_is_ie6;
 		if (!defined('PHOTONIC_VERSION')) {
-			define('PHOTONIC_VERSION', '1.40');
+			define('PHOTONIC_VERSION', '1.41');
 		}
 
 		if (!defined('PHOTONIC_PATH')) {
@@ -29,9 +29,11 @@ class Photonic {
 		}
 
 		require_once(plugin_dir_path(__FILE__)."/options/photonic-options.php");
+		require_once(plugin_dir_path(__FILE__)."/libraries/Photonic_Printer.php");
 
 		$this->plugin_name = plugin_basename(__FILE__);
 		$this->set_version();
+		$this->printer = new Photonic_Printer();
 
 		add_action('admin_menu', array(&$this, 'add_admin_menu'));
 		add_action('admin_enqueue_scripts', array(&$this, 'add_admin_scripts'));

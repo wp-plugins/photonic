@@ -60,9 +60,10 @@ The following Zenfolio concepts are supported in Photonic:
 *	<a href='http://aquoid.com/news/plugins/photonic/zenfolio/photos/'>Photos</a>
 *	<a href='http://aquoid.com/news/plugins/photonic/zenfolio/photosets/'>PhotoSets</a>
 *	<a href='http://aquoid.com/news/plugins/photonic/zenfolio/groups/'>Groups</a>
-*	<a href='aquoid.com/news/plugins/photonic/zenfolio/group-hierarchy/'>Group Hierarchies</a>
+*	<a href='http://aquoid.com/news/plugins/photonic/zenfolio/group-hierarchy/'>Group Hierarchies</a>
 
-For demos of Zenfolio support visit the <a href='http://aquoid.com/news/plugins/photonic/zenfolio/'>Zenfolio page</a>.
+For demos of Zenfolio support visit the <a href='http://aquoid.com/news/plugins/photonic/zenfolio/'>Zenfolio page</a>. Note that
+access to protected / private content in Zenfolio is not currently supported.
 
 = Instagram Support =
 
@@ -135,6 +136,12 @@ Yes, but only for the plugin front-end. The admin panel is not translated at thi
 in the third-party JS scripts are not translated.
 
 == Changelog ==
+
+= 1.41 =
+
+*	Resolved a conflict between JetPack "Publicize" and protected access. The login box was not showing up.
+*	Added the "ids" parameter to the shortcode insertion UI.
+*	Added options to control thumbnail, title and photo count display in SmugMug album headers
 
 = 1.40 =
 

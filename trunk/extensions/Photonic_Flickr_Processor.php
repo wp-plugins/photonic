@@ -44,7 +44,7 @@ class Photonic_Flickr_Processor extends Photonic_OAuth1_Processor {
 	 */
 	function get_gallery_images($attr = array()) {
 		global $photonic_flickr_api_key, $photonic_flickr_position, $photonic_carousel_mode;
-		global $photonic_flickr_login_shown, $photonic_flickr_allow_oauth, $photonic_flickr_oauth_done;
+		global $photonic_flickr_allow_oauth, $photonic_flickr_oauth_done;
 
 		$attr = array_merge(array(
 			'style' => 'default',
@@ -243,10 +243,9 @@ class Photonic_Flickr_Processor extends Photonic_OAuth1_Processor {
 			$carousel = '';
 		}
 
-		if (!$photonic_flickr_login_shown && $photonic_flickr_allow_oauth && is_singular() && !$photonic_flickr_oauth_done && $login_required) {
+		if ($photonic_flickr_allow_oauth && is_singular() && !$photonic_flickr_oauth_done && $login_required) {
 			$post_id = get_the_ID();
 			$ret .= $this->get_login_box($post_id);
-			$photonic_flickr_login_shown = true;
 		}
 
 		foreach ($query_urls as $query_url) {
