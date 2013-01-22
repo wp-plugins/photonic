@@ -1,3 +1,14 @@
+Version 1.42 - 21st Jan 2013
+============================
+1.	Massively refactored code. Several lines of JS code taken off, lots of PHP code modularized.
+2.	Added option to use a Colorbox skin defined in the theme folder
+3.	Updated SimpleModal, Colorbox and PrettyPhoto to latest versions.
+4.	Swapped the use of "on" for "live". This means Photonic needs WP 3.3 at least (since "on" was introduced in JQuery 1.7)
+5.	Removed the "View in Flickr" text from the plugin.
+6.	Ensured consistent behaviour with the lightbox title linking behaviour across all providers.
+7.	Introduced non-bundled lightbox support, with support for FancyBox2
+8.	Removed the modified scripts for FancyBox and ColorBox - now the original scripts are used.
+
 Version 1.41 - 10th Jan 2013
 ============================
 1.	Resolved a conflict between JetPack "Publicize" and protected access. The login box was not showing up.

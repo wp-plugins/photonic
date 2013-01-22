@@ -60,6 +60,13 @@ $photonic_picasa_options = array(
 		),
 		"std" => "desc-title"),
 
+	array("name" => "Disable lightbox linking",
+		"desc" => "Check this to disable linking the photo title in the lightbox to the original photo.",
+		"id" => "picasa_disable_title_link",
+		"grouping" => "picasa-settings",
+		"type" => "checkbox",
+		"std" => ""),
+
 	array("name" => "Picasa Photos - \"In-page\" View",
 		"desc" => "Control settings for Picasa Photos when displayed in your page",
 		"category" => "picasa-photos",

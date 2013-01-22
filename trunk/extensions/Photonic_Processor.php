@@ -11,11 +11,17 @@
  */
 
 abstract class Photonic_Processor {
-	public $library, $thumb_size, $full_size, $api_key, $api_secret, $provider, $nonce, $oauth_timestamp, $signature_parameters, $oauth_version, $oauth_done, $show_more_link, $is_server_down, $is_more_required, $login_shown, $login_box_counter;
+	public $library, $thumb_size, $full_size, $api_key, $api_secret, $provider, $nonce, $oauth_timestamp, $signature_parameters, $link_lightbox_title,
+		$oauth_version, $oauth_done, $show_more_link, $is_server_down, $is_more_required, $login_shown, $login_box_counter, $gallery_index;
 
 	function __construct() {
-		global $photonic_slideshow_library;
-		$this->library = $photonic_slideshow_library;
+		global $photonic_slideshow_library, $photonic_custom_lightbox;
+		if ($photonic_slideshow_library != 'custom') {
+			$this->library = $photonic_slideshow_library;
+		}
+		else {
+			$this->library = $photonic_custom_lightbox;
+		}
 		$this->nonce = Photonic_Processor::nonce();
 		$this->oauth_timestamp = time();
 		$this->oauth_version = '1.0';
@@ -24,6 +30,7 @@ abstract class Photonic_Processor {
 		$this->is_more_required = true;
 		$this->login_shown = false;
 		$this->login_box_counter = 0;
+		$this->gallery_index = 0;
 	}
 
 	/**
@@ -230,5 +237,332 @@ abstract class Photonic_Processor {
 		}
 		$this->is_more_required = true;
 		return '';
+	}
+
+	/**
+	 * Prints the header for a section. Typically used for albums / photosets / groups, where some generic information about the album / photoset / group is available.
+	 *
+	 * @param array $header The header object, which contains the title, thumbnail source URL and the link where clicking on the thumb will take you
+	 * @param string $type Indicates what type of object is being displayed like gallery / photoset / album etc. This is added to the CSS class.
+	 * @param array $hidden Contains the elements that should be hidden from the header display.
+	 * @param array $counters Contains counts of the object that the header represents. In most cases this has just one value. Zenfolio objects have multiple values.
+	 * @param string $link Should clicking on the thumbnail / title take you anywhere?
+	 * @param string $display Indicates if this is on the page or in a popup
+	 * @return string
+	 */
+	function process_object_header($header, $type = 'group', $hidden = array(), $counters = array(), $link, $display = 'in-page') {
+		$ret = '';
+		if (!empty($header['title'])) {
+			global $photonic_external_links_in_new_tab;
+			$title = esc_attr($header['title']);
+			if (!empty($photonic_external_links_in_new_tab)) {
+				$target = ' target="_blank" ';
+			}
+			else {
+				$target = '';
+			}
+
+			$anchor = '';
+			if (!empty($header['thumb_url'])) {
+				$image = '<img src="'.$header['thumb_url'].'" alt="'.$title.'" />';
+
+				if ($link) {
+					$anchor = "<a href='".$header['link_url']."' class='photonic-header-thumb photonic-{$this->provider}-$type-solo-thumb' title='".$title."' $target>".$image."</a>";
+				}
+				else {
+					$anchor = "<div class='photonic-header-thumb photonic-{$this->provider}-$type-solo-thumb'>$image</div>";
+				}
+			}
+
+			if (empty($hidden['thumbnail']) || empty($hidden['title']) || empty($hidden['counter'])) {
+				$popup_header_class = '';
+				if ($display == 'popup') {
+					$popup_header_class = 'photonic-panel-header';
+				}
+				$ret .= "<div class='photonic-{$this->provider}-$type $popup_header_class'>";
+
+				if (empty($hidden['thumbnail'])) {
+					$ret .= $anchor;
+				}
+				if (empty($hidden['title']) || empty($hidden['counter'])) {
+					$ret .= "<div class='photonic-header-details photonic-$type-details'>";
+					if (empty($hidden['title'])) {
+						if ($link) {
+							$ret .= "<div class='photonic-header-title photonic-$type-title'><a href='".$header['link_url']."' $target>".$title.'</a></div>';
+						}
+						else {
+							$ret .= "<div class='photonic-header-title photonic-$type-title'>".$title.'</div>';
+						}
+					}
+					if (empty($hidden['counter'])) {
+						$counter_texts = array();
+						if (!empty($counters['groups'])) {
+							$counter_texts[] = sprintf(_n('%s group', '%s groups', $counters['groups'], 'photonic'), $counters['groups']);
+						}
+						if (!empty($counters['sets'])) {
+							$counter_texts[] = sprintf(_n('%s set', '%s sets', $counters['sets'], 'photonic'), $counters['sets']);
+						}
+						if (!empty($counters['photos'])) {
+							$counter_texts[] = sprintf(_n('%s photo', '%s photos', $counters['photos'], 'photonic'), $counters['photos']);
+						}
+
+						apply_filters('photonic_modify_counter_texts', $counter_texts, $counters);
+
+						if (!empty($counter_texts)) {
+							$ret .= "<span class='photonic-header-info photonic-$type-photos'>".implode(', ', $counter_texts).'</span>';
+						}
+					}
+					$ret .= "</div><!-- .photonic-$type-details -->";
+				}
+				$ret .= "</div>";
+			}
+		}
+
+		return $ret;
+	}
+
+	function get_popup_tooltip($option) {
+		if ('tooltip' == $option) {
+			return "<script type='text/javascript'>\$j('.photonic-{$this->provider}-panel a').each(function() { \$j(this).data('title', \$j(this).attr('title')); }); \$j('.photonic-{$this->provider}-panel a').each(function() { if (!(\$j(this).parent().hasClass('photonic-header-title'))) { var iTitle = \$j(this).find('img').attr('alt'); \$j(this).tooltip({ bodyHandler: function() { return iTitle; }, showURL: false });}})</script>";
+		}
+		return '';
+	}
+
+	function get_popup_lightbox() {
+		$ret = '';
+		if ($this->library == 'fancybox') {
+			$ret .= "<script type='text/javascript'>\$j('a.launch-gallery-fancybox').each(function() { \$j(this).fancybox({ transitionIn:'elastic', transitionOut:'elastic',speedIn:600,speedOut:200,overlayShow:true,overlayOpacity:0.8,overlayColor:\"#000\",titleShow:Photonic_JS.fbox_show_title,titlePosition:Photonic_JS.fbox_title_position,titleFormat:photonicFormatFancyBoxTitle});});</script>";
+		}
+		else if ($this->library == 'colorbox') {
+			$ret .= "<script type='text/javascript'>\$j('a.launch-gallery-colorbox').each(function() { \$j(this).colorbox({ opacity: 0.8, maxWidth: '95%', maxHeight: '95%', title: photonicLightBoxTitle(this), slideshow: Photonic_JS.slideshow_mode, slideshowSpeed: Photonic_JS.slideshow_interval });});</script>";
+		}
+		else if ($this->library == 'prettyphoto') {
+			$ret .= "<script type='text/javascript'>\$j(\"a[rel^='photonic-prettyPhoto']\").prettyPhoto({ theme: Photonic_JS.pphoto_theme, autoplay_slideshow: Photonic_JS.slideshow_mode, slideshow: parseInt(Photonic_JS.slideshow_interval), show_title: false, social_tools: '', deeplinking: false });</script>";
+		}
+		else if ($this->library == 'fancybox2') {
+			$ret .= "<script type='text/javascript'>\$j('a.launch-gallery-fancybox').fancybox({ autoPlay:Photonic_JS.slideshow_mode,playSpeed: parseInt(Photonic_JS.slideshow_interval, 10),beforeLoad: function(){ if (Photonic_JS.fbox_show_title) {this.title = \$j(this.element).data('title'); }},helpers: { title: { type: Photonic_JS.fbox_title_position } }});</script>";
+		}
+		return $ret;
+	}
+
+	function generate_level_1_gallery($photos, $title_position, $row_constraints = array(),
+		$columns = 'auto', $display = 'in-page', $sizes = array(), $show_lightbox = true, $type = 'photo') {
+		$col_class = '';
+		if (Photonic::check_integer($columns)) {
+			$col_class = 'photonic-gallery-'.$columns.'c';
+		}
+
+		if ($col_class == '' && $row_constraints['constraint-type'] == 'padding') {
+			$col_class = 'photonic-pad-photos';
+		}
+		else if ($col_class == '') {
+			$col_class = 'photonic-gallery-'.$row_constraints['count'].'c';
+		}
+
+/*		$a_class = '';
+		$a_rel = '';
+		if ($this->library != 'none' && $show_lightbox) {
+			$a_class = 'launch-gallery-'.$this->library." ".$this->library;
+			if ($display == 'popup') {
+				$a_class .= ' '.$col_class;
+			}
+			$a_class = "class='$a_class'";
+
+			$a_rel = 'lightbox-photonic-'.$this->provider.'-stream-'.$this->gallery_index;
+			if ($this->library == 'prettyphoto') {
+				$a_rel = 'photonic-prettyPhoto['.$a_rel.']';
+			}
+			$a_rel = "rel='$a_rel'";
+		}*/
+		$link_attributes = $this->get_lightbox_attributes($display, $col_class, $show_lightbox);
+
+		$ul_class = "class='title-display-$title_position'";
+		if ($display == 'popup') {
+			$ul_class = "class='slideshow-grid-panel lib-{$this->library} title-display-$title_position'";
+		}
+
+		$ret = "<ul $ul_class>";
+
+		global $photonic_external_links_in_new_tab;
+		if (!empty($photonic_external_links_in_new_tab)) {
+			$target = " target='_blank' ";
+		}
+		else {
+			$target = '';
+		}
+
+		$counter = 0;
+		global $photonic_gallery_panel_items;
+		foreach ($photos as $photo) {
+			$counter++;
+			$thumb = $photo['thumbnail'];
+			$orig = $photo['main_image'];
+			$url = $photo['main_page'];
+			$title = esc_attr($photo['title']);
+			$alt = esc_attr($photo['alt_title']);
+			$orig = ($this->library == 'none' || !$show_lightbox) ? $url : $orig;
+
+			$shown_title = '';
+			if ($title_position == 'below') {
+				$shown_title = '<span class="photonic-photo-title">'.wp_specialchars_decode($alt, ENT_QUOTES).'</span>';
+			}
+			if ($display == 'in-page') {
+				$ret .= "\n\t".'<li class="photonic-'.$this->provider.'-image photonic-'.$this->provider.'-'.$type.' '.$col_class.'">';
+			}
+			else if ($counter % $photonic_gallery_panel_items == 1 && $display != 'in-page') {
+				$ret .= "\n\t".'<li class="photonic-'.$this->provider.'-image photonic-'.$this->provider.'-'.$type.'">';
+			}
+
+			$style = array();
+			if (!empty($sizes['thumb-width'])) $style[] = 'width:'.$sizes['thumb-width'].'px';
+			if (!empty($sizes['thumb-height'])) $style[] = 'height:'.$sizes['thumb-height'].'px';
+			if (!empty($style)) $style = 'style="'.implode(';', $style).'"'; else $style = '';
+			$title_link_start = $this->link_lightbox_title ? esc_attr("<a href='$url' $target>") : '';
+			$title_link_end = $this->link_lightbox_title ? esc_attr("</a>") : '';
+			if ($display == 'in-page') {
+				//$ret .= '<a href="'.$orig.'" '.$a_class.' '.$a_rel.' title="'.$title.'" '.$target.'><img alt="'.$alt.'" src="'.$thumb.'" '.$style.'/></a>'.$shown_title;
+				$ret .= '<a href="'.$orig.'" '.$link_attributes.' title="'.$title_link_start.$title.$title_link_end.'" '.$target.'><img alt="'.$alt.'" src="'.$thumb.'" '.$style.'/></a>'.$shown_title;
+			}
+			else {
+				$ret .= '<a href="'.$orig.'" '.$link_attributes.' title="'.$title_link_start.$title.$title_link_end.'" '.$target.'><img alt="'.$alt.'" src="'.$thumb.'" '.$style.'/>'.$shown_title.'</a>';
+			}
+/*			if (!empty($object['passworded'])) {
+				$prompt_title = esc_attr(__('Enter Password', 'photonic'));
+				$prompt_submit = esc_attr(__('Access', 'photonic'));
+				$form_url = admin_url('admin-ajax.php');
+				$password_prompt = "
+				<div class='photonic-password-prompter' id='photonic-zenfolio-prompter-{$object['id_1']}-$this->gallery_index' title='$prompt_title'>
+					<form class='photonic-password-form photonic-zenfolio-form' action='$form_url'>
+						<input type='password' name='photonic-zenfolio-password' />
+						<input type='hidden' name='photonic-zenfolio-realm' value='{$photoset->AccessDescriptor->RealmId}' />
+						<input type='hidden' name='action' value='photonic_verify_password' />
+						<input type='submit' name='photonic-zenfolio-submit' value='$prompt_submit' />
+					</form>
+				</div>";
+				$ret .= $password_prompt;
+			}*/
+			if ($display == 'in-page' || ($counter % $photonic_gallery_panel_items == 0 && $display != 'in-page')) {
+				$ret .= "</li>";
+			}
+		}
+		if ($ret != "<ul $ul_class>") {
+			if (substr($ret, -5) != "</li>") {
+				$ret .= "</li>";
+			}
+			$ret .= "\n</ul>\n";
+		}
+		else {
+			$ret = '';
+		}
+
+		if (is_archive()) {
+			global $photonic_archive_thumbs;
+			if (!empty($photonic_archive_thumbs) && $counter < $photonic_archive_thumbs) {
+				$this->is_more_required = false;
+			}
+		}
+
+		return $ret;
+	}
+
+	function generate_level_2_gallery($objects, $row_constraints, $columns, $type, $singular_type, $title_position, $level_1_count_display) {
+		$ul_class = "class='title-display-$title_position'";
+
+		$ret = "<ul $ul_class>";
+
+		if ($columns != 'auto') {
+			$col_class = 'photonic-gallery-'.$columns.'c';
+		}
+		else if ($row_constraints['constraint-type'] == 'padding') {
+			$col_class = 'photonic-pad-'.$type;
+		}
+		else {
+			$col_class = 'photonic-gallery-'.$row_constraints['count'].'c';
+		}
+
+		$counter = 0;
+		foreach ($objects as $object) {
+			$id = empty($object['id_1']) ? '' : $object['id_1'].'-';
+			$id = $id.$this->gallery_index;
+			$id = empty($object['id_2']) ? $id : ($id.'-'.$object['id_2']);
+			$title = esc_attr($object['title']);
+			$image = "<img src='".$object['thumbnail']."' alt='".$title."' />";
+			$additional_classes = !empty($object['classes']) ? implode(' ', $object['classes']) : '';
+			$anchor = "<a href='{$object['main_page']}' class='photonic-{$this->provider}-$singular_type-thumb $additional_classes' id='photonic-{$this->provider}-$singular_type-thumb-$id' title='".$title."'>".$image."</a>";
+			$text = '';
+			if ($title_position == 'below') {
+				$text = "<span class='photonic-$singular_type-title'>".$title."</span>";
+				if (!$level_1_count_display && !empty($object['counter'])) {
+					$text .= '<span class="photonic-'.$singular_type.'-photo-count">'.sprintf(__('%s photos', 'photonic'), $object['counter']).'</span>';
+				}
+			}
+			$ret .= "<li class='photonic-{$this->provider}-image photonic-{$this->provider}-$singular_type-thumb $col_class' id='photonic-{$this->provider}-$singular_type-$id'>{$anchor}{$text}</li>";
+			$counter++;
+		}
+
+		if ($ret != '<ul>') {
+			$ret .= '</ul>';
+		}
+		else {
+			$ret = '';
+		}
+		if (is_archive()) {
+			global $photonic_archive_thumbs;
+			if (!empty($photonic_archive_thumbs) && $counter < $photonic_archive_thumbs) {
+				$this->is_more_required = false;
+			}
+		}
+		return $ret;
+	}
+
+	/**
+	 * Depending on the lightbox library, this function provides the CSS class and the rel tag for the thumbnail. This method borrows heavily from
+	 * Justin Tadlock's Cleaner Gallery Plugin.
+	 *
+	 * @param $display
+	 * @param $col_class
+	 * @param $show_lightbox
+	 * @return string
+	 */
+	function get_lightbox_attributes($display, $col_class, $show_lightbox) {
+		$class = '';
+		$rel = '';
+		if ($this->library != 'none' && $show_lightbox) {
+			$class = 'launch-gallery-'.$this->library." ".$this->library;
+			$rel = 'lightbox-photonic-'.$this->provider.'-stream-'.$this->gallery_index;
+			switch ($this->library) {
+				case 'lightbox':
+				case 'slimbox':
+				case 'jquery_lightbox_plugin':
+				case 'jquery_lightbox_balupton':
+					$class = 'launch-gallery-lightbox lightbox';
+					$rel = "lightbox[{$rel}]";
+					break;
+
+				case 'fancybox2':
+					$class = 'launch-gallery-fancybox fancybox';
+					break;
+
+				case 'pirobox':
+					$class = 'launch-gallery-pirobox pirobox_gall';
+					break;
+
+				case 'prettyphoto':
+					$rel = 'photonic-prettyPhoto['.$rel.']';
+					break;
+
+				default:
+					$class = 'launch-gallery-'.$this->library." ".$this->library;
+					$rel = 'lightbox-photonic-'.$this->provider.'-stream-'.$this->gallery_index;
+					break;
+			}
+
+			if ($display == 'popup') {
+				$class .= ' '.$col_class;
+			}
+			$class = " class='$class' ";
+			$rel = " rel='$rel' ";
+		}
+		return $class.$rel;
 	}
 }

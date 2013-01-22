@@ -9,13 +9,14 @@
 class Photonic_Instagram_Processor extends Photonic_OAuth2_Processor {
 	function __construct() {
 		parent::__construct();
-		global $photonic_instagram_client_id, $photonic_instagram_client_secret;
+		global $photonic_instagram_client_id, $photonic_instagram_client_secret, $photonic_instagram_disable_title_link;
 		$this->client_id = $photonic_instagram_client_id;
 		$this->client_secret = $photonic_instagram_client_secret;
 		$this->provider = 'instagram';
 		$this->oauth_version = '2.0';
 		$this->response_type = 'code';
 		$this->scope = 'comments relationships likes';
+		$this->link_lightbox_title = empty($photonic_instagram_disable_title_link);
 
 		$cookie = Photonic::parse_cookie();
 		global $photonic_instagram_allow_oauth;
@@ -248,6 +249,7 @@ class Photonic_Instagram_Processor extends Photonic_OAuth2_Processor {
 					$body = json_decode($response['body']);
 					if (isset($body->data) && $display_what != 'single-media') {
 						$data = $body->data;
+						$this->gallery_index++;
 						switch ($display_what) {
 							case 'users':
 								$ret .= $this->process_users($data, $columns, $thumb_size);
@@ -290,128 +292,87 @@ class Photonic_Instagram_Processor extends Photonic_OAuth2_Processor {
 	}
 
 	function process_media($data, $columns, $thumb_size) {
-		global $photonic_instagram_position;
-		$photonic_instagram_position++;
+		global $photonic_instagram_photos_per_row_constraint, $photonic_instagram_photos_constrain_by_padding, $photonic_instagram_photos_constrain_by_count, $photonic_instagram_photo_title_display;
 
-		global $photonic_slideshow_library, $photonic_instagram_photos_per_row_constraint, $photonic_instagram_photos_constrain_by_count, $photonic_instagram_main_size, $photonic_instagram_photo_title_display;
-		$a_class = '';
-		$col_class = '';
-		if ($photonic_slideshow_library != 'none') {
-			$a_class = 'launch-gallery-'.$photonic_slideshow_library." ".$photonic_slideshow_library;
-		}
-		if (Photonic::check_integer($columns)) {
-			$col_class = 'photonic-gallery-'.$columns.'c';
-		}
-
-		if ($col_class == '' && $photonic_instagram_photos_per_row_constraint == 'padding') {
-			$col_class = 'photonic-pad-photos';
-		}
-		else if ($col_class == '') {
-			$col_class = 'photonic-gallery-'.$photonic_instagram_photos_constrain_by_count.'c';
-		}
-		$a_rel = 'lightbox-photonic-instagram-stream-'.$photonic_instagram_position;
-		if ($photonic_slideshow_library == 'prettyphoto') {
-			$a_rel = 'photonic-prettyPhoto['.$a_rel.']';
-		}
-
-		if ($thumb_size <= 150) {
-			$url_function = 'thumbnail';
-		}
-		else if ($thumb_size > 150 && $thumb_size <= 306) {
-			$url_function = 'low_resolution';
-		}
-		else {
-			$url_function = 'standard_resolution';
-		}
-		$ret = '<ul>';
-		foreach ($data as $photo) {
-			if (isset($photo->type) && $photo->type == 'image' && isset($photo->images)) {
-				$thumb = $photo->images->{$url_function}->url;
-				if (!isset($photo->images->{$photonic_instagram_main_size})) {
-					$main = $photo->images->thumbnail->url;
-				}
-				else {
-					$main = $photo->images->{$photonic_instagram_main_size}->url;
-				}
-				$title = '';
-				$shown_title = '';
-				if (isset($photo->caption) && isset($photo->caption->text)) {
-					$title = esc_attr($photo->caption->text);
-				}
-				if ($photonic_instagram_photo_title_display == 'below') {
-					$shown_title = '<span class="photonic-photo-title">'.$title.'</span>';
-				}
-				$ret .= '<li class="photonic-instagram-image photonic-instagram-photo '.$col_class.'">';
-				$ret .= '<a href="'.$main.'" class="'.$a_class.'" rel="'.$a_rel.'" title="'.$title.'">';
-				$ret .= '<img src="'.$thumb.'" alt="'.$title.'" style="width: '.$thumb_size.'px; height: '.$thumb_size.'px;"/>';
-				$ret .= '</a>';
-				$ret .= $shown_title;
-				$ret .= '</li>';
-			}
-		}
-		if ($ret != '<ul>') {
-			$ret .= '</ul>';
-		}
-		else {
-			$ret = '';
-		}
-		$ret = "<div class='photonic-instagram-stream' id='photonic-instagram-stream-$photonic_instagram_position'>".$ret.'</div>';
+		$photo_objects = $this->build_level_1_objects($data, $thumb_size);
+		$row_constraints = array('constraint-type' => $photonic_instagram_photos_per_row_constraint, 'padding' => $photonic_instagram_photos_constrain_by_padding, 'count' => $photonic_instagram_photos_constrain_by_count);
+		$ret = $this->generate_level_1_gallery($photo_objects, $photonic_instagram_photo_title_display, $row_constraints, $columns, 'in-page', array('thumb-width' => $thumb_size, 'thumb-height' => $thumb_size));
+		$ret = "<div class='photonic-instagram-stream photonic-stream' id='photonic-instagram-stream-{$this->gallery_index}'>".$ret.'</div>';
 		return $ret;
 	}
 
-	function process_users($users, $columns, $thumb_size) {
-		global $photonic_instagram_user_link, $photonic_instagram_user_title_display, $photonic_instagram_users_per_row_constraint, $photonic_instagram_users_constrain_by_count;
-		$ret = '<ul>';
-		$col_class = '';
-		if (Photonic::check_integer($columns)) {
-			$col_class = 'photonic-gallery-'.$columns.'c';
-		}
-
-		if ($col_class == '' && $photonic_instagram_users_per_row_constraint == 'padding') {
-			$col_class = 'photonic-pad-photos';
-		}
-		else if ($col_class == '') {
-			$col_class = 'photonic-gallery-'.$photonic_instagram_users_constrain_by_count.'c';
-		}
-
-		if ($thumb_size > 150) {
-			$thumb_size = 150;
-		}
-
-		foreach ($users as $user) {
-			$a_open = '';
-			$a_close = '';
-			if (!empty($user->full_name)) {
-				$title = esc_attr($user->full_name);
+	function build_level_1_objects($data, $thumb_size, $type = 'media') {
+		global $photonic_instagram_main_size, $photonic_instagram_user_link;
+		$level_1_objects = array();
+		if ($type == 'media') {
+			if ($thumb_size <= 150) {
+				$url_function = 'thumbnail';
+			}
+			else if ($thumb_size > 150 && $thumb_size <= 306) {
+				$url_function = 'low_resolution';
 			}
 			else {
-				$title = esc_attr($user->username);
+				$url_function = 'standard_resolution';
 			}
-			if ($photonic_instagram_user_link == 'instagram' || ($photonic_instagram_user_link == 'home' && empty($user->website))) {
-				$a_open = '<a href="http://instagram.com/'.$user->username.'/" target="_blank" title="'.$title.'">';
-				$a_close = '</a>';
-			}
-			else if ($photonic_instagram_user_link == 'home' && !empty($user->website)) {
-				$a_open = '<a href="'.$user->website.'" target="_blank" title="'.$title.'">';
-				$a_close = '</a>';
-			}
+			foreach ($data as $photo) {
+				if (isset($photo->type) && $photo->type == 'image' && isset($photo->images)) {
+					$photo_object = array();
+					$photo_object['thumbnail'] = $photo->images->{$url_function}->url;
+					if (!isset($photo->images->{$photonic_instagram_main_size})) {
+						$photo_object['main_image'] = $photo->images->{$url_function}->url;
+					}
+					else {
+						$photo_object['main_image'] = $photo->images->{$photonic_instagram_main_size}->url;
+					}
 
-			$shown_title = '';
-			if ($photonic_instagram_user_title_display == 'below') {
-				$shown_title = '<span class="photonic-photo-title">'.$title.'</span>';
+					if (isset($photo->caption) && isset($photo->caption->text)) {
+						$photo_object['title'] = esc_attr($photo->caption->text);
+					}
+					else {
+						$photo_object['title'] = '';
+					}
+					$photo_object['alt_title'] = $photo_object['title'];
+					$photo_object['main_page'] = $photo->link;
+					$level_1_objects[] = $photo_object;
+				}
 			}
-
-			$ret .= '<li class="photonic-instagram-image photonic-instagram-user '.$col_class.'">';
-			$ret .= $a_open.'<img src="'.$user->profile_picture.'" alt="'.$title.'" style="width: '.$thumb_size.'px; height: '.$thumb_size.'px; "/>'.$a_close;
-			$ret .= $shown_title;
-			$ret .= '</li>';
-		}
-		if ($ret != '<ul>') {
-			$ret .= '</ul>';
 		}
 		else {
-			$ret = '';
+			foreach ($data as $user) {
+				$user_object = array();
+				$user_object['thumbnail'] = $user->profile_picture;
+				$user_object['main_image'] = $user->profile_picture;
+				if ($photonic_instagram_user_link == 'instagram' || ($photonic_instagram_user_link == 'home' && empty($user->website))) {
+					$user_object['main_page'] = "http://instagram.com/{$user->username}/";
+				}
+				else if ($photonic_instagram_user_link == 'home' && !empty($user->website)) {
+					$user_object['main_page'] = $user->website;
+				}
+				else {
+					$user_object['main_page'] = '';
+				}
+				if (!empty($user->full_name)) {
+					$user_object['title'] = esc_attr($user->full_name);
+				}
+				else {
+					$user_object['title'] = esc_attr($user->username);
+				}
+				$user_object['alt_title'] = $user_object['title'];
+
+				$level_1_objects[] = $user_object;
+			}
 		}
+		return $level_1_objects;
+	}
+
+	function process_users($users, $columns, $thumb_size) {
+		global $photonic_instagram_user_title_display, $photonic_instagram_users_per_row_constraint,$photonic_instagram_users_constrain_by_count, $photonic_instagram_users_constrain_by_padding;
+
+		$user_objects = $this->build_level_1_objects($users, $thumb_size, 'user');
+		$row_constraints = array('constraint-type' => $photonic_instagram_users_per_row_constraint, 'padding' => $photonic_instagram_users_constrain_by_padding, 'count' => $photonic_instagram_users_constrain_by_count);
+		$thumb_size = ($thumb_size > 150) ? 150 : $thumb_size;
+		$ret = $this->generate_level_1_gallery($user_objects, $photonic_instagram_user_title_display, $row_constraints, $columns, 'in-page', array('thumb-width' => $thumb_size, 'thumb-height' => $thumb_size), false, 'user');
+		$ret = "<div class='photonic-instagram-stream photonic-stream' id='photonic-instagram-stream-{$this->gallery_index}'>".$ret.'</div>';
 		return $ret;
 	}
 

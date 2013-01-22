@@ -9,13 +9,14 @@
 class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 	function __construct() {
 		parent::__construct();
-		global $photonic_picasa_client_id, $photonic_picasa_client_secret;
+		global $photonic_picasa_client_id, $photonic_picasa_client_secret, $photonic_picasa_disable_title_link;
 		$this->client_id = $photonic_picasa_client_id;
 		$this->client_secret = $photonic_picasa_client_secret;
 		$this->provider = 'picasa';
 		$this->oauth_version = '2.0';
 		$this->response_type = 'code';
 		$this->scope = 'https://picasaweb.google.com/data/';
+		$this->link_lightbox_title = empty($photonic_picasa_disable_title_link);
 
 		$cookie = Photonic::parse_cookie();
 		global $photonic_picasa_allow_oauth;
@@ -60,7 +61,7 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 			'style' => 'default',
 			'show_captions' => false,
 			'crop' => true,
-			'display' => 'page',
+			'display' => 'in-page',
 			'max_results' => 1000,
 			'thumbsize' => 75,
 		), $attr);
@@ -149,7 +150,7 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 	}
 
 	function make_call($query_url, $display, $view, $attr) {
-		global $photonic_picasa_position, $photonic_picasa_allow_oauth;
+		global $photonic_picasa_allow_oauth;
 		extract($attr);
 		if (isset($photonic_picasa_allow_oauth) && $photonic_picasa_allow_oauth && $this->oauth_done) {
 			if (isset($_COOKIE['photonic-' . md5($this->client_secret) . '-oauth-token'])) {
@@ -180,22 +181,25 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 			}
 		}
 
-		$photonic_picasa_position++;
+		$this->gallery_index++;
 		if ($display != 'popup') {
-			$out = "<div class='photonic-picasa-stream' id='photonic-picasa-stream-$photonic_picasa_position'>";
+			$out = "<div class='photonic-picasa-stream photonic-stream' id='photonic-picasa-stream-{$this->gallery_index}'>";
 		}
 		else {
-			$out = "<div class='photonic-picasa-panel photonic-panel'>";
+			if (empty($panel)) {
+				$panel = '';
+			}
+			$out = "<div class='photonic-picasa-panel photonic-panel' id='photonic-picasa-panel-$panel'>";
 		}
 		if (!isset($columns)) {
-			$columns = null;
+			$columns = 'auto';
 		}
 
 		if (!isset($panel)) {
 			$panel = null;
 		}
 
-		$out .= $this->picasa_parse_feed($rss, $view, $display, $columns, $panel, $attr['thumbsize']);
+		$out .= $this->process_response($rss, $view, $display, $columns, $panel, $attr['thumbsize']);
 		$out .= "</div>";
 		return $out;
 	}
@@ -207,175 +211,106 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 	 * @param $rss
 	 * @param null $view
 	 * @param string $display
-	 * @param null $columns
+	 * @param null|string $columns
 	 * @param null $panel
 	 * @param int $thumb_size
 	 * @return string
 	 */
-	function picasa_parse_feed($rss, $view = null, $display = 'page', $columns = null, $panel = null, $thumb_size = 75) {
-		global $photonic_picasa_position, $photonic_slideshow_library, $photonic_picasa_photo_title_display, $photonic_gallery_panel_items, $photonic_picasa_photo_pop_title_display;
-		global $photonic_picasa_photos_per_row_constraint, $photonic_picasa_photos_constrain_by_count, $photonic_picasa_photos_pop_per_row_constraint, $photonic_picasa_photos_pop_constrain_by_count;
-		if (!isset($photonic_gallery_panel_items) || $photonic_gallery_panel_items == '0' || $photonic_gallery_panel_items == 0) {
-			$photonic_gallery_panel_items = 20;
-		}
-
+	function process_response($rss, $view = null, $display = 'in-page', $columns = 'auto', $panel = null, $thumb_size = 75) {
+		global $photonic_picasa_photo_title_display, $photonic_picasa_photo_pop_title_display, $photonic_picasa_photos_per_row_constraint,
+			$photonic_picasa_photos_constrain_by_count, $photonic_picasa_photos_constrain_by_padding, $photonic_picasa_photos_pop_per_row_constraint,
+			$photonic_picasa_photos_pop_constrain_by_count, $photonic_picasa_photos_pop_constrain_by_padding;
 		$picasa_result = simplexml_load_string($rss);
-
-		$count=0;
-
-		$ul_class = '';
 		$out = '';
 		if ($display == 'popup') {
-			$ul_class = "class='slideshow-grid-panel lib-$photonic_slideshow_library'";
 			$out .= "<div class='photonic-picasa-panel-content photonic-panel-content fix'>";
 		}
-		$out .= "<ul $ul_class>";
-
 		if (is_a($picasa_result, 'SimpleXMLElement')) {
-			global $photonic_picasa_use_desc;
-			$album_user = '';
-			$album_photos = 0;
-
-			$gphoto_album = $picasa_result->children('gphoto', 1);
-			if (!empty($gphoto_album->user)) {
-				$album_user = $gphoto_album->user;
-			}
-			if (!empty($gphoto_album->numphotos)) {
-				$album_photos = $gphoto_album->numphotos;
-			}
-
 			if (isset($picasa_result->entry) && count($picasa_result->entry) > 0) {
-				if ($display == 'page') {
-					if ($columns == null) {
-						if ($photonic_picasa_photos_per_row_constraint == 'padding') {
-							$pad_class = 'photonic-pad-photos';
-						}
-						else {
-							$pad_class = 'photonic-gallery-'.$photonic_picasa_photos_constrain_by_count.'c';
-						}
-					}
-					else {
-						$pad_class = 'photonic-gallery-'.$columns.'c';
-					}
+				$row_constraints = array('constraint-type' => $photonic_picasa_photos_per_row_constraint, 'padding' => $photonic_picasa_photos_constrain_by_padding, 'count' => $photonic_picasa_photos_constrain_by_count);
+				if ($view == 'album' && $display == 'in-page') {
+					$objects = $this->build_level_2_objects($picasa_result->entry, $thumb_size);
+					$out .= $this->generate_level_2_gallery($objects, $row_constraints, $columns, 'albums', 'album', $photonic_picasa_photo_title_display, false);
 				}
 				else {
-					if ($photonic_picasa_photos_pop_per_row_constraint == 'padding') {
-						$pad_class = 'photonic-pad-photos';
+					if ($display == 'in-page') {
+						$title_position = $photonic_picasa_photo_title_display;
 					}
 					else {
-						$pad_class = 'photonic-gallery-'.$photonic_picasa_photos_pop_constrain_by_count.'c';
+						$row_constraints = array('constraint-type' => $photonic_picasa_photos_pop_per_row_constraint, 'padding' => $photonic_picasa_photos_pop_constrain_by_padding, 'count' => $photonic_picasa_photos_pop_constrain_by_count);
+						$title_position = $photonic_picasa_photo_pop_title_display;
 					}
-				}
-
-				$library = '';
-				if ($photonic_slideshow_library != 'none') {
-					if ($view != 'album' || $display == 'popup') {
-						$library = 'launch-gallery-'.$photonic_slideshow_library.' '.$photonic_slideshow_library;
-					}
-					else {
-						$library = 'photonic-picasa-album-thumb photonic-picasa-album-thumb-'.$thumb_size;
-					}
-				}
-
-				$rel = '';
-				if (($view != 'album' || $display == 'popup') && $photonic_slideshow_library != 'prettyphoto') {
-					$rel = "rel='photonic-picasa-stream-$photonic_picasa_position'";
-				}
-				else if (($view != 'album' || $display == 'popup') && $photonic_slideshow_library == 'prettyphoto') {
-					if ($panel == null) {
-						$rel = "rel='photonic-prettyPhoto[photonic-picasa-stream-$photonic_picasa_position]'";
-					}
-					else {
-						$rel = "rel='photonic-prettyPhoto[$panel]'";
-					}
-				}
-
-				$a_pad_class = $display == 'popup' ? $pad_class : '';
-
-				foreach ($picasa_result->entry as $entry) {
-					$media_photo = $entry->children('media', 1);
-					$media_photo = $media_photo->group;
-					if (stripos($media_photo->content->attributes()->type, 'video') !== false) {
-						continue;
-					}
-					$count++;
-					$gphoto_photo = $entry->children('gphoto', 1);
-
-					$object_id = $gphoto_photo->id;
-					$object_user = $gphoto_photo->user;
-					if ($photonic_picasa_use_desc == 'desc' || ($photonic_picasa_use_desc == 'desc-title' && !empty($entry->summary))) {
-						$object_caption = esc_attr($entry->summary);
-					}
-					else {
-						$object_caption = esc_attr($entry->title);
-					}
-
-					$li_id = $view == 'album' ? "id='photonic-picasa-album-$object_user-$photonic_picasa_position-$object_id'" : '';
-					if ($display == 'page') {
-						$out .= "<li class='photonic-picasa-image $pad_class' $li_id>";
-					}
-					else if ($count % $photonic_gallery_panel_items == 1) {
-						$out .= "<li class='photonic-picasa-image'>";
-					}
-
-					$id = "id='photonic-picasa-album-thumb-$object_user-$photonic_picasa_position-$object_id'";
-
-					$object_thumb = $media_photo->thumbnail->attributes()->url;
-					$object_href = $media_photo->content->attributes()->url;
-
-					$out .= "<a class='$library $a_pad_class' title=\"".$object_caption."\" href='$object_href' $rel $id>";
-					$out .= "<img src='$object_thumb' alt=\"".$object_caption."\"/>";
-					if ($display == 'page' && $photonic_picasa_photo_title_display == 'below') {
-						$out .= "<span class='photonic-photo-title'>$object_caption</span>";
-					}
-					else if ($display == 'popup' && $photonic_picasa_photo_pop_title_display == 'below') {
-						$out .= "<span class='photonic-photo-title'>$object_caption</span>";
-					}
-					$out .= "</a>";
-					if ($display == 'page') {
-						$out .= "</li>";
-					}
-					else {
-						if ($count % $photonic_gallery_panel_items == 0) {
-							$out .= "</li>";
-						}
-					}
-
-					unset($gphoto_photo);
-					unset($media_photo);
+					$objects = $this->build_level_1_objects($picasa_result->entry);
+					$out .= $this->generate_level_1_gallery($objects, $title_position, $row_constraints, $columns, $display);
 				}
 			}
 		}
 
-		if ($out != '<ul>') {
-			if (substr($out, -5) != "</li>") {
-				$out .= "</li>";
-			}
-			$out .= '</ul>';
+		if ($out != '') {
 			if ($this->show_more_link) {
-				$out .= $this->more_link_button(get_permalink().'#photonic-picasa-stream-'.$photonic_picasa_position);
+				$out .= $this->more_link_button(get_permalink().'#photonic-picasa-stream-'.$this->gallery_index);
 			}
-			if ($photonic_picasa_photo_pop_title_display == 'tooltip') {
-				$out .= "<script type='text/javascript'>\$j('.photonic-picasa-panel a').each(function() { \$j(this).data('title', \$j(this).attr('title')); }); \$j('.photonic-picasa-panel a').each(function() { if (!(\$j(this).parent().hasClass('photonic-header-title'))) { var iTitle = \$j(this).find('img').attr('alt'); \$j(this).tooltip({ bodyHandler: function() { return iTitle; }, showURL: false });}})</script>";
-			}
-
+			global $photonic_picasa_photo_pop_title_display;
 			if ($display == 'popup') {
-				if ($photonic_slideshow_library == 'fancybox') {
-					$out .= "<script type='text/javascript'>\$j('a.launch-gallery-fancybox').each(function() { \$j(this).fancybox({ transitionIn:'elastic', transitionOut:'elastic',speedIn:600,speedOut:200,overlayShow:true,overlayOpacity:0.8,overlayColor:\"#000\",titleShow:Photonic_JS.fbox_show_title,titlePosition:Photonic_JS.fbox_title_position});});</script>";
-				}
-				else if ($photonic_slideshow_library == 'colorbox') {
-					$out .= "<script type='text/javascript'>\$j('a.launch-gallery-colorbox').each(function() { \$j(this).colorbox({ opacity: 0.8, maxWidth: '95%', maxHeight: '95%', slideshow: Photonic_JS.slideshow_mode, slideshowSpeed: Photonic_JS.slideshow_interval });});</script>";
-				}
-				else if ($photonic_slideshow_library == 'prettyphoto') {
-					$out .= "<script type='text/javascript'>\$j(\"a[rel^='photonic-prettyPhoto']\").prettyPhoto({ theme: Photonic_JS.pphoto_theme, autoplay_slideshow: Photonic_JS.slideshow_mode, slideshow: parseInt(Photonic_JS.slideshow_interval), show_title: false, social_tools: '', deeplinking: false });</script>";
-				}
+				$out .= $this->get_popup_tooltip($photonic_picasa_photo_pop_title_display);
+				$out .= $this->get_popup_lightbox();
 				$out .= "</div>";
 			}
 		}
-		else {
-			$out = '';
-		}
 		return $out;
+	}
+
+	function build_level_1_objects($photos) {
+		global $photonic_picasa_use_desc;
+		$objects = array();
+		foreach ($photos as $entry) {
+			$media_photo = $entry->children('media', 1);
+			$media_photo = $media_photo->group;
+			if (stripos($media_photo->content->attributes()->type, 'video') !== false) {
+				continue;
+			}
+			$object = array();
+			$object['thumbnail'] = $media_photo->thumbnail->attributes()->url;
+			$object['main_image'] = $media_photo->content->attributes()->url;
+			$object['main_page'] = $object['main_image'];
+			if ($photonic_picasa_use_desc == 'desc' || ($photonic_picasa_use_desc == 'desc-title' && !empty($entry->summary))) {
+				$object['title'] = esc_attr($entry->summary);
+			}
+			else {
+				$object['title'] = esc_attr($entry->title);
+			}
+			$object['alt_title'] = $object['title'];
+
+			$objects[] = $object;
+		}
+		return $objects;
+	}
+
+	function build_level_2_objects($albums, $thumb_size) {
+		global $photonic_picasa_use_desc;
+		$objects = array();
+		foreach ($albums as $entry) {
+			$media_photo = $entry->children('media', 1);
+			$media_photo = $media_photo->group;
+			$gphoto_photo = $entry->children('gphoto', 1);
+
+			$object = array();
+			$object['id_1'] = "{$gphoto_photo->user}";
+			$object['id_2'] = "{$gphoto_photo->id}";
+			$object['thumbnail'] = $media_photo->thumbnail->attributes()->url;
+			$object['main_page'] = $media_photo->content->attributes()->url;
+			if ($photonic_picasa_use_desc == 'desc' || ($photonic_picasa_use_desc == 'desc-title' && !empty($entry->summary))) {
+				$object['title'] = esc_attr($entry->summary);
+			}
+			else {
+				$object['title'] = esc_attr($entry->title);
+			}
+			$object['counter'] = $gphoto_photo->numphotos;
+			$object['classes'] = array('photonic-picasa-album-thumb-'.$thumb_size);
+
+			$objects[] = $object;
+		}
+		return $objects;
 	}
 
 	/**
@@ -385,7 +320,7 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 	 * @return void
 	 */
 	function display_album() {
-		$panel = $_POST['panel'];
+		$panel = $_POST['panel_id'];
 		$panel = substr($panel, 28);
 		$user = substr($panel, 0, strpos($panel, '-'));
 		$album = substr($panel, strpos($panel, '-') + 1);

@@ -2,7 +2,7 @@
 Contributors: sayontan
 Donate link: http://aquoid.com/news/plugins/photonic/
 Tags: gallery, flickr, picasa, 500px, smugmug, zenfolio, instagram, fancybox, colorbox, prettyphoto, slideshow, jquery, shortcode
-Requires at least: WP 3.2
+Requires at least: WP 3.3
 Tested up to: WP 3.5
 Stable tag: trunk
 License: GPLv3 or later
@@ -99,7 +99,7 @@ contents to the <code>wp-content/plugins</code> folder of your WordPress install
 
 For the plugin in action see the <a href='http://aquoid.com/news/plugins/photonic/'>plugin page</a>.
 
-1.	To insert the shortcode for Photonic through the "Add Media" options click on "Add an Image".
+1.	To insert the shortcode for Photonic through the Media Uploader click on "Add Media".
 2.	You will see a new tab for "Photonic".
 3.	Clicking on the "Photonic" tab will show you new tabs, one for each type of gallery. Fill out what you need and click "Insert into post"
 
@@ -136,6 +136,17 @@ Yes, but only for the plugin front-end. The admin panel is not translated at thi
 in the third-party JS scripts are not translated.
 
 == Changelog ==
+
+= 1.42 =
+
+*	Massively refactored code. Several lines of JS code taken off, lots of PHP code modularized.
+*	Added option to use a Colorbox skin defined in the theme folder
+*	Updated SimpleModal, Colorbox and PrettyPhoto to latest versions.
+*	Swapped the use of "live" for "on". This means Photonic needs WP 3.3 at least (since "on" was introduced in JQuery 1.7)
+*	Removed the "View in Flickr" text from the plugin.
+*	Ensured consistent behaviour with the lightbox title linking behaviour across all providers.
+*	Introduced non-bundled lightbox support, with support for FancyBox2
+*	Removed the modified scripts for FancyBox and ColorBox - now the original scripts are used.
 
 = 1.41 =
 

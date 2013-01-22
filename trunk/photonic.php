@@ -3,7 +3,7 @@
  * Plugin Name: Photonic Gallery for Flickr, Picasa, SmugMug, 500px, Zenfolio and Instagram
  * Plugin URI: http://aquoid.com/news/plugins/photonic/
  * Description: Extends the native gallery shortcode to support Flickr, Picasa, SmugMug, 500px, Zenfolio and Instagram. JS libraries like Fancybox, Colorbox and PrettyPhoto are supported. The plugin also helps convert a regular WP gallery into a slideshow.
- * Version: 1.41
+ * Version: 1.42
  * Author: Sayontan Sinha
  * Author URI: http://mynethome.net/blog
  * License: GNU General Public License (GPL), v3 (or newer)
@@ -17,11 +17,11 @@
  */
 
 class Photonic {
-	var $version, $registered_extensions, $defaults, $plugin_name, $options_page_name, $settings_page, $helper_page, $printer;
+	var $version, $registered_extensions, $defaults, $plugin_name, $options_page_name, $settings_page, $helper_page;
 	function Photonic() {
 		global $photonic_options, $photonic_setup_options, $photonic_is_ie6;
 		if (!defined('PHOTONIC_VERSION')) {
-			define('PHOTONIC_VERSION', '1.41');
+			define('PHOTONIC_VERSION', '1.42');
 		}
 
 		if (!defined('PHOTONIC_PATH')) {
@@ -29,11 +29,9 @@ class Photonic {
 		}
 
 		require_once(plugin_dir_path(__FILE__)."/options/photonic-options.php");
-		require_once(plugin_dir_path(__FILE__)."/libraries/Photonic_Printer.php");
 
 		$this->plugin_name = plugin_basename(__FILE__);
 		$this->set_version();
-		$this->printer = new Photonic_Printer();
 
 		add_action('admin_menu', array(&$this, 'add_admin_menu'));
 		add_action('admin_enqueue_scripts', array(&$this, 'add_admin_scripts'));
@@ -68,11 +66,11 @@ class Photonic {
 		add_action('wp_head', array(&$this, 'print_scripts'), 20);
 		add_action('wp_loaded', array(&$this, 'check_authentication'), 20);
 
-		add_action('wp_ajax_photonic_flickr_sign', array(&$this, 'flickr_sign'));
-		add_action('wp_ajax_nopriv_photonic_flickr_sign', array(&$this, 'flickr_sign'));
-
 		add_action('wp_ajax_photonic_verify_password', array(&$this, 'verify_password'));
 		add_action('wp_ajax_nopriv_photonic_verify_password', array(&$this, 'verify_password'));
+
+		add_action('wp_ajax_photonic_flickr_display_photos', array(&$this, 'flickr_display_photos'));
+		add_action('wp_ajax_nopriv_photonic_flickr_display_photos', array(&$this, 'flickr_display_photos'));
 
 		add_action('wp_ajax_photonic_picasa_display_album', array(&$this, 'picasa_display_album'));
 		add_action('wp_ajax_nopriv_photonic_picasa_display_album', array(&$this, 'picasa_display_album'));
@@ -167,19 +165,16 @@ class Photonic {
 	 * @return void
 	 */
 	function add_scripts() {
-		global $photonic_slideshow_library, $photonic_slideshow_mode, $photonic_slideshow_interval, $photonic_pphoto_theme, $photonic_carousel_mode, $photonic_external_links_in_new_tab;
-		global $photonic_flickr_api_key, $photonic_flickr_oauth_done, $photonic_flickr_thumb_size, $photonic_flickr_main_size, $photonic_fbox_title_position, $photonic_gallery_panel_width, $photonic_gallery_panel_items;
-		global $photonic_flickr_hide_collection_thumbnail, $photonic_flickr_hide_collection_title, $photonic_flickr_hide_collection_set_count, $photonic_flickr_collection_set_title_display, $photonic_flickr_hide_collection_set_photos_count_display;
-		global $photonic_flickr_photos_constrain_by_count, $photonic_flickr_collection_set_constrain_by_count, $photonic_flickr_collection_set_per_row_constraint, $photonic_flickr_photos_per_row_constraint;
-		global $photonic_flickr_hide_set_thumbnail, $photonic_flickr_hide_set_title, $photonic_flickr_hide_set_photo_count, $photonic_flickr_hide_set_pop_thumbnail, $photonic_flickr_hide_set_pop_title, $photonic_flickr_hide_set_pop_photo_count;
-		global $photonic_flickr_hide_gallery_pop_thumbnail, $photonic_flickr_hide_gallery_pop_title, $photonic_flickr_hide_gallery_pop_photo_count, $photonic_flickr_gallery_title_display, $photonic_flickr_hide_gallery_photos_count_display, $photonic_flickr_galleries_per_row_constraint, $photonic_flickr_galleries_constrain_by_count;
-		global $photonic_flickr_hide_gallery_thumbnail,$photonic_flickr_hide_gallery_title, $photonic_flickr_hide_gallery_photo_count;
-		global $photonic_flickr_photos_pop_per_row_constraint, $photonic_flickr_photos_pop_constrain_by_count, $photonic_flickr_photo_pop_title_display, $photonic_flickr_photo_title_display;
+		global $photonic_slideshow_library, $photonic_slideshow_mode, $photonic_slideshow_interval, $photonic_pphoto_theme, $photonic_carousel_mode;
+		global $photonic_fbox_title_position, $photonic_gallery_panel_width, $photonic_gallery_panel_items;
+		global $photonic_flickr_collection_set_title_display, $photonic_flickr_gallery_title_display;
+		global $photonic_flickr_photo_title_display;
 		global $photonic_picasa_photo_title_display, $photonic_picasa_photo_pop_title_display, $photonic_wp_thumbnail_title_display;
-		global $photonic_500px_photos_per_row_constraint, $photonic_500px_photos_constrain_by_count, $photonic_500px_photos_pop_per_row_constraint, $photonic_500px_photos_pop_constrain_by_count, $photonic_500px_photo_title_display;
+		global $photonic_500px_photo_title_display;
 		global $photonic_smug_photo_title_display, $photonic_smug_photo_pop_title_display, $photonic_smug_albums_album_title_display;
 		global $photonic_instagram_photo_title_display, $photonic_instagram_user_title_display;
 		global $photonic_zenfolio_photo_title_display, $photonic_zenfolio_set_title_display;
+		global $photonic_custom_lightbox_js, $photonic_custom_lightbox_css, $photonic_custom_lightbox;
 
 		//wp_enqueue_script('photonic', plugins_url('include/scripts/photonic.js', __FILE__), array('jquery', 'jquery-ui-dialog', 'jquery-form'), $this->version);
 		wp_enqueue_script('photonic', plugins_url('include/scripts/photonic.js', __FILE__), array('jquery'), $this->version);
@@ -195,6 +190,18 @@ class Photonic {
 		else if ($photonic_slideshow_library == 'prettyphoto') {
 			wp_enqueue_script('photonic-slideshow', plugins_url('include/scripts/jquery.prettyPhoto-min.js', __FILE__), array('jquery'), $this->version);
 		}
+		else if ($photonic_slideshow_library == 'custom') {
+			$counter = 1;
+			$dependencies = array('jquery');
+			if ($photonic_custom_lightbox == 'pirobox') {
+				$dependencies[] = 'jquery-ui-draggable';
+				$dependencies[] = 'jquery-ui-resizable';
+			}
+			foreach(preg_split("/((\r?\n)|(\r\n?))/", $photonic_custom_lightbox_js) as $line){
+				wp_enqueue_script('photonic-slideshow-'.$counter, trim($line), $dependencies, $this->version);
+				$counter++;
+			}
+		}
 
 		if (isset($photonic_carousel_mode) && $photonic_carousel_mode == 'on') {
 			wp_enqueue_script('photonic-carousel', plugins_url('include/scripts/jquery.jcarousel.min.js', __FILE__), array('jquery'), $this->version);
@@ -202,78 +209,36 @@ class Photonic {
 		
 		$js_array = array(
 			'ajaxurl' => admin_url('admin-ajax.php'),
-			'flickr_api_key' => $photonic_flickr_api_key,
-			'flickr_position' => 0,
-			'flickr_thumbnail_size' => $photonic_flickr_thumb_size,
-			'flickr_main_size' => $photonic_flickr_main_size,
-			'flickr_view' => __('View in Flickr', 'photonic'),
-			'flickr_set_count' => __('{#} sets', 'photonic'),
-			'flickr_photo_count' => __('{#} photos', 'photonic'),
 			'fbox_show_title' => $photonic_fbox_title_position == 'none' ? false : true,
 			'fbox_title_position' => $photonic_fbox_title_position == 'none' ? 'outside' : $photonic_fbox_title_position,
-			'flickr_hide_collection_thumbnail' => $photonic_flickr_hide_collection_thumbnail == 'on' ? true : false,
-			'flickr_hide_collection_title' => $photonic_flickr_hide_collection_title == 'on' ? true : false,
-			'flickr_hide_collection_set_count' => $photonic_flickr_hide_collection_set_count == 'on' ? true : false,
-
-			'flickr_hide_set_thumbnail' => $photonic_flickr_hide_set_thumbnail == 'on' ? true : false,
-			'flickr_hide_set_title' => $photonic_flickr_hide_set_title == 'on' ? true : false,
-			'flickr_hide_set_photo_count' => $photonic_flickr_hide_set_photo_count == 'on' ? true : false,
-
-			'flickr_hide_gallery_thumbnail' => $photonic_flickr_hide_gallery_thumbnail == 'on' ? true : false,
-			'flickr_hide_gallery_title' => $photonic_flickr_hide_gallery_title == 'on' ? true : false,
-			'flickr_hide_gallery_photo_count' => $photonic_flickr_hide_gallery_photo_count == 'on' ? true : false,
-
-			'flickr_hide_set_pop_thumbnail' => $photonic_flickr_hide_set_pop_thumbnail == 'on' ? true : false,
-			'flickr_hide_set_pop_title' => $photonic_flickr_hide_set_pop_title == 'on' ? true : false,
-			'flickr_hide_set_pop_photo_count' => $photonic_flickr_hide_set_pop_photo_count == 'on' ? true : false,
-
-			'flickr_hide_gallery_pop_thumbnail' => $photonic_flickr_hide_gallery_pop_thumbnail == 'on' ? true : false,
-			'flickr_hide_gallery_pop_title' => $photonic_flickr_hide_gallery_pop_title == 'on' ? true : false,
-			'flickr_hide_gallery_pop_photo_count' => $photonic_flickr_hide_gallery_pop_photo_count == 'on' ? true : false,
 
 			'flickr_collection_set_title_display' => $photonic_flickr_collection_set_title_display,
-			'flickr_hide_collection_set_photos_count_display' => $photonic_flickr_hide_collection_set_photos_count_display == 'on' ? true : false,
-			'flickr_collection_set_per_row_constraint' => $photonic_flickr_collection_set_per_row_constraint,
-			'flickr_collection_set_constrain_by_count' => $photonic_flickr_collection_set_constrain_by_count,
-
 			'flickr_gallery_title_display' => $photonic_flickr_gallery_title_display,
-			'flickr_hide_gallery_photos_count_display' => $photonic_flickr_hide_gallery_photos_count_display == 'on' ? true : false,
-			'flickr_galleries_per_row_constraint' => $photonic_flickr_galleries_per_row_constraint,
-			'flickr_galleries_constrain_by_count' => $photonic_flickr_galleries_constrain_by_count,
-
-			'flickr_photos_per_row_constraint' => $photonic_flickr_photos_per_row_constraint,
-			'flickr_photos_constrain_by_count' => $photonic_flickr_photos_constrain_by_count,
-			'flickr_photos_pop_per_row_constraint' => $photonic_flickr_photos_pop_per_row_constraint,
-			'flickr_photos_pop_constrain_by_count' => $photonic_flickr_photos_pop_constrain_by_count,
-
-			'flickr_auth_call' => $photonic_flickr_oauth_done,
-
-			'Dpx_photos_per_row_constraint' => $photonic_500px_photos_per_row_constraint,
-			'Dpx_photos_constrain_by_count' => $photonic_500px_photos_constrain_by_count,
-			'Dpx_photos_pop_per_row_constraint' => $photonic_500px_photos_pop_per_row_constraint,
-			'Dpx_photos_pop_constrain_by_count' => $photonic_500px_photos_pop_constrain_by_count,
-
-			'flickr_photo_pop_title_display' => $photonic_flickr_photo_pop_title_display,
 			'flickr_photo_title_display' => $photonic_flickr_photo_title_display,
+
 			'picasa_photo_title_display' => $photonic_picasa_photo_title_display,
 			'picasa_photo_pop_title_display' => $photonic_picasa_photo_pop_title_display,
+
 			'wp_thumbnail_title_display' => $photonic_wp_thumbnail_title_display,
+
 			'Dpx_photo_title_display' => $photonic_500px_photo_title_display,
+
 			'smug_photo_title_display' => $photonic_smug_photo_title_display,
 			'smug_photo_pop_title_display' => $photonic_smug_photo_pop_title_display,
 			'smug_albums_album_title_display' => $photonic_smug_albums_album_title_display,
+
 			'instagram_photo_title_display' => $photonic_instagram_photo_title_display,
 			'instagram_user_title_display' => $photonic_instagram_user_title_display,
+
 			'zenfolio_photo_title_display' => $photonic_zenfolio_photo_title_display,
 			'zenfolio_set_title_display' => $photonic_zenfolio_set_title_display,
 
-			'slideshow_library' => $photonic_slideshow_library,
+			'slideshow_library' => $photonic_slideshow_library == 'custom' ? $photonic_custom_lightbox : $photonic_slideshow_library,
 			'slideshow_mode' => (isset($photonic_slideshow_mode) && $photonic_slideshow_mode == 'on') ? true : false,
 			'slideshow_interval' => (isset($photonic_slideshow_interval) && Photonic::check_integer($photonic_slideshow_interval)) ? $photonic_slideshow_interval : 5000,
 			'pphoto_theme' => isset($photonic_pphoto_theme) ? $photonic_pphoto_theme : 'pp_default',
 			'gallery_panel_width' => $photonic_gallery_panel_width,
 			'gallery_panel_items' => $photonic_gallery_panel_items,
-			'new_link' => $photonic_external_links_in_new_tab,
 		);
 		wp_localize_script('photonic', 'Photonic_JS', $js_array);
 
@@ -292,14 +257,17 @@ class Photonic {
 			}
 		}
 		else if ($photonic_slideshow_library == 'colorbox') {
-			if (@file_exists($stylesheet_directory.'/scripts/colorbox/colorbox.css')) {
+			global $photonic_cbox_theme;
+			if ($photonic_cbox_theme == 'theme' && @file_exists($stylesheet_directory.'/scripts/colorbox/colorbox.css')) {
 				wp_enqueue_style("photonic-slideshow", get_stylesheet_directory_uri().'/scripts/colorbox/colorbox.css', array(), $this->version);
 			}
-			else if (@file_exists($template_directory.'/scripts/colorbox/colorbox.css')) {
+			else if ($photonic_cbox_theme == 'theme' && @file_exists($template_directory.'/scripts/colorbox/colorbox.css')) {
 				wp_enqueue_style("photonic-slideshow", get_template_directory_uri().'/scripts/colorbox/colorbox.css', array(), $this->version);
 			}
+			else if ($photonic_cbox_theme == 'theme') {
+				wp_enqueue_style("photonic-slideshow", plugins_url('include/scripts/colorbox/style-1/colorbox.css', __FILE__), array(), $this->version);
+			}
 			else {
-				global $photonic_cbox_theme;
 				wp_enqueue_style("photonic-slideshow", plugins_url('include/scripts/colorbox/style-'.$photonic_cbox_theme.'/colorbox.css', __FILE__), array(), $this->version);
 			}
 		}
@@ -312,6 +280,13 @@ class Photonic {
 			}
 			else {
 				wp_enqueue_style("photonic-slideshow", plugins_url('include/scripts/prettyphoto/css/prettyPhoto.css', __FILE__), array(), $this->version);
+			}
+		}
+		else if ($photonic_slideshow_library == 'custom') {
+			$counter = 1;
+			foreach(preg_split("/((\r?\n)|(\r\n?))/", $photonic_custom_lightbox_css) as $line){
+				wp_enqueue_style('photonic-slideshow-'.$counter, trim($line), array(), $this->version);
+				$counter++;
 			}
 		}
 
@@ -681,6 +656,13 @@ class Photonic {
 		return $ret;
 	}
 
+	function flickr_display_photos() {
+		global $photonic_flickr_gallery;
+		if (!isset($photonic_flickr_gallery)) {
+			$photonic_flickr_gallery = new Photonic_Flickr_Processor();
+		}
+		$photonic_flickr_gallery->display_photos();
+	}
 	/**
 	 * If a Picasa album thumbnail is being displayed on a page, clicking on the thumbnail should launch a popup displaying all
 	 * album photos. This function handles the click event and the subsequent invocation of the popup.
@@ -723,13 +705,6 @@ class Photonic {
 		$photonic_zenfolio_gallery->display_set();
 	}
 
-	function flickr_sign() {
-		global $photonic_flickr_gallery;
-		if (!isset($photonic_flickr_gallery)) {
-			$photonic_flickr_gallery = new Photonic_Flickr_Processor();
-		}
-		$photonic_flickr_gallery->sign_js_call();
-	}
 	/**
 	 * Checks if a text being passed to it is an integer or not.
 	 *

@@ -57,9 +57,6 @@ li.slideshow-grid li { display: inline-block; }
 .photonic-panel { display: none; text-align: center; width: 800px; z-index: 5; padding: 10px; border-radius:10px; }
 
 .photonic-flickr-panel .photonic-flickr-image img { border-color: #333; }
-.photonic-flickr-panel-header { top: 0; left: 0; padding: 10px 0; text-align: left; font-weight: bold; border-bottom: 5px solid #787878; color: #787878; position: relative; display: table; width: 100%; }
-.photonic-flickr-panel-header div { vertical-align: middle; margin: 0 5px; }
-.photonic-flickr-panel-header a { text-decoration: none; font-size: 100%; }
 .photonic-panel-content { padding: 10px 40px; }
 
 .photonic-flickr-image, .photonic-picasa-image, .photonic-500px-image, .photonic-smug-image, .photonic-instagram-image, .photonic-zenfolio-image {
@@ -80,8 +77,8 @@ li.slideshow-grid li { display: inline-block; }
 .photonic-flickr-collection { display: inline-block; width: 100%; text-align: left; border-width: 1px 0 1px 0; border-style: dotted; border-color: #888; padding: 0.5em 0; margin: 0.5em 0; }
 .photonic-flickr-set, .photonic-flickr-gallery, .photonic-smug-album, .photonic-smug-category, .photonic-smug-sub-category, .photonic-zenfolio-set, .photonic-zenfolio-group { list-style: none; display: inline-block; width: 100%; text-align: left; border-width: 1px 0 1px 0; border-style: dotted; border-color: #888; padding: 0.5em 0; margin: 0.5em 0; }
 
-.photonic-photoset-title, .photonic-gallery-title, .photonic-photo-title, .photonic-photo-pop-title, .photonic-album-title { display: block; }
-.photonic-photoset-photo-count, .photonic-gallery-photo-count, .photonic-album-photo-count { font-size: 85%; font-style: italic; }
+.photonic-set-title, .photonic-gallery-title, .photonic-photo-title, .photonic-photo-pop-title, .photonic-album-title { display: block; }
+.photonic-set-photo-count, .photonic-gallery-photo-count, .photonic-album-photo-count { font-size: 85%; font-style: italic; }
 
 .photonic-header-thumb { float: left; margin: 0 1em 0 0; }
 .photonic-header-details { float: left; }
@@ -159,11 +156,14 @@ li.slideshow-grid li { display: inline-block; }
 	display: inline-block;
 	width: 100%;
 }
-.photonic-user-thumbnail img {
+.photonic-user-thumbnail img, .photonic-500px-user img {
 	width: 100px;
 	min-height: 100px;
 }
 
+.photonic-panel-header { top: 0; left: 0; padding: 10px 0; text-align: left; font-weight: bold; border-bottom: 5px solid #787878; color: #787878; position: relative; display: table; width: 100%; border-top: none;}
+.photonic-panel-header div { vertical-align: middle; margin: 0 5px; }
+.photonic-panel-header a { text-decoration: none; font-size: 100%; }
 
 
 
