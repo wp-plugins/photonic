@@ -73,38 +73,39 @@
  *   http://www.opensource.org/licenses/mit-license.php
  *   http://www.gnu.org/licenses/gpl.html
  */
-;(function($){var helper={},current,title,tID,IE=$.browser.msie&&/MSIE\s(5\.5|6\.)/.test(navigator.userAgent),track=false;$.tooltip={blocked:false,defaults:{delay:200,fade:false,showURL:true,extraClass:"",top:15,left:15,id:"tooltip"},block:function(){$.tooltip.blocked=!$.tooltip.blocked;}};$.fn.extend({tooltip:function(settings){settings=$.extend({},$.tooltip.defaults,settings);createHelper(settings);return this.each(function(){$.data(this,"tooltip",settings);this.tOpacity=helper.parent.css("opacity");this.tooltipText=this.title;$(this).removeAttr("title");this.alt="";}).mouseover(save).mouseout(hide).click(hide);},fixPNG:IE?function(){return this.each(function(){var image=$(this).css('backgroundImage');if(image.match(/^url\(["']?(.*\.png)["']?\)$/i)){image=RegExp.$1;$(this).css({'backgroundImage':'none','filter':"progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled=true, sizingMethod=crop, src='"+image+"')"}).each(function(){var position=$(this).css('position');if(position!='absolute'&&position!='relative')$(this).css('position','relative');});}});}:function(){return this;},unfixPNG:IE?function(){return this.each(function(){$(this).css({'filter':'',backgroundImage:''});});}:function(){return this;},hideWhenEmpty:function(){return this.each(function(){$(this)[$(this).html()?"show":"hide"]();});},url:function(){return this.attr('href')||this.attr('src');}});function createHelper(settings){if(helper.parent)return;helper.parent=$('<div id="'+settings.id+'"><h3></h3><div class="body"></div><div class="url"></div></div>').appendTo(document.body).hide();if($.fn.bgiframe)helper.parent.bgiframe();helper.title=$('h3',helper.parent);helper.body=$('div.body',helper.parent);helper.url=$('div.url',helper.parent);}function settings(element){return $.data(element,"tooltip");}function handle(event){if(settings(this).delay)tID=setTimeout(show,settings(this).delay);else
-show();track=!!settings(this).track;$(document.body).bind('mousemove',update);update(event);}function save(){if($.tooltip.blocked||this==current||(!this.tooltipText&&!settings(this).bodyHandler))return;current=this;title=this.tooltipText;if(settings(this).bodyHandler){helper.title.hide();var bodyContent=settings(this).bodyHandler.call(this);if(bodyContent.nodeType||bodyContent.jquery){helper.body.empty().append(bodyContent)}else{helper.body.html(bodyContent);}helper.body.show();}else if(settings(this).showBody){var parts=title.split(settings(this).showBody);helper.title.html(parts.shift()).show();helper.body.empty();for(var i=0,part;(part=parts[i]);i++){if(i>0)helper.body.append("<br/>");helper.body.append(part);}helper.body.hideWhenEmpty();}else{helper.title.html(title).show();helper.body.hide();}if(settings(this).showURL&&$(this).url())helper.url.html($(this).url().replace('http://','')).show();else
+;(function($){var helper={},current,title,tID,IE=$.browser.msie&&/MSIE\s(5\.5|6\.)/.test(navigator.userAgent),track=false;$.tooltip={blocked:false,defaults:{delay:200,fade:false,showURL:true,extraClass:"",top:15,left:15,id:"tooltip"},block:function(){$.tooltip.blocked=!$.tooltip.blocked;}};$.fn.extend({tooltip:function(settings){settings=$.extend({},$.tooltip.defaults,settings);createHelper(settings);return this.each(function(){$.data(this,"tooltip",settings);this.tOpacity=helper.parent.css("opacity");this.tooltipText=this.title;/*$(this).data('title', this.title);*/$(this).removeAttr("title");this.alt="";}).mouseover(save).mouseout(hide).click(hide);},fixPNG:IE?function(){return this.each(function(){var image=$(this).css('backgroundImage');if(image.match(/^url\(["']?(.*\.png)["']?\)$/i)){image=RegExp.$1;$(this).css({'backgroundImage':'none','filter':"progid:DXImageTransform.Microsoft.AlphaImageLoader(enabled=true, sizingMethod=crop, src='"+image+"')"}).each(function(){var position=$(this).css('position');if(position!='absolute'&&position!='relative')$(this).css('position','relative');});}});}:function(){return this;},unfixPNG:IE?function(){return this.each(function(){$(this).css({'filter':'',backgroundImage:''});});}:function(){return this;},hideWhenEmpty:function(){return this.each(function(){$(this)[$(this).html()?"show":"hide"]();});},url:function(){return this.attr('href')||this.attr('src');}});function createHelper(settings){if(helper.parent)return;helper.parent=$('<div id="'+settings.id+'"><h3></h3><div class="body"></div><div class="url"></div></div>').appendTo(document.body).hide();if($.fn.bgiframe)helper.parent.bgiframe();helper.title=$('h3',helper.parent);helper.body=$('div.body',helper.parent);helper.url=$('div.url',helper.parent);}function settings(element){return $.data(element,"tooltip");}function handle(event){if(settings(this).delay)tID=setTimeout(show,settings(this).delay);else
+show();track=!!settings(this).track;$(document.body).bind('mousemove',update);update(event);}function save(){if($.tooltip.blocked||this==current||(!this.tooltipText&&!settings(this).bodyHandler))return;current=this;title=this.tooltipText;if(settings(this).bodyHandler){helper.title.hide();var bodyContent=settings(this).bodyHandler.call(this);if((bodyContent.nodeType||bodyContent.jquery)){helper.body.empty().append(bodyContent)}else{helper.body.html(bodyContent);}helper.body.show();}else if(settings(this).showBody){var parts=title.split(settings(this).showBody);helper.title.html(parts.shift()).show();helper.body.empty();for(var i=0,part;(part=parts[i]);i++){if(i>0)helper.body.append("<br/>");helper.body.append(part);}helper.body.hideWhenEmpty();}else{helper.title.html(title).show();helper.body.hide();}if(settings(this).showURL&&$(this).url())helper.url.html($(this).url().replace('http://','')).show();else
 helper.url.hide();helper.parent.addClass(settings(this).extraClass);if(settings(this).fixPNG)helper.parent.fixPNG();handle.apply(this,arguments);}function show(){tID=null;if((!IE||!$.fn.bgiframe)&&settings(current).fade){if(helper.parent.is(":animated"))helper.parent.stop().show().fadeTo(settings(current).fade,current.tOpacity);else
 helper.parent.is(':visible')?helper.parent.fadeTo(settings(current).fade,current.tOpacity):helper.parent.fadeIn(settings(current).fade);}else{helper.parent.show();}update();}function update(event){if($.tooltip.blocked)return;if(event&&event.target.tagName=="OPTION"){return;}if(!track&&helper.parent.is(":visible")){$(document.body).unbind('mousemove',update)}if(current==null){$(document.body).unbind('mousemove',update);return;}helper.parent.removeClass("viewport-right").removeClass("viewport-bottom");var left=helper.parent[0].offsetLeft;var top=helper.parent[0].offsetTop;if(event){left=event.pageX+settings(current).left;top=event.pageY+settings(current).top;var right='auto';if(settings(current).positionLeft){right=$(window).width()-left;left='auto';}helper.parent.css({left:left,right:right,top:top});}var v=viewport(),h=helper.parent[0];if(v.x+v.cx<h.offsetLeft+h.offsetWidth){left-=h.offsetWidth+20+settings(current).left;helper.parent.css({left:left+'px'}).addClass("viewport-right");}if(v.y+v.cy<h.offsetTop+h.offsetHeight){top-=h.offsetHeight+20+settings(current).top;helper.parent.css({top:top+'px'}).addClass("viewport-bottom");}}function viewport(){return{x:$(window).scrollLeft(),y:$(window).scrollTop(),cx:$(window).width(),cy:$(window).height()};}function hide(event){if($.tooltip.blocked)return;if(tID)clearTimeout(tID);current=null;var tsettings=settings(this);function complete(){helper.parent.removeClass(tsettings.extraClass).hide().css("opacity","");}if((!IE||!$.fn.bgiframe)&&tsettings.fade){if(helper.parent.is(':animated'))helper.parent.stop().fadeTo(tsettings.fade,0,complete);else
 helper.parent.stop().fadeOut(tsettings.fade,complete);}else
 complete();if(settings(this).fixPNG)helper.parent.unfixPNG();}})(jQuery);
 
 /*
- * SimpleModal 1.4.1 - jQuery Plugin
- * http://www.ericmmartin.com/projects/simplemodal/
- * Copyright (c) 2010 Eric Martin (http://twitter.com/ericmmartin)
- * Dual licensed under the MIT and GPL licenses
- * Revision: $Id: jquery.simplemodal.js 261 2010-11-05 21:16:20Z emartin24 $
+ * SimpleModal 1.4.3 - jQuery Plugin
+ * http://simplemodal.com/
+ * Copyright (c) 2012 Eric Martin
+ * Licensed under MIT and GPL
+ * Date: Sat, Sep 8 2012 07:52:31 -0700
  */
-(function(d){var k=d.browser.msie&&parseInt(d.browser.version)===6&&typeof window.XMLHttpRequest!=="object",m=d.browser.msie&&parseInt(d.browser.version)===7,l=null,f=[];d.modal=function(a,b){return d.modal.impl.init(a,b)};d.modal.close=function(){d.modal.impl.close()};d.modal.focus=function(a){d.modal.impl.focus(a)};d.modal.setContainerDimensions=function(){d.modal.impl.setContainerDimensions()};d.modal.setPosition=function(){d.modal.impl.setPosition()};d.modal.update=function(a,b){d.modal.impl.update(a,
-b)};d.fn.modal=function(a){return d.modal.impl.init(this,a)};d.modal.defaults={appendTo:"body",focus:true,opacity:50,overlayId:"simplemodal-overlay",overlayCss:{},containerId:"simplemodal-container",containerCss:{},dataId:"simplemodal-data",dataCss:{},minHeight:null,minWidth:null,maxHeight:null,maxWidth:null,autoResize:false,autoPosition:true,zIndex:1E3,close:true,closeHTML:'<a class="modalCloseImg" title="Close"></a>',closeClass:"simplemodal-close",escClose:true,overlayClose:false,position:null,
-persist:false,modal:true,onOpen:null,onShow:null,onClose:null};d.modal.impl={d:{},init:function(a,b){var c=this;if(c.d.data)return false;l=d.browser.msie&&!d.boxModel;c.o=d.extend({},d.modal.defaults,b);c.zIndex=c.o.zIndex;c.occb=false;if(typeof a==="object"){a=a instanceof jQuery?a:d(a);c.d.placeholder=false;if(a.parent().parent().size()>0){a.before(d("<span></span>").attr("id","simplemodal-placeholder").css({display:"none"}));c.d.placeholder=true;c.display=a.css("display");if(!c.o.persist)c.d.orig=
-a.clone(true)}}else if(typeof a==="string"||typeof a==="number")a=d("<div></div>").html(a);else{alert("SimpleModal Error: Unsupported data type: "+typeof a);return c}c.create(a);c.open();d.isFunction(c.o.onShow)&&c.o.onShow.apply(c,[c.d]);return c},create:function(a){var b=this;f=b.getDimensions();if(b.o.modal&&k)b.d.iframe=d('<iframe src="javascript:false;"></iframe>').css(d.extend(b.o.iframeCss,{display:"none",opacity:0,position:"fixed",height:f[0],width:f[1],zIndex:b.o.zIndex,top:0,left:0})).appendTo(b.o.appendTo);
-b.d.overlay=d("<div></div>").attr("id",b.o.overlayId).addClass("simplemodal-overlay").css(d.extend(b.o.overlayCss,{display:"none",opacity:b.o.opacity/100,height:b.o.modal?f[0]:0,width:b.o.modal?f[1]:0,position:"fixed",left:0,top:0,zIndex:b.o.zIndex+1})).appendTo(b.o.appendTo);b.d.container=d("<div></div>").attr("id",b.o.containerId).addClass("simplemodal-container").css(d.extend(b.o.containerCss,{display:"none",position:"fixed",zIndex:b.o.zIndex+2})).append(b.o.close&&b.o.closeHTML?d(b.o.closeHTML).addClass(b.o.closeClass):
-"").appendTo(b.o.appendTo);b.d.wrap=d("<div></div>").attr("tabIndex",-1).addClass("simplemodal-wrap").css({height:"100%",outline:0,width:"100%"}).appendTo(b.d.container);b.d.data=a.attr("id",a.attr("id")||b.o.dataId).addClass("simplemodal-data").css(d.extend(b.o.dataCss,{display:"none"})).appendTo("body");b.setContainerDimensions();b.d.data.appendTo(b.d.wrap);if(k||l)b.fixIE()},bindEvents:function(){var a=this;d("."+a.o.closeClass).bind("click.simplemodal",function(b){b.preventDefault();a.close()});
-a.o.modal&&a.o.close&&a.o.overlayClose&&a.d.overlay.bind("click.simplemodal",function(b){b.preventDefault();a.close()});d(document).bind("keydown.simplemodal",function(b){if(a.o.modal&&b.keyCode===9)a.watchTab(b);else if(a.o.close&&a.o.escClose&&b.keyCode===27){b.preventDefault();a.close()}});d(window).bind("resize.simplemodal",function(){f=a.getDimensions();a.o.autoResize?a.setContainerDimensions():a.o.autoPosition&&a.setPosition();if(k||l)a.fixIE();else if(a.o.modal){a.d.iframe&&a.d.iframe.css({height:f[0],
-width:f[1]});a.d.overlay.css({height:f[0],width:f[1]})}})},unbindEvents:function(){d("."+this.o.closeClass).unbind("click.simplemodal");d(document).unbind("keydown.simplemodal");d(window).unbind("resize.simplemodal");this.d.overlay.unbind("click.simplemodal")},fixIE:function(){var a=this,b=a.o.position;d.each([a.d.iframe||null,!a.o.modal?null:a.d.overlay,a.d.container],function(c,h){if(h){var g=h[0].style;g.position="absolute";if(c<2){g.removeExpression("height");g.removeExpression("width");g.setExpression("height",
-'document.body.scrollHeight > document.body.clientHeight ? document.body.scrollHeight : document.body.clientHeight + "px"');g.setExpression("width",'document.body.scrollWidth > document.body.clientWidth ? document.body.scrollWidth : document.body.clientWidth + "px"')}else{var e;if(b&&b.constructor===Array){c=b[0]?typeof b[0]==="number"?b[0].toString():b[0].replace(/px/,""):h.css("top").replace(/px/,"");c=c.indexOf("%")===-1?c+' + (t = document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop) + "px"':
-parseInt(c.replace(/%/,""))+' * ((document.documentElement.clientHeight || document.body.clientHeight) / 100) + (t = document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop) + "px"';if(b[1]){e=typeof b[1]==="number"?b[1].toString():b[1].replace(/px/,"");e=e.indexOf("%")===-1?e+' + (t = document.documentElement.scrollLeft ? document.documentElement.scrollLeft : document.body.scrollLeft) + "px"':parseInt(e.replace(/%/,""))+' * ((document.documentElement.clientWidth || document.body.clientWidth) / 100) + (t = document.documentElement.scrollLeft ? document.documentElement.scrollLeft : document.body.scrollLeft) + "px"'}}else{c=
-'(document.documentElement.clientHeight || document.body.clientHeight) / 2 - (this.offsetHeight / 2) + (t = document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop) + "px"';e='(document.documentElement.clientWidth || document.body.clientWidth) / 2 - (this.offsetWidth / 2) + (t = document.documentElement.scrollLeft ? document.documentElement.scrollLeft : document.body.scrollLeft) + "px"'}g.removeExpression("top");g.removeExpression("left");g.setExpression("top",
-c);g.setExpression("left",e)}}})},focus:function(a){var b=this;a=a&&d.inArray(a,["first","last"])!==-1?a:"first";var c=d(":input:enabled:visible:"+a,b.d.wrap);setTimeout(function(){c.length>0?c.focus():b.d.wrap.focus()},10)},getDimensions:function(){var a=d(window);return[d.browser.opera&&d.browser.version>"9.5"&&d.fn.jquery<"1.3"||d.browser.opera&&d.browser.version<"9.5"&&d.fn.jquery>"1.2.6"?a[0].innerHeight:a.height(),a.width()]},getVal:function(a,b){return a?typeof a==="number"?a:a==="auto"?0:
-a.indexOf("%")>0?parseInt(a.replace(/%/,""))/100*(b==="h"?f[0]:f[1]):parseInt(a.replace(/px/,"")):null},update:function(a,b){var c=this;if(!c.d.data)return false;c.d.origHeight=c.getVal(a,"h");c.d.origWidth=c.getVal(b,"w");c.d.data.hide();a&&c.d.container.css("height",a);b&&c.d.container.css("width",b);c.setContainerDimensions();c.d.data.show();c.o.focus&&c.focus();c.unbindEvents();c.bindEvents()},setContainerDimensions:function(){var a=this,b=k||m,c=a.d.origHeight?a.d.origHeight:d.browser.opera?
-a.d.container.height():a.getVal(b?a.d.container[0].currentStyle.height:a.d.container.css("height"),"h");b=a.d.origWidth?a.d.origWidth:d.browser.opera?a.d.container.width():a.getVal(b?a.d.container[0].currentStyle.width:a.d.container.css("width"),"w");var h=a.d.data.outerHeight(true),g=a.d.data.outerWidth(true);a.d.origHeight=a.d.origHeight||c;a.d.origWidth=a.d.origWidth||b;var e=a.o.maxHeight?a.getVal(a.o.maxHeight,"h"):null,i=a.o.maxWidth?a.getVal(a.o.maxWidth,"w"):null;e=e&&e<f[0]?e:f[0];i=i&&i<
-f[1]?i:f[1];var j=a.o.minHeight?a.getVal(a.o.minHeight,"h"):"auto";c=c?a.o.autoResize&&c>e?e:c<j?j:c:h?h>e?e:a.o.minHeight&&j!=="auto"&&h<j?j:h:j;e=a.o.minWidth?a.getVal(a.o.minWidth,"w"):"auto";b=b?a.o.autoResize&&b>i?i:b<e?e:b:g?g>i?i:a.o.minWidth&&e!=="auto"&&g<e?e:g:e;a.d.container.css({height:c,width:b});a.d.wrap.css({overflow:h>c||g>b?"auto":"visible"});a.o.autoPosition&&a.setPosition()},setPosition:function(){var a=this,b,c;b=f[0]/2-a.d.container.outerHeight(true)/2;c=f[1]/2-a.d.container.outerWidth(true)/
-2;if(a.o.position&&Object.prototype.toString.call(a.o.position)==="[object Array]"){b=a.o.position[0]||b;c=a.o.position[1]||c}else{b=b;c=c}a.d.container.css({left:c,top:b})},watchTab:function(a){var b=this;if(d(a.target).parents(".simplemodal-container").length>0){b.inputs=d(":input:enabled:visible:first, :input:enabled:visible:last",b.d.data[0]);if(!a.shiftKey&&a.target===b.inputs[b.inputs.length-1]||a.shiftKey&&a.target===b.inputs[0]||b.inputs.length===0){a.preventDefault();b.focus(a.shiftKey?"last":
-"first")}}else{a.preventDefault();b.focus()}},open:function(){var a=this;a.d.iframe&&a.d.iframe.show();if(d.isFunction(a.o.onOpen))a.o.onOpen.apply(a,[a.d]);else{a.d.overlay.show();a.d.container.show();a.d.data.show()}a.o.focus&&a.focus();a.bindEvents()},close:function(){var a=this;if(!a.d.data)return false;a.unbindEvents();if(d.isFunction(a.o.onClose)&&!a.occb){a.occb=true;a.o.onClose.apply(a,[a.d])}else{if(a.d.placeholder){var b=d("#simplemodal-placeholder");if(a.o.persist)b.replaceWith(a.d.data.removeClass("simplemodal-data").css("display",
-a.display));else{a.d.data.hide().remove();b.replaceWith(a.d.orig)}}else a.d.data.hide().remove();a.d.container.hide().remove();a.d.overlay.hide();a.d.iframe&&a.d.iframe.hide().remove();setTimeout(function(){a.d.overlay.remove();a.d={}},10)}}}})(jQuery);
+(function(b){"function"===typeof define&&define.amd?define(["jquery"],b):b(jQuery)})(function(b){var j=[],l=b(document),m=b.browser.msie&&6===parseInt(b.browser.version)&&"object"!==typeof window.XMLHttpRequest,o=b.browser.msie&&7===parseInt(b.browser.version),n=null,k=b(window),h=[];b.modal=function(a,d){return b.modal.impl.init(a,d)};b.modal.close=function(){b.modal.impl.close()};b.modal.focus=function(a){b.modal.impl.focus(a)};b.modal.setContainerDimensions=function(){b.modal.impl.setContainerDimensions()};
+	b.modal.setPosition=function(){b.modal.impl.setPosition()};b.modal.update=function(a,d){b.modal.impl.update(a,d)};b.fn.modal=function(a){return b.modal.impl.init(this,a)};b.modal.defaults={appendTo:"body",focus:!0,opacity:50,overlayId:"simplemodal-overlay",overlayCss:{},containerId:"simplemodal-container",containerCss:{},dataId:"simplemodal-data",dataCss:{},minHeight:null,minWidth:null,maxHeight:null,maxWidth:null,autoResize:!1,autoPosition:!0,zIndex:1E3,close:!0,closeHTML:'<a class="modalCloseImg" title="Close"></a>',
+		closeClass:"simplemodal-close",escClose:!0,overlayClose:!1,fixed:!0,position:null,persist:!1,modal:!0,onOpen:null,onShow:null,onClose:null};b.modal.impl={d:{},init:function(a,d){if(this.d.data)return!1;n=b.browser.msie&&!b.support.boxModel;this.o=b.extend({},b.modal.defaults,d);this.zIndex=this.o.zIndex;this.occb=!1;if("object"===typeof a){if(a=a instanceof b?a:b(a),this.d.placeholder=!1,0<a.parent().parent().size()&&(a.before(b("<span></span>").attr("id","simplemodal-placeholder").css({display:"none"})),
+		this.d.placeholder=!0,this.display=a.css("display"),!this.o.persist))this.d.orig=a.clone(!0)}else if("string"===typeof a||"number"===typeof a)a=b("<div></div>").html(a);else return alert("SimpleModal Error: Unsupported data type: "+typeof a),this;this.create(a);this.open();b.isFunction(this.o.onShow)&&this.o.onShow.apply(this,[this.d]);return this},create:function(a){this.getDimensions();if(this.o.modal&&m)this.d.iframe=b('<iframe src="javascript:false;"></iframe>').css(b.extend(this.o.iframeCss,
+		{display:"none",opacity:0,position:"fixed",height:h[0],width:h[1],zIndex:this.o.zIndex,top:0,left:0})).appendTo(this.o.appendTo);this.d.overlay=b("<div></div>").attr("id",this.o.overlayId).addClass("simplemodal-overlay").css(b.extend(this.o.overlayCss,{display:"none",opacity:this.o.opacity/100,height:this.o.modal?j[0]:0,width:this.o.modal?j[1]:0,position:"fixed",left:0,top:0,zIndex:this.o.zIndex+1})).appendTo(this.o.appendTo);this.d.container=b("<div></div>").attr("id",this.o.containerId).addClass("simplemodal-container").css(b.extend({position:this.o.fixed?
+		"fixed":"absolute"},this.o.containerCss,{display:"none",zIndex:this.o.zIndex+2})).append(this.o.close&&this.o.closeHTML?b(this.o.closeHTML).addClass(this.o.closeClass):"").appendTo(this.o.appendTo);this.d.wrap=b("<div></div>").attr("tabIndex",-1).addClass("simplemodal-wrap").css({height:"100%",outline:0,width:"100%"}).appendTo(this.d.container);this.d.data=a.attr("id",a.attr("id")||this.o.dataId).addClass("simplemodal-data").css(b.extend(this.o.dataCss,{display:"none"})).appendTo("body");this.setContainerDimensions();
+		this.d.data.appendTo(this.d.wrap);(m||n)&&this.fixIE()},bindEvents:function(){var a=this;b("."+a.o.closeClass).bind("click.simplemodal",function(b){b.preventDefault();a.close()});a.o.modal&&a.o.close&&a.o.overlayClose&&a.d.overlay.bind("click.simplemodal",function(b){b.preventDefault();a.close()});l.bind("keydown.simplemodal",function(b){a.o.modal&&9===b.keyCode?a.watchTab(b):a.o.close&&a.o.escClose&&27===b.keyCode&&(b.preventDefault(),a.close())});k.bind("resize.simplemodal orientationchange.simplemodal",
+		function(){a.getDimensions();a.o.autoResize?a.setContainerDimensions():a.o.autoPosition&&a.setPosition();m||n?a.fixIE():a.o.modal&&(a.d.iframe&&a.d.iframe.css({height:h[0],width:h[1]}),a.d.overlay.css({height:j[0],width:j[1]}))})},unbindEvents:function(){b("."+this.o.closeClass).unbind("click.simplemodal");l.unbind("keydown.simplemodal");k.unbind(".simplemodal");this.d.overlay.unbind("click.simplemodal")},fixIE:function(){var a=this.o.position;b.each([this.d.iframe||null,!this.o.modal?null:this.d.overlay,
+		"fixed"===this.d.container.css("position")?this.d.container:null],function(b,f){if(f){var g=f[0].style;g.position="absolute";if(2>b)g.removeExpression("height"),g.removeExpression("width"),g.setExpression("height",'document.body.scrollHeight > document.body.clientHeight ? document.body.scrollHeight : document.body.clientHeight + "px"'),g.setExpression("width",'document.body.scrollWidth > document.body.clientWidth ? document.body.scrollWidth : document.body.clientWidth + "px"');else{var c,e;a&&a.constructor===
+		Array?(c=a[0]?"number"===typeof a[0]?a[0].toString():a[0].replace(/px/,""):f.css("top").replace(/px/,""),c=-1===c.indexOf("%")?c+' + (t = document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop) + "px"':parseInt(c.replace(/%/,""))+' * ((document.documentElement.clientHeight || document.body.clientHeight) / 100) + (t = document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop) + "px"',a[1]&&(e="number"===typeof a[1]?
+		a[1].toString():a[1].replace(/px/,""),e=-1===e.indexOf("%")?e+' + (t = document.documentElement.scrollLeft ? document.documentElement.scrollLeft : document.body.scrollLeft) + "px"':parseInt(e.replace(/%/,""))+' * ((document.documentElement.clientWidth || document.body.clientWidth) / 100) + (t = document.documentElement.scrollLeft ? document.documentElement.scrollLeft : document.body.scrollLeft) + "px"')):(c='(document.documentElement.clientHeight || document.body.clientHeight) / 2 - (this.offsetHeight / 2) + (t = document.documentElement.scrollTop ? document.documentElement.scrollTop : document.body.scrollTop) + "px"',
+		e='(document.documentElement.clientWidth || document.body.clientWidth) / 2 - (this.offsetWidth / 2) + (t = document.documentElement.scrollLeft ? document.documentElement.scrollLeft : document.body.scrollLeft) + "px"');g.removeExpression("top");g.removeExpression("left");g.setExpression("top",c);g.setExpression("left",e)}}})},focus:function(a){var d=this,a=a&&-1!==b.inArray(a,["first","last"])?a:"first",f=b(":input:enabled:visible:"+a,d.d.wrap);setTimeout(function(){0<f.length?f.focus():d.d.wrap.focus()},
+		10)},getDimensions:function(){var a="undefined"===typeof window.innerHeight?k.height():window.innerHeight;j=[l.height(),l.width()];h=[a,k.width()]},getVal:function(a,b){return a?"number"===typeof a?a:"auto"===a?0:0<a.indexOf("%")?parseInt(a.replace(/%/,""))/100*("h"===b?h[0]:h[1]):parseInt(a.replace(/px/,"")):null},update:function(a,b){if(!this.d.data)return!1;this.d.origHeight=this.getVal(a,"h");this.d.origWidth=this.getVal(b,"w");this.d.data.hide();a&&this.d.container.css("height",a);b&&this.d.container.css("width",
+		b);this.setContainerDimensions();this.d.data.show();this.o.focus&&this.focus();this.unbindEvents();this.bindEvents()},setContainerDimensions:function(){var a=m||o,d=this.d.origHeight?this.d.origHeight:b.browser.opera?this.d.container.height():this.getVal(a?this.d.container[0].currentStyle.height:this.d.container.css("height"),"h"),a=this.d.origWidth?this.d.origWidth:b.browser.opera?this.d.container.width():this.getVal(a?this.d.container[0].currentStyle.width:this.d.container.css("width"),"w"),f=this.d.data.outerHeight(!0),
+		g=this.d.data.outerWidth(!0);this.d.origHeight=this.d.origHeight||d;this.d.origWidth=this.d.origWidth||a;var c=this.o.maxHeight?this.getVal(this.o.maxHeight,"h"):null,e=this.o.maxWidth?this.getVal(this.o.maxWidth,"w"):null,c=c&&c<h[0]?c:h[0],e=e&&e<h[1]?e:h[1],i=this.o.minHeight?this.getVal(this.o.minHeight,"h"):"auto",d=d?this.o.autoResize&&d>c?c:d<i?i:d:f?f>c?c:this.o.minHeight&&"auto"!==i&&f<i?i:f:i,c=this.o.minWidth?this.getVal(this.o.minWidth,"w"):"auto",a=a?this.o.autoResize&&a>e?e:a<c?c:a:
+		g?g>e?e:this.o.minWidth&&"auto"!==c&&g<c?c:g:c;this.d.container.css({height:d,width:a});this.d.wrap.css({overflow:f>d||g>a?"auto":"visible"});this.o.autoPosition&&this.setPosition()},setPosition:function(){var a,b;a=h[0]/2-this.d.container.outerHeight(!0)/2;b=h[1]/2-this.d.container.outerWidth(!0)/2;var f="fixed"!==this.d.container.css("position")?k.scrollTop():0;this.o.position&&"[object Array]"===Object.prototype.toString.call(this.o.position)?(a=f+(this.o.position[0]||a),b=this.o.position[1]||
+		b):a=f+a;this.d.container.css({left:b,top:a})},watchTab:function(a){if(0<b(a.target).parents(".simplemodal-container").length){if(this.inputs=b(":input:enabled:visible:first, :input:enabled:visible:last",this.d.data[0]),!a.shiftKey&&a.target===this.inputs[this.inputs.length-1]||a.shiftKey&&a.target===this.inputs[0]||0===this.inputs.length)a.preventDefault(),this.focus(a.shiftKey?"last":"first")}else a.preventDefault(),this.focus()},open:function(){this.d.iframe&&this.d.iframe.show();b.isFunction(this.o.onOpen)?
+		this.o.onOpen.apply(this,[this.d]):(this.d.overlay.show(),this.d.container.show(),this.d.data.show());this.o.focus&&this.focus();this.bindEvents()},close:function(){if(!this.d.data)return!1;this.unbindEvents();if(b.isFunction(this.o.onClose)&&!this.occb)this.occb=!0,this.o.onClose.apply(this,[this.d]);else{if(this.d.placeholder){var a=b("#simplemodal-placeholder");this.o.persist?a.replaceWith(this.d.data.removeClass("simplemodal-data").css("display",this.display)):(this.d.data.hide().remove(),a.replaceWith(this.d.orig))}else this.d.data.hide().remove();
+		this.d.container.hide().remove();this.d.overlay.hide();this.d.iframe&&this.d.iframe.hide().remove();this.d.overlay.remove();this.d={}}}}});
 
 /**
  * photonic.js - Contains all custom JavaScript functions required by Photonic
@@ -117,6 +118,20 @@ function photonicHtmlEncode(value){
 
 function photonicHtmlDecode(value){
 	return $j('<div/>').html(value).text();
+}
+
+function photonicFormatFancyBoxTitle(title, currentArray, currentIndex, currentOpts) {
+	if (typeof $j(currentArray[currentIndex]).data('title') != 'undefined' && $j(currentArray[currentIndex]).data('title') != '') {
+		return $j(currentArray[currentIndex]).data('title');
+	}
+	return title;
+}
+
+function photonicLightBoxTitle(obj) {
+	if (typeof obj.title != 'undefined' && obj.title != '') {
+		return obj.title;
+	}
+	return $j(obj).data('title');
 }
 
 $j(document).ready(function() {
@@ -132,19 +147,38 @@ $j(document).ready(function() {
 		setInterval($j.fancybox.next, parseInt(Photonic_JS.slideshow_interval, 10));
 	}
 
-	$j('a.launch-gallery-fancybox').each(function() {
-		$j(this).fancybox({
-			transitionIn	:	'elastic',
-			transitionOut	:	'elastic',
-			speedIn		:	600,
-			speedOut		:	200,
-			overlayShow	:	true,
-			overlayColor:	'#000',
-			overlayOpacity: 0.8,
-			titleShow	: Photonic_JS.fbox_show_title,
-			titlePosition	: Photonic_JS.fbox_title_position
+	if (Photonic_JS.slideshow_library == 'fancybox') {
+		$j('a.launch-gallery-fancybox').each(function() {
+			$j(this).fancybox({
+				transitionIn	:	'elastic',
+				transitionOut	:	'elastic',
+				speedIn			:	600,
+				speedOut		:	200,
+				overlayShow		:	true,
+				overlayColor	:	'#000',
+				overlayOpacity	: 0.8,
+				titleShow		: Photonic_JS.fbox_show_title,
+				titleFormat		: photonicFormatFancyBoxTitle,
+				titlePosition	: Photonic_JS.fbox_title_position
+			});
 		});
-	});
+	}
+	else if (Photonic_JS.slideshow_library == 'fancybox2' && $j.fancybox) {
+		$j('a.launch-gallery-fancybox').fancybox({
+			autoPlay: Photonic_JS.slideshow_mode,
+			playSpeed: parseInt(Photonic_JS.slideshow_interval, 10),
+			beforeLoad: function() {
+				if (Photonic_JS.fbox_show_title) {
+					this.title = $j(this.element).data('title');
+				}
+			},
+			helpers: {
+				title: {
+					type: Photonic_JS.fbox_title_position
+				}
+			}
+		});
+	}
 
 	if ($j.prettyPhoto) {
 		$j("a[rel^='photonic-prettyPhoto']").prettyPhoto({
@@ -162,22 +196,29 @@ $j(document).ready(function() {
 			opacity: 0.8,
 			maxWidth: '95%',
 			maxHeight: '95%',
+			title: photonicLightBoxTitle(this),
 			slideshow: Photonic_JS.slideshow_mode,
 			slideshowSpeed: Photonic_JS.slideshow_interval
 		});
 	});
 
-	$j('.photonic-flickr-set-thumb').live('click', function() {
-		photonicDisplaySetPopup(this);
+	if ($j.fn.piroBox_ext) {
+		$j().piroBox_ext({
+			//
+		});
+	}
+
+	$j('.photonic-flickr-set-thumb').on('click', function() {
+		photonicDisplayPopup(this, 'flickr', 'set');
 		return false;
 	});
 
-	$j('.photonic-flickr-gallery-thumb').live('click', function() {
-		photonicDisplayGalleryPopup(this);
+	$j('.photonic-flickr-gallery-thumb').on('click', function() {
+		photonicDisplayPopup(this, 'flickr', 'gallery');
 		return false;
 	});
 
-	$j('.photonic-picasa-album-thumb').live('click', function(e) {
+	$j('.photonic-picasa-album-thumb').on('click', function(e) {
 		var thumb_id = this.id;
 		var href = this.href;
 		var classes = this.className;
@@ -197,94 +238,18 @@ $j(document).ready(function() {
 		}
 
 		if ($j(panel).length == 0) {
-			$j.post(Photonic_JS.ajaxurl, "action=photonic_picasa_display_album&panel=" + thumb_id + "&href=" + href + '&thumb_size=' + thumb_size, function(data) {
-				var div = $j(data);
-				//div.id = 'photonic-picasa-panel-' + panel_id;
-
-				var ul = div.find('ul');
-				var screens = ul.find('li').length;
-				var prev = document.createElement('a');
-				prev.id = 'photonic-picasa-album-' + panel_id + '-prev';
-				prev.href = '#';
-				prev.className = 'panel-previous';
-				prev.innerHTML = '&nbsp;';
-
-				var next = document.createElement('a');
-				next.id = 'photonic-picasa-album-' + panel_id + '-next';
-				next.href = '#';
-				next.className = 'panel-next';
-				next.innerHTML = '&nbsp;';
-
-				$j(ul).first('li').waitForImages(function() {
-					div.attr('id', 'photonic-picasa-panel-' + panel_id).appendTo($j('#photonic-picasa-album-' + panel_id)).show();
-					if (screens > 1) {
-						$j(ul).before(prev)
-							.after(next)
-							.cycle({
-								timeout: 0,
-								slideResize: false,
-								prev: 'a#photonic-picasa-album-' + panel_id + '-prev',
-								next: 'a#photonic-picasa-album-' + panel_id + '-next',
-								sync: false
-							});
-					}
-					else {
-						$j(this).cycle({
-							timeout: 0,
-							slideResize: false,
-							sync: false
-						});
-					}
-
-					$j(panel).modal({
-						autoPosition: false,
-						dataCss: { width: '' + Photonic_JS.gallery_panel_width + 'px' },
-						overlayCss: { background: '#000' },
-						closeClass: 'photonic-picasa-panel-' + panel_id,
-						opacity: 90,
-						close: true,
-						escClose: false,
-						containerId: 'photonic-picasa-panel-container-' + panel_id,
-						onClose: function(dialog) { $j.modal.close(); $j('#photonic-picasa-panel-' + panel_id).css({ display: 'none' }) },
-						onShow: modalOnPicasaShow,
-						onOpen: modalOpen
-					});
-
-					var viewport = [$j(window).width(), $j(window).height(), $j(document).scrollLeft(), $j(document).scrollTop()];
-					var target = {};
-
-					target.top = parseInt(Math.max(viewport[3] - 20, viewport[3] + ((viewport[1] - $j('#photonic-picasa-panel-container-' + panel_id).height() - 40) * 0.5)), 10);
-					target.left = parseInt(Math.max(viewport[2] - 20, viewport[2] + ((viewport[0] - $j('#photonic-picasa-panel-container-' + panel_id).width() - 40) * 0.5)), 10);
-
-					$j('#photonic-picasa-panel-container-' + panel_id).css({top: target.top, left: target.left });
-					$j(loading).hide();
-				});
+			$j.post(Photonic_JS.ajaxurl, "action=photonic_picasa_display_album&panel_id=" + thumb_id + "&href=" + href + '&thumb_size=' + thumb_size, function(data) {
+				photonicDisplayPopupContent(data, 'picasa', 'album', panel_id);
 			});
 		}
 		else {
-			$j(loading).hide();
-			$j(panel).modal({
-				autoPosition: false,
-				dataCss: { width: '' + Photonic_JS.gallery_panel_width + 'px' },
-				overlayCss: { background: '#000' },
-				opacity: 90,
-				close: true,
-				escClose: false,
-				containerId: 'photonic-picasa-panel-container-' + panel_id,
-				onClose: modalClose
-			});
-			var viewport = [$j(window).width(), $j(window).height(), $j(document).scrollLeft(), $j(document).scrollTop()];
-			var target = {};
-			target.top = parseInt(Math.max(viewport[3] - 20, viewport[3] + ((viewport[1] - $j('#photonic-picasa-panel-' + panel_id).height() - 40) * 0.5)), 10);
-			target.left = parseInt(Math.max(viewport[2] - 20, viewport[2] + ((viewport[0] - $j('#photonic-picasa-panel-' + panel_id).width() - 40) * 0.5)), 10);
-			$j('#' + 'photonic-picasa-panel-container-' + panel_id).css({top: target.top, left: target.left});
-			$j('.slideshow-grid-panel').cycle({timeout: 0, prev: 'a#photonic-picasa-album-' + panel_id + '-prev', next: 'a#photonic-picasa-album-' + panel_id + '-next'});
+			photonicRedisplayPopupContents('picasa', 'album', panel_id, panel, 'photonic-picasa-panel-container-' + panel_id);
 		}
 
 		return false;
 	});
 
-	$j('a.photonic-smug-album-thumb').live('click', function(e) {
+	$j('a.photonic-smug-album-thumb').on('click', function(e) {
 		if ($j(this).hasClass('photonic-smug-passworded')) {
 			return false;
 		}
@@ -299,93 +264,18 @@ $j(document).ready(function() {
 		$j(loading).appendTo($j('body')).show();
 
 		if ($j(panel).length == 0) {
-			$j.post(Photonic_JS.ajaxurl, "action=photonic_smug_display_album&panel=" + thumb_id + "&href=" + href, function(data) {
-				var div = $j(data);
-
-				var ul = div.find('ul');
-				var screens = ul.find('li').length;
-				var prev = document.createElement('a');
-				prev.id = 'photonic-smug-album-' + panel_id + '-prev';
-				prev.href = '#';
-				prev.className = 'panel-previous';
-				prev.innerHTML = '&nbsp;';
-
-				var next = document.createElement('a');
-				next.id = 'photonic-smug-album-' + panel_id + '-next';
-				next.href = '#';
-				next.className = 'panel-next';
-				next.innerHTML = '&nbsp;';
-
-				$j(ul).first('li').waitForImages(function() {
-					div.attr('id', 'photonic-smug-panel-' + panel_id).appendTo($j('#photonic-smug-album-' + panel_id)).show();
-					if (screens > 1) {
-						$j(ul).before(prev)
-							.after(next)
-							.cycle({
-								timeout: 0,
-								slideResize: false,
-								prev: 'a#photonic-smug-album-' + panel_id + '-prev',
-								next: 'a#photonic-smug-album-' + panel_id + '-next',
-								sync: false
-							});
-					}
-					else {
-						$j(this).cycle({
-							timeout: 0,
-							slideResize: false,
-							sync: false
-						});
-					}
-
-					$j(panel).modal({
-						autoPosition: false,
-						dataCss: { width: '' + Photonic_JS.gallery_panel_width + 'px' },
-						overlayCss: { background: '#000' },
-						closeClass: 'photonic-smug-panel-' + panel_id,
-						opacity: 90,
-						close: true,
-						escClose: false,
-						containerId: 'photonic-smug-panel-container-' + panel_id,
-						onClose: function(dialog) { $j.modal.close(); $j('#photonic-smug-panel-' + panel_id).css({ display: 'none' }) },
-						onShow: modalOnSmugShow,
-						onOpen: modalOpen
-					});
-
-					var viewport = [$j(window).width(), $j(window).height(), $j(document).scrollLeft(), $j(document).scrollTop()];
-					var target = {};
-
-					target.top = parseInt(Math.max(viewport[3] - 20, viewport[3] + ((viewport[1] - $j('#photonic-smug-panel-container-' + panel_id).height() - 40) * 0.5)), 10);
-					target.left = parseInt(Math.max(viewport[2] - 20, viewport[2] + ((viewport[0] - $j('#photonic-smug-panel-container-' + panel_id).width() - 40) * 0.5)), 10);
-
-					$j('#photonic-smug-panel-container-' + panel_id).css({top: target.top, left: target.left });
-					$j(loading).hide();
-				});
+			$j.post(Photonic_JS.ajaxurl, "action=photonic_smug_display_album&panel_id=" + thumb_id + "&href=" + href, function(data) {
+				photonicDisplayPopupContent(data, 'smug', 'album', panel_id);
 			});
 		}
 		else {
-			$j(loading).hide();
-			$j(panel).modal({
-				autoPosition: false,
-				dataCss: { width: '' + Photonic_JS.gallery_panel_width + 'px' },
-				overlayCss: { background: '#000' },
-				opacity: 90,
-				close: true,
-				escClose: false,
-				containerId: 'photonic-smug-panel-container-' + panel_id,
-				onClose: modalClose
-			});
-			var viewport = [$j(window).width(), $j(window).height(), $j(document).scrollLeft(), $j(document).scrollTop()];
-			var target = {};
-			target.top = parseInt(Math.max(viewport[3] - 20, viewport[3] + ((viewport[1] - $j('#photonic-smug-panel-' + panel_id).height() - 40) * 0.5)), 10);
-			target.left = parseInt(Math.max(viewport[2] - 20, viewport[2] + ((viewport[0] - $j('#photonic-smug-panel-' + panel_id).width() - 40) * 0.5)), 10);
-			$j('#' + 'photonic-smug-panel-container-' + panel_id).css({top: target.top, left: target.left});
-			$j('.slideshow-grid-panel').cycle({timeout: 0, prev: 'a#photonic-smug-album-' + panel_id + '-prev', next: 'a#photonic-smug-album-' + panel_id + '-next'});
+			photonicRedisplayPopupContents('smug', 'album', panel_id, panel, 'photonic-smug-panel-container-' + panel_id);
 		}
 
 		return false;
 	});
 
-	$j('.photonic-zenfolio-set-thumb').live('click', function(e) {
+	$j('.photonic-zenfolio-set-thumb').on('click', function(e) {
 		var thumb_id = this.id;
 		var href = this.href;
 		var panel_id = thumb_id.substr(28);
@@ -412,91 +302,18 @@ $j(document).ready(function() {
 		}
 
 		if ($j(panel).length == 0) {
-			$j.post(Photonic_JS.ajaxurl, "action=photonic_zenfolio_display_set&panel=" + thumb_id + "&href=" + href + '&thumb_size=' + thumb_size, function(data) {
-				var div = $j(data);
-				var ul = div.find('ul');
-				var screens = ul.find('li').length;
-				var prev = document.createElement('a');
-				prev.id = 'photonic-zenfolio-set-' + panel_id + '-prev';
-				prev.href = '#';
-				prev.className = 'panel-previous';
-				prev.innerHTML = '&nbsp;';
-
-				var next = document.createElement('a');
-				next.id = 'photonic-zenfolio-set-' + panel_id + '-next';
-				next.href = '#';
-				next.className = 'panel-next';
-				next.innerHTML = '&nbsp;';
-
-				$j(ul).first('li').waitForImages(function() {
-					div.attr('id', 'photonic-zenfolio-panel-' + panel_id).appendTo($j('#photonic-zenfolio-set-' + panel_id)).show();
-					if (screens > 1) {
-						$j(ul).before(prev)
-							.after(next)
-							.cycle({
-								timeout: 0,
-								slideResize: false,
-								prev: 'a#photonic-zenfolio-set-' + panel_id + '-prev',
-								next: 'a#photonic-zenfolio-set-' + panel_id + '-next',
-								sync: false
-							});
-					}
-					else {
-						$j(this).cycle({
-							timeout: 0,
-							slideResize: false,
-							sync: false
-						});
-					}
-
-					$j(panel).modal({
-						autoPosition: false,
-						dataCss: { width: '' + Photonic_JS.gallery_panel_width + 'px' },
-						overlayCss: { background: '#000' },
-						closeClass: 'photonic-zenfolio-panel-' + panel_id,
-						opacity: 90,
-						close: true,
-						escClose: false,
-						containerId: 'photonic-zenfolio-panel-container-' + panel_id,
-						onClose: function(dialog) { $j.modal.close(); $j('#photonic-zenfolio-panel-' + panel_id).css({ display: 'none' }) },
-						onOpen: modalOpen
-					});
-
-					var viewport = [$j(window).width(), $j(window).height(), $j(document).scrollLeft(), $j(document).scrollTop()];
-					var target = {};
-
-					target.top = parseInt(Math.max(viewport[3] - 20, viewport[3] + ((viewport[1] - $j('#photonic-zenfolio-panel-container-' + panel_id).height() - 40) * 0.5)), 10);
-					target.left = parseInt(Math.max(viewport[2] - 20, viewport[2] + ((viewport[0] - $j('#photonic-zenfolio-panel-container-' + panel_id).width() - 40) * 0.5)), 10);
-
-					$j('#photonic-zenfolio-panel-container-' + panel_id).css({top: target.top, left: target.left });
-					$j(loading).hide();
-				});
+			$j.post(Photonic_JS.ajaxurl, "action=photonic_zenfolio_display_set&panel_id=" + thumb_id + "&href=" + href + '&thumb_size=' + thumb_size, function(data) {
+				photonicDisplayPopupContent(data, 'zenfolio', 'set', panel_id);
 			});
 		}
 		else {
-			$j(loading).hide();
-			$j(panel).modal({
-				autoPosition: false,
-				dataCss: { width: '' + Photonic_JS.gallery_panel_width + 'px' },
-				overlayCss: { background: '#000' },
-				opacity: 90,
-				close: true,
-				escClose: false,
-				containerId: 'photonic-zenfolio-panel-container-' + panel_id,
-				onClose: modalClose
-			});
-			var viewport = [$j(window).width(), $j(window).height(), $j(document).scrollLeft(), $j(document).scrollTop()];
-			var target = {};
-			target.top = parseInt(Math.max(viewport[3] - 20, viewport[3] + ((viewport[1] - $j('#photonic-zenfolio-panel-' + panel_id).height() - 40) * 0.5)), 10);
-			target.left = parseInt(Math.max(viewport[2] - 20, viewport[2] + ((viewport[0] - $j('#photonic-zenfolio-panel-' + panel_id).width() - 40) * 0.5)), 10);
-			$j('#' + 'photonic-zenfolio-panel-container-' + panel_id).css({top: target.top, left: target.left});
-			$j('.slideshow-grid-panel').cycle({timeout: 0, prev: 'a#photonic-zenfolio-set-' + panel_id + '-prev', next: 'a#photonic-zenfolio-set-' + panel_id + '-next'});
+			photonicRedisplayPopupContents('zenfolio', 'set', panel_id, panel, 'photonic-zenfolio-panel-container-' + panel_id);
 		}
 
 		return false;
 	});
 
-	$j('a.modalCloseImg').live('click', function() {
+	$j('a.modalCloseImg').on('click', function() {
 		var thisClass = this.className;
 		thisClass = thisClass.substr(14);
 		$j('#' + thisClass).hide();
@@ -507,9 +324,8 @@ $j(document).ready(function() {
 			$j(this).data('title', $j(this).attr('title'));
 			var tempTitle = $j(this).data('title');
 			if (typeof tempTitle != 'undefined' && tempTitle != '') {
-				var tempIndex = tempTitle.indexOf('|');
-				tempTitle = tempTitle.substr(0, tempIndex);
-				$j(this).attr('title', tempTitle);
+				var strippedTitle = $j('<div/>').html(tempTitle).text();
+				$j(this).attr('title', strippedTitle);
 			}
 		}
 	});
@@ -624,479 +440,6 @@ $j(document).ready(function() {
 	});
 */
 
-	/**
-	 * Displays all photos in a Flickr Set. Invoked when the Set is being fetched for the first time for display in a popup.
-	 *
-	 * @param rsp
-	 */
-	function photonicDisplaySetImages(rsp) {
-		if (rsp.stat != "ok") {
-			$j('.photonic-loading').hide();
-			return;
-		}
-		var photoset = rsp.photoset;
-		var photos = photoset.photo;
-		var owner = photoset.owner;
-		var main_size = Photonic_JS.flickr_main_size == 'none' ? '' : '_' + Photonic_JS.flickr_main_size;
-
-		if (typeof photos != 'undefined' && photos.length > 0) {
-			var col_class = '';
-			if (Photonic_JS.flickr_photos_pop_per_row_constraint == 'padding') {
-				col_class = 'photonic-pad-photos';
-			}
-			else {
-				col_class = 'photonic-gallery-' + Photonic_JS.flickr_photos_pop_constrain_by_count + 'c';
-			}
-
-			var div = document.createElement('div');
-			div.className = 'photonic-flickr-panel photonic-panel';
-			div.id = 'photonic-flickr-panel-' + current_panel;
-
-			var flickr_url = 'http://www.flickr.com/photos/' + owner + '/sets/' + photoset.id;
-
-			if (!(Photonic_JS.flickr_hide_set_pop_thumbnail && Photonic_JS.flickr_hide_set_pop_title && Photonic_JS.flickr_hide_set_pop_photo_count)) {
-				var div_header = document.createElement('div');
-				div_header.className = 'photonic-flickr-panel-header fix';
-				var header_html = '';
-
-				if (!Photonic_JS.flickr_hide_set_pop_thumbnail) {
-					var thumbnail = current_thumbnail.attr('src');
-					header_html += '<a href="' + flickr_url + '" class="photonic-header-thumb photonic-flickr-set-pop-thumb" title="' + photonicHtmlEncode(current_title) + '"><img src="' + thumbnail + '" alt="' + current_title + '" /></a>';
-				}
-				if (!(Photonic_JS.flickr_hide_set_pop_title && Photonic_JS.flickr_hide_set_pop_photo_count)) {
-					header_html += '<div class="photonic-header-details photonic-set-pop-details">';
-					if (typeof current_title != 'undefined') {
-						header_html += '<span class="photonic-header-title photonic-set-pop-title"><a href="' + flickr_url + '">' + current_title + '</a></span>';
-					}
-					header_html += ' <span class="photonic-header-info photonic-set-pop-info">' + Photonic_JS.flickr_photo_count.replace('{#}', photos.length) + '</span> ';
-					header_html += "</div>";
-				}
-
-				div_header.innerHTML = header_html;
-				div.appendChild(div_header);
-			}
-
- 			var div_content = document.createElement('div');
-			div_content.className = 'photonic-flickr-panel-content photonic-panel-content fix';
-			div_content.id = 'photonic-flickr-panel-content-' + current_panel;
-
-			var script;
-			if (Photonic_JS.slideshow_library != 'none') {
-				script = document.createElement('script');
-				script.type = 'text/javascript';
-				if (Photonic_JS.slideshow_library == 'fancybox') {
-					script.text = "$j('a.launch-gallery-fancybox').each(function() { $j(this).fancybox({ transitionIn:'elastic', transitionOut:'elastic',speedIn:600,speedOut:200,overlayShow:true,overlayOpacity:0.8,overlayColor:\"#000\",titleShow:Photonic_JS.fbox_show_title,titlePosition:Photonic_JS.fbox_title_position});});";
-				}
-				else if (Photonic_JS.slideshow_library == 'colorbox') {
-					script.text = "$j('a.launch-gallery-colorbox').each(function() { $j(this).colorbox({ opacity: 0.8, maxWidth: '95%', maxHeight: '95%', slideshow: Photonic_JS.slideshow_mode, slideshowSpeed: Photonic_JS.slideshow_interval });});";
-				}
-				else if (Photonic_JS.slideshow_library == 'prettyphoto') {
-					script.text = "$j(\"a[rel^='photonic-prettyPhoto']\").prettyPhoto({ theme: Photonic_JS.pphoto_theme, autoplay_slideshow: Photonic_JS.slideshow_mode, slideshow: parseInt(Photonic_JS.slideshow_interval, 10), show_title: false, social_tools: '', deeplinking: false }); ";
-				}
-				div_content.appendChild(script);
-			}
-
-			if (Photonic_JS.flickr_photo_pop_title_display == 'tooltip') {
-				script = document.createElement('script');
-				script.type = 'text/javascript';
-				script.text = "$j('.photonic-flickr-panel a').each(function() { $j(this).data('title', $j(this).attr('title')); }); $j('.photonic-flickr-panel a').each(function() { if (!($j(this).parent().hasClass('photonic-header-title'))) { var iTitle = $j(this).find('img').attr('alt'); $j(this).tooltip({ bodyHandler: function() { return iTitle; }, showURL: false });}})";
-				div_content.appendChild(script);
-			}
-
-			var target = '';
-			if (Photonic_JS.new_link == 'on') {
-				target = ' target="_blank" ';
-			}
-			var ul = document.createElement('ul');
-			ul.className = 'slideshow-grid-panel lib-' + Photonic_JS.slideshow_library;
-
-			var rows = 4;
-			var li_count = Photonic_JS.gallery_panel_items;
-			var li;
-
-			for (var i = 0; i < photos.length; i++) {
-				var photo = photos[ i ];
-				var thumb = "http://farm" + photo.farm + ".static.flickr.com/" + photo.server + "/" + photo.id + "_" + photo.secret + "_" + Photonic_JS.flickr_thumbnail_size + ".jpg";
-				var orig = "http://farm" + photo.farm + ".static.flickr.com/" + photo.server + "/" + photo.id + "_" + photo.secret + main_size + ".jpg";
-
-				if (typeof photo.owner != 'undefined') {
-					owner = photo.owner;
-				}
-
-				var url = "http://www.flickr.com/photos/" + owner + "/" + photo.id;
-
-				if (i%li_count == 0) {
-					li = document.createElement('li');
-					li.className = "photonic-flickr-image photonic-flickr-photo ";
-				}
-
-				var a = document.createElement('a');
-				a.rel = 'lightbox-' + div_content.id;
-				if (Photonic_JS.slideshow_library == 'prettyphoto') {
-					a.rel = 'photonic-prettyPhoto[' + a.rel + ']';
-				}
-				if (Photonic_JS.slideshow_library != 'none') {
-					a.className = 'launch-gallery-' + Photonic_JS.slideshow_library + " " + Photonic_JS.slideshow_library + " " + col_class;
-					a.href = orig;
-					var encodedFlickrView = "<a href='" + url + "' " + target + ">" + Photonic_JS.flickr_view + "</a>";
-					a.title = photo.title == '' ? encodedFlickrView : photo.title + " | " + encodedFlickrView;
-				}
-				else {
-					a.href = url;
-					a.title = photo.title;
-				}
-
-				var img = document.createElement('img');
-				img.alt = photo.title;
-				img.src = thumb;
-
-				a.appendChild(img);
-				if (Photonic_JS.flickr_photo_pop_title_display == 'below') {
-					var span = document.createElement('span');
-					span.className = 'photonic-photo-pop-title';
-					span.innerHTML = photo.title;
-					a.appendChild(span);
-				}
-
-				li.appendChild(a);
-
-				if (i%li_count == 0 || i == photos.length - 1) {
-					ul.appendChild(li);
-				}
-			}
-
-			var screens = ul.children.length;
-			var prev = document.createElement('a');
-			prev.id = 'photonic-flickr-set-' + current_panel + '-prev';
-			prev.href = '#';
-			prev.className = 'panel-previous';
-			prev.innerHTML = '&nbsp;';
-
-			var next = document.createElement('a');
-			next.id = 'photonic-flickr-set-' + current_panel + '-next';
-			next.href = '#';
-			next.className = 'panel-next';
-			next.innerHTML = '&nbsp;';
-
-			div_content.appendChild(ul);
-			div.appendChild(div_content);
-
-			$j(ul).first('li').waitForImages(function() {
-				$j(div).appendTo($j('#photonic-flickr-set-' + current_panel)).show();
-				if (screens > 1) {
-					$j(this).before(prev)
-							.after(next)
-							.cycle({
-								//fx: 'scrollHorz',
-								timeout: 0,
-								slideResize: false,
-								prev: 'a#photonic-flickr-set-' + current_panel + '-prev',
-								next: 'a#photonic-flickr-set-' + current_panel + '-next',
-								sync: false
-							});
-				}
-				else {
-					$j(this).cycle({
-						//fx: 'scrollHorz',
-						timeout: 0,
-						slideResize: false,
-						sync: false
-					});
-				}
-
-				$j('#photonic-flickr-panel-' + current_panel).modal({
-					autoPosition: false,
-					dataCss: { width: '' + Photonic_JS.gallery_panel_width + 'px' },
-					overlayCss: { background: '#000' },
-					closeClass: 'photonic-flickr-panel-' + current_panel,
-					opacity: 90,
-					close: true,
-					escClose: false,
-					containerId: 'photonic-flickr-panel-container-' + current_panel,
-					onClose: function(dialog) { $j.modal.close(); $j('#photonic-flickr-panel-' + current_panel).css({ display: 'none' }) },
-					onShow: modalOnShow,
-					onOpen: modalOpen
-				});
-				var viewport = [$j(window).width(), $j(window).height(), $j(document).scrollLeft(), $j(document).scrollTop()];
-				var target = {};
-
-				target.top = parseInt(Math.max(viewport[3] - 20, viewport[3] + ((viewport[1] - $j('#photonic-flickr-panel-container-' + current_panel).height() - 40) * 0.5)), 10);
-				target.left = parseInt(Math.max(viewport[2] - 20, viewport[2] + ((viewport[0] - $j('#photonic-flickr-panel-container-' + current_panel).width() - 40) * 0.5)), 10);
-
-				$j('#photonic-flickr-panel-container-' + current_panel).css({top: target.top, left: target.left });
-				$j('.photonic-loading').hide();
-			});
-		}
-	}
-
-	/**
-	 * Displays all photos in a Flickr Gallery. Invoked when the Gallery is being fetched for the first time for display in a popup.
-	 *
-	 * @param rsp
-	 */
-	function photonicDisplayGalleryImages(rsp) {
-		if (rsp.stat != "ok") {
-			$j('.photonic-loading').hide();
-			return;
-		}
-		var gallery = rsp.photos;
-		var photos = gallery.photo;
-		var main_size = Photonic_JS.flickr_main_size == 'none' ? '' : '_' + Photonic_JS.flickr_main_size;
-
-		var target = '';
-		if (Photonic_JS.new_link == 'on') {
-			target = ' target="_blank" ';
-		}
-
-		if (typeof photos != 'undefined' && photos.length > 0) {
-			var first_photo = photos[0];
-			var owner = first_photo.owner;
-
-			var col_class = '';
-			if (Photonic_JS.flickr_photos_pop_per_row_constraint == 'padding') {
-				col_class = 'photonic-pad-photos';
-			}
-			else {
-				col_class = 'photonic-gallery-' + Photonic_JS.flickr_photos_pop_constrain_by_count + 'c';
-			}
-
-			var div = document.createElement('div');
-			div.className = 'photonic-flickr-panel photonic-panel';
-			div.id = 'photonic-flickr-panel-' + current_panel;
-
-			var gallery_id = current_panel.substr(current_panel.lastIndexOf('-') + 1);
-			var flickr_url = 'http://www.flickr.com/photos/' + owner + '/galleries/' + gallery_id;
-
-			if (!(Photonic_JS.flickr_hide_gallery_pop_thumbnail && Photonic_JS.flickr_hide_gallery_pop_title && Photonic_JS.flickr_hide_gallery_pop_photo_count)) {
-				var div_header = document.createElement('div');
-				div_header.className = 'photonic-flickr-panel-header fix';
-				var header_html = '';
-
-				if (!Photonic_JS.flickr_hide_gallery_pop_thumbnail) {
-					var thumbnail = current_thumbnail.attr('src');
-					header_html += '<a href="' + flickr_url + '" class="photonic-header-thumb photonic-flickr-gallery-pop-thumb" title="' + photonicHtmlEncode(current_title) + '" ' + target + '><img src="' + thumbnail + '" alt="' + current_title + '" /></a>';
-				}
-				if (!(Photonic_JS.flickr_hide_gallery_pop_title && Photonic_JS.flickr_hide_gallery_pop_photo_count)) {
-					header_html += '<div class="photonic-header-details photonic-gallery-pop-details">';
-					if (!Photonic_JS.flickr_hide_gallery_pop_title && typeof current_title != 'undefined') {
-						header_html += '<span class="photonic-header-title photonic-gallery-pop-title"><a href="' + flickr_url + '" ' + target + '>' + current_title + '</a></span>';
-					}
-					if (!Photonic_JS.flickr_hide_gallery_pop_photo_count) {
-						header_html += ' <span class="photonic-header-info photonic-gallery-pop-info">' + Photonic_JS.flickr_photo_count.replace('{#}', photos.length) + '</span> ';
-					}
-					header_html += "</div>";
-				}
-
-				div_header.innerHTML = header_html;
-				div.appendChild(div_header);
-			}
-
- 			var div_content = document.createElement('div');
-			div_content.className = 'photonic-flickr-panel-content photonic-panel-content fix';
-			div_content.id = 'photonic-flickr-panel-content-' + current_panel;
-
-			var script;
-			if (Photonic_JS.slideshow_library != 'none') {
-				script = document.createElement('script');
-				script.type = 'text/javascript';
-				if (Photonic_JS.slideshow_library == 'fancybox') {
-					script.text = "$j('a.launch-gallery-fancybox').each(function() { $j(this).fancybox({ transitionIn:'elastic', transitionOut:'elastic',speedIn:600,speedOut:200,overlayShow:true,overlayOpacity:0.8,overlayColor:\"#000\",titleShow:Photonic_JS.fbox_show_title,titlePosition:Photonic_JS.fbox_title_position});});";
-				}
-				else if (Photonic_JS.slideshow_library == 'colorbox') {
-					script.text = "$j('a.launch-gallery-colorbox').each(function() { $j(this).colorbox({ opacity: 0.8, maxWidth: '95%', maxHeight: '95%', slideshow: Photonic_JS.slideshow_mode, slideshowSpeed: Photonic_JS.slideshow_interval });});";
-				}
-				else if (Photonic_JS.slideshow_library == 'prettyphoto') {
-					script.text = "$j(\"a[rel^='photonic-prettyPhoto']\").prettyPhoto({ theme: Photonic_JS.pphoto_theme, autoplay_slideshow: Photonic_JS.slideshow_mode, slideshow: parseInt(Photonic_JS.slideshow_interval, 10), show_title: false, social_tools: '', deeplinking: false }); ";
-				}
-				div_content.appendChild(script);
-			}
-
-			if (Photonic_JS.flickr_photo_pop_title_display == 'tooltip') {
-				script = document.createElement('script');
-				script.type = 'text/javascript';
-				script.text = "$j('.photonic-flickr-panel a').each(function() { $j(this).data('title', $j(this).attr('title')); }); $j('.photonic-flickr-panel a').each(function() { if (!($j(this).parent().hasClass('photonic-header-title'))) { var iTitle = $j(this).find('img').attr('alt'); $j(this).tooltip({ bodyHandler: function() {	return iTitle; }, showURL: false });}})";
-				div_content.appendChild(script);
-			}
-
-			var ul = document.createElement('ul');
-			ul.className = 'slideshow-grid-panel lib-' + Photonic_JS.slideshow_library;
-
-			var rows = 4;
-			var li_count = Photonic_JS.gallery_panel_items;
-			var li;
-
-			for (var i = 0; i < photos.length; i++) {
-				var photo = photos[ i ];
-				var thumb = "http://farm" + photo.farm + ".static.flickr.com/" + photo.server + "/" + photo.id + "_" + photo.secret + "_" + Photonic_JS.flickr_thumbnail_size + ".jpg";
-				var orig = "http://farm" + photo.farm + ".static.flickr.com/" + photo.server + "/" + photo.id + "_" + photo.secret + main_size + ".jpg";
-
-				if (typeof photo.owner != 'undefined') {
-					owner = photo.owner;
-				}
-
-				var url = "http://www.flickr.com/photos/" + owner + "/" + photo.id;
-
-				if (i%li_count == 0) {
-					li = document.createElement('li');
-					li.className = "photonic-flickr-image photonic-flickr-photo ";
-				}
-
-				var a = document.createElement('a');
-				a.rel = 'lightbox-' + div_content.id;
-				if (Photonic_JS.slideshow_library == 'prettyphoto') {
-					a.rel = 'photonic-prettyPhoto[' + a.rel + ']';
-				}
-				if (Photonic_JS.slideshow_library != 'none') {
-					a.className = 'launch-gallery-' + Photonic_JS.slideshow_library + " " + Photonic_JS.slideshow_library + " " + col_class;
-					a.href = orig;
-					var encodedFlickrView = "<a href='" + url + "' " + target + ">" + Photonic_JS.flickr_view + "</a>";
-					a.title = photo.title == '' ? encodedFlickrView : photo.title + " | " + encodedFlickrView;
-				}
-				else {
-					a.href = url;
-					a.title = photo.title;
-				}
-
-				var img = document.createElement('img');
-				img.alt = photo.title;
-				img.src = thumb;
-
-				a.appendChild(img);
-				if (Photonic_JS.flickr_photo_pop_title_display == 'below') {
-					var span = document.createElement('span');
-					span.className = 'photonic-photo-pop-title';
-					span.innerHTML = photo.title;
-					a.appendChild(span);
-				}
-
-				li.appendChild(a);
-
-				if (i%li_count == 0 || i == photos.length - 1) {
-					ul.appendChild(li);
-				}
-			}
-
-			var screens = ul.children.length;
-			var prev = document.createElement('a');
-			prev.id = 'photonic-flickr-gallery-' + current_panel + '-prev';
-			prev.href = '#';
-			prev.className = 'panel-previous';
-			prev.innerHTML = '&nbsp;';
-
-			var next = document.createElement('a');
-			next.id = 'photonic-flickr-gallery-' + current_panel + '-next';
-			next.href = '#';
-			next.className = 'panel-next';
-			next.innerHTML = '&nbsp;';
-
-			div_content.appendChild(ul);
-			div.appendChild(div_content);
-
-			$j(ul).first('li').waitForImages(function() {
-				$j(div).appendTo($j('#photonic-flickr-gallery-' + current_panel)).show();
-				if (screens > 1) {
-					$j(this).before(prev)
-							.after(next)
-							.cycle({
-								timeout: 0,
-								slideResize: false,
-								prev: 'a#photonic-flickr-gallery-' + current_panel + '-prev',
-								next: 'a#photonic-flickr-gallery-' + current_panel + '-next',
-								sync: false
-							});
-				}
-				else {
-					$j(this).cycle({
-						timeout: 0,
-						slideResize: false,
-						sync: false
-					});
-				}
-
-				$j('#photonic-flickr-panel-' + current_panel).modal({
-					autoPosition: false,
-					dataCss: { width: '' + Photonic_JS.gallery_panel_width + 'px' },
-					overlayCss: { background: '#000' },
-					closeClass: 'photonic-flickr-panel-' + current_panel,
-					opacity: 90,
-					close: true,
-					escClose: false,
-					containerId: 'photonic-flickr-panel-container-' + current_panel,
-					onClose: function(dialog) { $j.modal.close(); $j('#photonic-flickr-panel-' + current_panel).css({ display: 'none' }) },
-					onShow: modalOnShow,
-					onOpen: modalOpen
-				});
-				var viewport = [$j(window).width(), $j(window).height(), $j(document).scrollLeft(), $j(document).scrollTop()];
-				var target = {};
-
-				target.top = parseInt(Math.max(viewport[3] - 20, viewport[3] + ((viewport[1] - $j('#photonic-flickr-panel-container-' + current_panel).height() - 40) * 0.5)), 10);
-				target.left = parseInt(Math.max(viewport[2] - 20, viewport[2] + ((viewport[0] - $j('#photonic-flickr-panel-container-' + current_panel).width() - 40) * 0.5)), 10);
-
-				$j('#photonic-flickr-panel-container-' + current_panel).css({top: target.top, left: target.left });
-				$j('.photonic-loading').hide();
-			});
-		}
-	}
-
-	// callback function
-	function modalOnShow(dialog) {
-		var s = this; // refers to the simplemodal object
-		$j('.photonic-flickr-set-thumb', dialog.data[0]).click(function () { // use the modal data context
-			photonicDisplaySetPopup(this);
-			var id = '#' + this.id + '-modal'; // dynamically determine the modal content id based on the link id
-			id = '#photonic-flickr-panel-' + this.id.substr(21);
-
-			setTimeout(function () { // wait for 6/10ths of a second, then open the next dialog
-				s.close(); // close the current dialog
-				$j(id).modal({
-					onShow: modalOnShow,
-					onOpen: modalOpen,
-					onClose: modalClose
-				});
-			}, 600);
-
-			return false;
-		});
-	}
-
-	function modalOnPicasaShow(dialog) {
-		var s = this; // refers to the simplemodal object
-		$j('.photonic-picasa-album-thumb', dialog.data[0]).click(function () { // use the modal data context
-			var id = '#photonic-picasa-panel-' + this.id.substr(21);
-
-			setTimeout(function () { // wait for 6/10ths of a second, then open the next dialog
-				s.close(); // close the current dialog
-				$j(id).modal({
-					onShow: modalOnPicasaShow,
-					onOpen: modalOpen,
-					onClose: modalClose
-				});
-			}, 600);
-
-			return false;
-		});
-	}
-
-	function modalOnSmugShow(dialog) {
-		var s = this; // refers to the simplemodal object
-		$j('.photonic-smug-album-thumb', dialog.data[0]).click(function () { // use the modal data context
-			if (!$j(this).hasClass('photonic-smug-passworded')) {
-				var id = '#photonic-smug-panel-' + this.id.substr(19);
-
-				setTimeout(function () { // wait for 6/10ths of a second, then open the next dialog
-					s.close(); // close the current dialog
-					$j(id).modal({
-						onShow: modalOnSmugShow,
-						onOpen: modalOpen,
-						onClose: modalClose
-					});
-				}, 600);
-			}
-
-			return false;
-		});
-	}
-
 	// callback function
 	function modalOpen(dialog) {
 		dialog.overlay.fadeIn(200, function () {
@@ -1120,129 +463,130 @@ $j(document).ready(function() {
 		});
 	}
 
-	function photonicDisplaySetPopup(setPanel) {
-		var panel = setPanel.id;
-		panel = panel.substr(26);
-		current_panel = panel;
-		var containerId = 'photonic-flickr-panel-container-' + panel;
-		panel = '#photonic-flickr-panel-' + panel;
-		current_title = setPanel.title;
-		if (current_title == '') {
-			current_title = $j(setPanel).data('title');
-		}
+	function photonicDisplayPopup(thumb, provider, popup) {
+		var thumbId = thumb.id;
+		var baseStr = 'photonic-' + provider + '-' + popup + '-thumb-';
+		var baseLen = baseStr.length;
+		var panelId = thumbId.substr(baseLen);
 
-		current_thumbnail = $j(setPanel).find('img');
+		var containerId = 'photonic-' + provider + '-panel-container-' + panelId;
+		var panel = '#photonic-' + provider + '-panel-' + panelId;
 
 		var loading = document.createElement('div');
 		loading.className = 'photonic-loading';
 		$j(loading).appendTo($j('body')).show();
 
 		if ($j(panel).length == 0) {
-			var photoset_id = current_panel.substr(current_panel.lastIndexOf('-') + 1);
-			if (Photonic_JS.flickr_auth_call) {
-				$j.post(Photonic_JS.ajaxurl, "action=photonic_flickr_sign&method=flickr.photosets.getPhotos&photoset_id=" + photoset_id, function(data) {
-					$j.getJSON(data, photonicDisplaySetImages);
-				});
+			var object_id = panelId.substr(panelId.lastIndexOf('-') + 1);
+			var method;
+			if (provider == 'flickr' && popup == 'gallery') {
+				var remainder = panelId.substr(0, panelId.lastIndexOf('-'));
+				remainder = remainder.substr(remainder.lastIndexOf('-') + 1);
+				object_id = remainder + '-' + object_id;
+				method = 'flickr.galleries.getPhotos'
 			}
-			else {
-				var url = 'http://api.flickr.com/services/rest/?format=json&api_key=' + (Photonic_JS.flickr_api_key) + '&method=flickr.photosets.getPhotos&photoset_id=' + photoset_id + '&jsoncallback=?';
-				// A quicker call, avoids server round-trip
-				$j.getJSON(url, photonicDisplaySetImages);
+			else if (provider == 'flickr' && popup == 'set') {
+				method = 'flickr.photosets.getPhotos';
 			}
+
+			$j.post(Photonic_JS.ajaxurl, "action=photonic_flickr_display_photos&method=" + method + "&object_id=" + object_id + '&panel_id=' + panelId, function(data) {
+				photonicDisplayPopupContent(data, provider, popup, panelId);
+			});
 		}
 		else {
-			$j(loading).hide();
-			$j(panel).modal({
-				autoPosition: false,
-				dataCss: { width: '' + Photonic_JS.gallery_panel_width + 'px' },
-				overlayCss: { background: '#000' },
-				opacity: 90,
-				close: true,
-				escClose: false,
-				containerId: containerId,
-//				onClose: function(dialog) { $j.modal.close(); $j(panel).css({ display: 'none' }) }
-				onClose: modalClose
-			});
-			var viewport = [$j(window).width(), $j(window).height(), $j(document).scrollLeft(), $j(document).scrollTop()];
-			var target = {};
-			target.top = parseInt(Math.max(viewport[3] - 20, viewport[3] + ((viewport[1] - $j('#photonic-flickr-panel-' + current_panel).height() - 40) * 0.5)), 10);
-			target.left = parseInt(Math.max(viewport[2] - 20, viewport[2] + ((viewport[0] - $j('#photonic-flickr-panel-' + current_panel).width() - 40) * 0.5)), 10);
-			$j('#' + containerId).css({top: target.top, left: target.left});
-			$j('.slideshow-grid-panel').cycle({timeout: 0, prev: 'a#photonic-flickr-set-' + current_panel + '-prev', next: 'a#photonic-flickr-set-' + current_panel + '-next'});
+			photonicRedisplayPopupContents(provider, popup, panelId, panel, containerId);
 		}
 
 		return false;
 	}
 
-	function photonicDisplayGalleryPopup(setPanel) {
-		var panel = setPanel.id;
-		panel = panel.substr(30);
-		current_panel = panel;
-		var containerId = 'photonic-flickr-panel-container-' + panel;
-		panel = '#photonic-flickr-panel-' + panel;
-		current_title = setPanel.title;
-		if (current_title == '') {
-			current_title = $j(setPanel).data('title');
-		}
+	/**
+	 * Displays all photos in a popup. Invoked when the popup data is being fetched for the first time for display in a popup.
+	 * Must be used by all providers for displaying photos in a popup.
+	 *
+	 * @param data The contents of the popup
+	 * @param provider The data provider: flickr | picasa | smug | zenfolio
+	 * @param popup The type of popup object: set | gallery | album
+	 * @param panelId The trailing section of the thumbnail's id
+	 */
+	function photonicDisplayPopupContent(data, provider, popup, panelId) {
+		var div = $j(data);
+		var ul = div.find('ul');
+		var screens = $j(ul).children('li').length;
+		var prev = document.createElement('a');
+		prev.id = 'photonic-' + provider + '-' + popup + '-' + panelId + '-prev';
+		prev.href = '#';
+		prev.className = 'panel-previous';
+		prev.innerHTML = '&nbsp;';
 
-		current_thumbnail = $j(setPanel).find('img');
+		var next = document.createElement('a');
+		next.id = 'photonic-' + provider + '-' + popup + '-' + panelId + '-next';
+		next.href = '#';
+		next.className = 'panel-next';
+		next.innerHTML = '&nbsp;';
 
-		var loading = document.createElement('div');
-		loading.className = 'photonic-loading';
-		$j(loading).appendTo($j('body')).show();
-
-		if ($j(panel).length == 0) {
-			var gallery_id = current_panel.substr(current_panel.lastIndexOf('-') + 1);
-			var remainder = current_panel.substr(0, current_panel.lastIndexOf('-'));
-			remainder = remainder.substr(remainder.lastIndexOf('-') + 1);
-			gallery_id = remainder + '-' + gallery_id;
-
-			if (Photonic_JS.flickr_auth_call) {
-				$j.post(Photonic_JS.ajaxurl, "action=photonic_flickr_sign&method=flickr.galleries.getPhotos&gallery_id=" + gallery_id, function(data) {
-					$j.getJSON(data, photonicDisplayGalleryImages);
-				});
+		$j(ul).first('li').waitForImages(function() {
+			$j(div).appendTo($j('#photonic-' + provider + '-' + popup + '-' + panelId)).show();
+			if (screens > 1) {
+				$j(this).before(prev)
+					.after(next)
+					.cycle({
+						timeout: 0,
+						slideResize: false,
+						prev: 'a#photonic-' + provider + '-' + popup + '-' + panelId + '-prev',
+						next: 'a#photonic-' + provider + '-' + popup + '-' + panelId + '-next',
+						sync: false
+					});
 			}
 			else {
-				var url = 'http://api.flickr.com/services/rest/?format=json&api_key=' + (Photonic_JS.flickr_api_key) + '&method=flickr.galleries.getPhotos&gallery_id=' + gallery_id + '&jsoncallback=?';
-				$j.getJSON(url, photonicDisplayGalleryImages);
+				$j(this).cycle({
+					timeout: 0,
+					slideResize: false,
+					sync: false
+				});
 			}
-		}
-		else {
-			$j(loading).hide();
-			$j(panel).modal({
+
+			$j('#photonic-' + provider + '-panel-' + panelId).modal({
 				autoPosition: false,
 				dataCss: { width: '' + Photonic_JS.gallery_panel_width + 'px' },
 				overlayCss: { background: '#000' },
+				closeClass: 'photonic-' + provider + '-panel-' + panelId,
 				opacity: 90,
 				close: true,
 				escClose: false,
-				containerId: containerId,
-//				onClose: function(dialog) { $j.modal.close(); $j(panel).css({ display: 'none' }) }
-				onClose: modalClose
+				containerId: 'photonic-' + provider + '-panel-container-' + panelId,
+				onClose: function(dialog) { $j.modal.close(); $j('#photonic-' + provider + '-panel-' + panelId).css({ display: 'none' }) },
+				onOpen: modalOpen
 			});
 			var viewport = [$j(window).width(), $j(window).height(), $j(document).scrollLeft(), $j(document).scrollTop()];
 			var target = {};
-			target.top = parseInt(Math.max(viewport[3] - 20, viewport[3] + ((viewport[1] - $j('#photonic-flickr-panel-' + current_panel).height() - 40) * 0.5)), 10);
-			target.left = parseInt(Math.max(viewport[2] - 20, viewport[2] + ((viewport[0] - $j('#photonic-flickr-panel-' + current_panel).width() - 40) * 0.5)), 10);
-			$j('#' + containerId).css({top: target.top, left: target.left});
-			$j('.slideshow-grid-panel').cycle({timeout: 0, prev: 'a#photonic-flickr-gallery-' + current_panel + '-prev', next: 'a#photonic-flickr-gallery-' + current_panel + '-next'});
-		}
 
-		return false;
+			target.top = parseInt(Math.max(viewport[3] - 20, viewport[3] + ((viewport[1] - $j('#photonic-' + provider + '-panel-container-' + panelId).height() - 40) * 0.5)), 10);
+			target.left = parseInt(Math.max(viewport[2] - 20, viewport[2] + ((viewport[0] - $j('#photonic-' + provider + '-panel-container-' + panelId).width() - 40) * 0.5)), 10);
+
+			$j('#photonic-' + provider + '-panel-container-' + panelId).css({top: target.top, left: target.left });
+			$j('.photonic-loading').hide();
+		});
 	}
 
-	function photonicDisplayPasswordPrompt() {
-		var markup = "<div class='photonic-password'><h4>Enter Password</h4><input type='password' name='access_password' /><input type='button' name='submit_password' value='Go' /></div>";
-		$j(markup).modal({
+	function photonicRedisplayPopupContents(provider, popup, panelId, panel, containerId) {
+		$j('.photonic-loading').hide();
+		$j(panel).modal({
 			autoPosition: false,
-//			dataCss: { width: '' + Photonic_JS.gallery_panel_width + 'px' },
+			dataCss: { width: '' + Photonic_JS.gallery_panel_width + 'px' },
 			overlayCss: { background: '#000' },
 			opacity: 90,
 			close: true,
 			escClose: false,
-//			containerId: containerId,
-//				onClose: function(dialog) { $j.modal.close(); $j(panel).css({ display: 'none' }) }
+			containerId: containerId,
 			onClose: modalClose
 		});
+		var viewport = [$j(window).width(), $j(window).height(), $j(document).scrollLeft(), $j(document).scrollTop()];
+		var target = {};
+		target.top = parseInt(Math.max(viewport[3] - 20, viewport[3] + ((viewport[1] - $j('#photonic-' + provider + '-panel-' + panelId).height() - 40) * 0.5)), 10);
+		target.left = parseInt(Math.max(viewport[2] - 20, viewport[2] + ((viewport[0] - $j('#photonic-' + provider + '-panel-' + panelId).width() - 40) * 0.5)), 10);
+		$j('#' + containerId).css({top: target.top, left: target.left});
+		$j('.slideshow-grid-panel').cycle({timeout: 0, prev: 'a#photonic-' + provider + '-' + popup + '-' + panelId + '-prev', next: 'a#photonic-' + provider + '-' + popup + '-' + panelId + '-next'});
 	}
 });
+

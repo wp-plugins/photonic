@@ -556,6 +556,13 @@ $photonic_flickr_options = array(
 		),
 		"std" => "tooltip"),
 
+	array("name" => "Disable lightbox linking",
+		"desc" => "Check this to disable linking the photo title in the lightbox to the original photo page.",
+		"id" => "flickr_disable_title_link",
+		"grouping" => "flickr-photos",
+		"type" => "checkbox",
+		"std" => ""),
+
 	array("name" => "Constrain Photos Per Row",
 		"desc" => "How do you want the control the number of photo thumbnails per row? This can be overridden by adding the '<code>columns</code>' parameter to the '<code>gallery</code>' shortcode.",
 		"id" => "flickr_photos_per_row_constraint",

@@ -7,17 +7,50 @@ $photonic_generic_options = array(
 		"category" => "generic-settings",
 		"type" => "section",),
 
-	array("name" => "Slideshow libraries",
-		"desc" => "Photonic lets you choose from the following JS libraries for gallery slideshows:",
+	array("name" => "Inbuilt Lightbox libraries",
+		"desc" => "Photonic lets you choose from the following JS libraries for Lightbox effects:",
 		"id" => "slideshow_library",
 		"grouping" => "generic-settings",
 		"type" => "radio",
-		"options" => array("fancybox" => "<a href='http://fancybox.net/'>FancyBox</a> &ndash; ~16KB: Released under MIT and GPL licenses.",
+		"options" => array(
+			"fancybox" => "<a href='http://fancybox.net/'>FancyBox</a> &ndash; ~16KB: Released under MIT and GPL licenses.",
 			"colorbox" => "<a href='http://colorpowered.com/colorbox/'>Colorbox</a> &ndash; ~10KB: Released under the MIT license",
 			"prettyphoto" => "<a href='http://www.no-margin-for-errors.com/projects/prettyphoto-jquery-lightbox-clone/'>PrettyPhoto</a> &ndash; ~23KB: Released under the GPL v2.0 license",
-			"none" => "None"
+//			"thickbox" => "Thickbox &ndash; ~12KB: Released under the MIT license",
+			"none" => "None",
+			"custom" => "Non-bundled (You have to provide the JS and CSS links)",
 		),
 		"std" => "fancybox"),
+
+	array("name" => "Non-bundled Lightbox libraries",
+		"desc" => "If you don't like the above libraries, you can try one of the following. These are not distributed with the theme for various reasons,
+			predominant being licensing restrictions. <strong>Photonic doesn't support installation of these scripts</strong>. If you want to use them,
+			you will need to specify their JS and CSS files in subsequent options, unless they come bundled with your theme.
+			<em>Currently only FancyBox2 (the responsive version of FancyBox) is supported</em>.",
+		"id" => "custom_lightbox",
+		"grouping" => "generic-settings",
+		"type" => "radio",
+		"options" => array(
+			"fancybox2" => "<a href='http://fancyapps.com/fancybox/'>FancyBox 2</a>",
+//			"pirobox" => "<a href='http://www.pirolab.it/pirobox/'>Pirobox</a>",
+		),
+		"std" => "fancybox2"),
+
+	array("name" => "Non-bundled Lightbox JS",
+		"desc" => "If you have chosen a custom lightbox library from the above, enter the full URLs of the JS files for each of them.
+			<strong>Please enter one URL per line</strong>. Note that your URL should start with <code>http://...</code> and you should be able to visit that entry in a browser",
+		"id" => "custom_lightbox_js",
+		"grouping" => "generic-settings",
+		"type" => "textarea",
+		"std" => ""),
+
+	array("name" => "Custom Lightbox CSS",
+		"desc" => "If you have chosen a custom lightbox library from the above, enter the full URLs of the CSS files for each of them.
+			<strong>Please enter one URL per line</strong>. Note that your URL should start with <code>http://...</code> and you should be able to visit that entry in a browser",
+		"id" => "custom_lightbox_css",
+		"grouping" => "generic-settings",
+		"type" => "textarea",
+		"std" => ""),
 
 	array("name" => "Slideshow mode",
 		"desc" => "Selecting this will make your images launch in a slideshow mode automatically upon clicking",
@@ -123,7 +156,7 @@ $photonic_generic_options = array(
 		),
 		"std" => "tooltip"),
 
-	array("name" => "JS Library settings",
+	array("name" => "Lightbox Library settings",
 		"desc" => "Control settings for the JS libraries distributed with the theme",
 		"category" => "fbox-settings",
 		"type" => "section",),
@@ -151,6 +184,7 @@ $photonic_generic_options = array(
 			"3" => "Style 3",
 			"4" => "Style 4",
 			"5" => "Style 5",
+			"theme" => "Use a skin defined in your theme (requires the files to be present in the <code>scripts/colorbox</code> folder within your theme directory).",
 		),
 		"std" => "1"),
 
@@ -169,13 +203,13 @@ $photonic_generic_options = array(
 		),
 		"std" => "pp_default"),
 
-	array("name" => "Flickr / Picasa Popup Panel",
+	array("name" => "Popup Panel",
 		"desc" => "Control settings for popup panel",
 		"category" => "photos-pop",
 		"type" => "section",),
 
 	array("name" => "What is this section?",
-		"desc" => "Options in this section are in effect when you click on a Photoset thumbnail to launch an overlaid gallery.",
+		"desc" => "Options in this section are in effect when you click on a Photoset/album thumbnail to launch an overlaid gallery.",
 		"grouping" => "photos-pop",
 		"type" => "blurb",),
 

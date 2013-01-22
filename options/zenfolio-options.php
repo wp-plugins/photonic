@@ -14,6 +14,13 @@ $photonic_zenfolio_options = array(
 		"type" => "text",
 		"std" => ""),*/
 
+	array("name" => "Disable lightbox linking",
+		"desc" => "Check this to disable linking the photo title in the lightbox to the original photo page.",
+		"id" => "zenfolio_disable_title_link",
+		"grouping" => "zenfolio-settings",
+		"type" => "checkbox",
+		"std" => ""),
+
 	array("name" => "Constrain Photos Per Row",
 		"desc" => "How do you want the control the number of photo thumbnails per row? This can be overridden by adding the '<code>columns</code>' parameter to the '<code>gallery</code>' shortcode.",
 		"id" => "zenfolio_photos_per_row_constraint",

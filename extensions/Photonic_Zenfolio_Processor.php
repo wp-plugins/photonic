@@ -10,7 +10,10 @@ class Photonic_Zenfolio_Processor extends Photonic_Processor {
 	var $user_name, $user_agent, $token, $service_url, $secure_url, $unlocked_realms;
 	function __construct() {
 		parent::__construct();
+		global $photonic_instagram_disable_title_link;
+		$this->provider = 'zenfolio';
 		$this->user_agent = "Photonic for ".get_home_url();
+		$this->link_lightbox_title = empty($photonic_instagram_disable_title_link);
 		$query_url = add_query_arg('dummy', 'dummy');
 		$query_url = remove_query_arg('dummy');
 		if (stripos($query_url, ':') === FALSE) {
@@ -33,7 +36,7 @@ class Photonic_Zenfolio_Processor extends Photonic_Processor {
 	 * @return mixed|string|void
 	 */
 	public function get_gallery_images($attr = array()) {
-		global $photonic_zenfolio_thumb_size, $photonic_zenfolio_position;
+		global $photonic_zenfolio_thumb_size;
 
 		$attr = array_merge(array(
 			'style' => 'default',
@@ -238,7 +241,7 @@ class Photonic_Zenfolio_Processor extends Photonic_Processor {
 			}
 		}
 
-		$photonic_zenfolio_position++;
+		$this->gallery_index++;
 		$response = $this->make_call($method, $params);
 
 		if (isset($_COOKIE['photonic-zf-keyring'])) {
@@ -249,11 +252,11 @@ class Photonic_Zenfolio_Processor extends Photonic_Processor {
 		}
 
 		if (!empty($panel)) {
-			$ret = "<div class='photonic-zenfolio-panel photonic-panel'>";
+			$ret = "<div class='photonic-zenfolio-panel photonic-panel' id='photonic-zenfolio-panel-$panel'>";
 			$display = 'popup';
 		}
 		else {
-			$ret = "<div class='photonic-zenfolio-stream' id='photonic-zenfolio-stream-$photonic_zenfolio_position'>";
+			$ret = "<div class='photonic-zenfolio-stream' id='photonic-zenfolio-stream-{$this->gallery_index}'>";
 			$display = 'in-page';
 		}
 		$ret .= $this->process_response($method, $response, $columns, $display, $thumb_size);
@@ -405,44 +408,41 @@ class Photonic_Zenfolio_Processor extends Photonic_Processor {
 			$response = $response->Photos;
 		}
 
-		global $photonic_slideshow_library, $photonic_zenfolio_position, $photonic_zenfolio_photos_per_row_constraint, $photonic_zenfolio_main_size, $photonic_zenfolio_photo_title_display, $photonic_gallery_panel_items;
-
-		$a_class = '';
-		$col_class = '';
-		if ($photonic_slideshow_library != 'none') {
-			$a_class = 'launch-gallery-'.$photonic_slideshow_library." ".$photonic_slideshow_library;
-		}
-		if (Photonic::check_integer($columns)) {
-			$col_class = 'photonic-gallery-'.$columns.'c';
-		}
-
-		if ($col_class == '' && $photonic_zenfolio_photos_per_row_constraint == 'padding') {
-			$col_class = 'photonic-pad-photos';
-		}
-		else if ($col_class == '') {
-			$col_class = 'photonic-gallery-'.$photonic_zenfolio_photos_per_row_constraint.'c';
-		}
-
-		$a_rel = 'lightbox-photonic-zenfolio-stream-'.$photonic_zenfolio_position;
-		if ($photonic_slideshow_library == 'prettyphoto') {
-			$a_rel = 'photonic-prettyPhoto['.$a_rel.']';
-		}
-
-		$ul_class = '';
+		global $photonic_zenfolio_photos_per_row_constraint, $photonic_zenfolio_photo_title_display, $photonic_zenfolio_photos_constrain_by_padding, $photonic_zenfolio_photos_constrain_by_count;
 		$ret = '';
 		if ($display == 'popup') {
-			$ul_class = "class='slideshow-grid-panel lib-$photonic_slideshow_library'";
 			$ret .= "<div class='photonic-zenfolio-panel-content photonic-panel-content fix'>";
 		}
-		$ret .= "<ul $ul_class>";
+		$row_constraints = array('constraint-type' => $photonic_zenfolio_photos_per_row_constraint, 'padding' => $photonic_zenfolio_photos_constrain_by_padding, 'count' => $photonic_zenfolio_photos_constrain_by_count);
 
-		$counter = 0;
+		$photo_objects = $this->build_level_1_objects($response, $thumb_size);
+		$ret .= $this->generate_level_1_gallery($photo_objects, $photonic_zenfolio_photo_title_display, $row_constraints, $columns, $display);
+
+		if ($display == 'popup') {
+			$ret .= $this->get_popup_tooltip($photonic_zenfolio_photo_title_display);
+			$ret .= $this->get_popup_lightbox();
+			$ret .= "</div>";
+		}
+
+		return $ret;
+	}
+
+	function build_level_1_objects($response, $thumb_size = 1) {
+		if (!is_array($response)) {
+			if (empty($response->Photos) || !is_array($response->Photos)) {
+				return __('Response is not an array', 'photonic');
+			}
+			$response = $response->Photos;
+		}
+
+		global $photonic_zenfolio_main_size;
+
 		$type = '$type';
+		$photo_objects = array();
 		foreach ($response as $photo) {
 			if (empty($photo->$type) || $photo->$type != 'Photo') {
 				continue;
 			}
-			$counter++;
 			$appendage = array();
 			if (isset($photo->Sequence)) {
 				$appendage[] = 'sn='.$photo->Sequence;
@@ -450,71 +450,52 @@ class Photonic_Zenfolio_Processor extends Photonic_Processor {
 			if (isset($photo->UrlToken)) {
 				$appendage[] = 'tk='.$photo->UrlToken;
 			}
-/*			$appendage = implode('&', $appendage);
-			if ($appendage) {
-				$appendage = '?'.$appendage;
-			}*/
+//			$appendage = implode('&', $appendage);
+//			if ($appendage) {
+//				$appendage = '?'.$appendage;
+//			}
 
-			$thumb = 'http://'.$photo->UrlHost.$photo->UrlCore.'-'.$thumb_size.'.jpg';
-			$orig = 'http://'.$photo->UrlHost.$photo->UrlCore.'-'.$photonic_zenfolio_main_size.'.jpg';
-			$title = esc_attr($photo->Title);
-			$shown_title = '';
-			if ($photonic_zenfolio_photo_title_display == 'below') {
-				$shown_title = '<span class="photonic-photo-title">'.$title.'</span>';
+			$photo_object = array();
+			$photo_object['thumbnail'] = 'http://'.$photo->UrlHost.$photo->UrlCore.'-'.$thumb_size.'.jpg';
+			$photo_object['main_image'] = 'http://'.$photo->UrlHost.$photo->UrlCore.'-'.$photonic_zenfolio_main_size.'.jpg';
+			$photo_object['title'] = esc_attr($photo->Title);
+			$photo_object['alt_title'] = esc_attr($photo->Title);
+			$photo_object['main_page'] = $photo->PageUrl;
+
+			$photo_objects[] = $photo_object;
+		}
+
+		return $photo_objects;
+	}
+
+	function build_level_2_objects($response, $thumb_size = 1) {
+		global $photonic_zenfolio_hide_password_protected_thumbnail;
+		$objects = array();
+		foreach ($response as $photoset) {
+			if (empty($photoset->TitlePhoto)) {
+				continue;
+			}
+			if (!empty($photoset->AccessDescriptor) && !empty($photoset->AccessDescriptor->AccessType) && $photoset->AccessDescriptor->AccessType == 'Password' && !empty($photonic_zenfolio_hide_password_protected_thumbnail)) {
+				continue;
 			}
 
-			if ($display == 'in-page') {
-				$ret .= '<li class="photonic-zenfolio-image photonic-zenfolio-photo '.$col_class.'">';
-			}
-			else if ($counter % $photonic_gallery_panel_items == 1) {
-				$ret .= "<li class='photonic-zenfolio-image'>";
-			}
+			$object = array();
 
-			$ret .= '<a href="'.$orig.'" class="'.$a_class.'" rel="'.$a_rel.'" title="'.$title.'"><img alt="'.$title.'" src="'.$thumb.'"/>'.$shown_title.'</a>';
-			if ($display == 'page') {
-				$ret .= "</li>";
-			}
-			else {
-				if ($counter % $photonic_gallery_panel_items == 0) {
-					$ret .= "</li>";
+			$photo = $photoset->TitlePhoto;
+			$object['id_1'] = $photoset->Id;
+			$object['thumbnail'] = 'http://'.$photo->UrlHost.$photo->UrlCore.'-'.$thumb_size.'.jpg';
+			$object['main_page'] = $photoset->PageUrl;
+			$object['title'] = esc_attr($photoset->Title);
+			$object['counter'] = $photoset->PhotoCount;
+
+			if (!empty($photoset->AccessDescriptor) && !empty($photoset->AccessDescriptor->AccessType) && $photoset->AccessDescriptor->AccessType == 'Password') {
+				if (!in_array($photoset->AccessDescriptor->RealmId, $this->unlocked_realms)) {
+					$object['classes'] = array('photonic-zenfolio-set-passworded');
 				}
 			}
+			$objects[] = $object;
 		}
-		if ($ret != '<ul>') {
-			if (substr($ret, -5) != "</li>") {
-				$ret .= "</li>";
-			}
-			$ret .= '</ul>';
-		}
-		else {
-			$ret = '';
-		}
-
-		if ($photonic_zenfolio_photo_title_display == 'tooltip') {
-			$ret .= "<script type='text/javascript'>\$j('.photonic-zenfolio-panel a').each(function() { \$j(this).data('title', \$j(this).attr('title')); }); \$j('.photonic-zenfolio-panel a').each(function() { if (!(\$j(this).parent().hasClass('photonic-header-title'))) { var iTitle = \$j(this).find('img').attr('alt'); \$j(this).tooltip({ bodyHandler: function() { return iTitle; }, showURL: false });}})</script>";
-		}
-
-		if ($display == 'popup') {
-			if ($photonic_slideshow_library == 'fancybox') {
-				$ret .= "<script type='text/javascript'>\$j('a.launch-gallery-fancybox').each(function() { \$j(this).fancybox({ transitionIn:'elastic', transitionOut:'elastic',speedIn:600,speedOut:200,overlayShow:true,overlayOpacity:0.8,overlayColor:\"#000\",titleShow:Photonic_JS.fbox_show_title,titlePosition:Photonic_JS.fbox_title_position});});</script>";
-			}
-			else if ($photonic_slideshow_library == 'colorbox') {
-				$ret .= "<script type='text/javascript'>\$j('a.launch-gallery-colorbox').each(function() { \$j(this).colorbox({ opacity: 0.8, maxWidth: '95%', maxHeight: '95%', slideshow: Photonic_JS.slideshow_mode, slideshowSpeed: Photonic_JS.slideshow_interval });});</script>";
-			}
-			else if ($photonic_slideshow_library == 'prettyphoto') {
-				$ret .= "<script type='text/javascript'>\$j(\"a[rel^='photonic-prettyPhoto']\").prettyPhoto({ theme: Photonic_JS.pphoto_theme, autoplay_slideshow: Photonic_JS.slideshow_mode, slideshow: parseInt(Photonic_JS.slideshow_interval), show_title: false, social_tools: '', deeplinking: false });</script>";
-			}
-			$ret .= "</div>";
-		}
-
-		if (is_archive()) {
-			global $photonic_archive_thumbs;
-			if (!empty($photonic_archive_thumbs) && $counter < $photonic_archive_thumbs) {
-				$this->is_more_required = false;
-			}
-		}
-
-		return $ret;
+		return $objects;
 	}
 
 	/**
@@ -568,87 +549,11 @@ class Photonic_Zenfolio_Processor extends Photonic_Processor {
 			$response = $response->PhotoSets;
 		}
 
-		global $photonic_zenfolio_sets_per_row_constraint, $photonic_zenfolio_sets_constrain_by_count, $photonic_zenfolio_position, $photonic_zenfolio_set_title_display, $photonic_zenfolio_hide_set_photos_count_display, $photonic_zenfolio_hide_password_protected_thumbnail;
-		$ret = '<ul>';
-
-		if ($columns != 'auto') {
-			$col_class = 'photonic-gallery-'.$columns.'c';
-		}
-		else if ($photonic_zenfolio_sets_per_row_constraint == 'padding') {
-			$col_class = 'photonic-pad-photosets';
-		}
-		else {
-			$col_class = 'photonic-gallery-'.$photonic_zenfolio_sets_constrain_by_count.'c';
-		}
-
-		$counter = 0;
-		foreach ($response as $photoset) {
-			if (empty($photoset->TitlePhoto)) {
-				continue;
-			}
-			if (!empty($photoset->AccessDescriptor) && !empty($photoset->AccessDescriptor->AccessType) && $photoset->AccessDescriptor->AccessType == 'Password' && !empty($photonic_zenfolio_hide_password_protected_thumbnail)) {
-				continue;
-			}
-
-			if (!empty($photoset->AccessDescriptor) && !empty($photoset->AccessDescriptor->AccessType) && $photoset->AccessDescriptor->AccessType == 'Password') {
-				if (!in_array($photoset->AccessDescriptor->RealmId, $this->unlocked_realms)) {
-					$passworded = 'photonic-zenfolio-set-passworded';
-				}
-				else {
-					$passworded = '';
-				}
-			}
-			else {
-				$passworded = '';
-			}
-			$id = $photoset->Id;
-
-			$photo = $photoset->TitlePhoto;
-			$thumb = 'http://'.$photo->UrlHost.$photo->UrlCore.'-'.$thumb_size.'.jpg';
-			$title = esc_attr($photoset->Title);
-			$image = '<img src="'.$thumb.'" alt="'.$title.'" />';
-
-			$anchor = "<a href='".$photoset->PageUrl."' class='photonic-zenfolio-set-thumb photonic-zenfolio-set-thumb-$thumb_size $passworded' id='photonic-zenfolio-set-thumb-".$id.'-'.$photonic_zenfolio_position."' title='".$title."'>".$image."</a>";
-			$text = '';
-			if ($photonic_zenfolio_set_title_display == 'below') {
-				$text = "<span class='photonic-photoset-title'>".$title."</span>";
-				if (!$photonic_zenfolio_hide_set_photos_count_display) {
-					$text .= '<span class="photonic-photoset-photo-count">'.sprintf(__('%s photos', 'photonic'), $photoset->photos).'</span>';
-				}
-			}
-			$password_prompt = '';
-/*			if ($passworded) {
-				$prompt_title = esc_attr(__('Enter Password', 'photonic'));
-				$prompt_submit = esc_attr(__('Access', 'photonic'));
-				$form_url = admin_url('admin-ajax.php');
-				$password_prompt = "
-				<div class='photonic-password-prompter' id='photonic-zenfolio-prompter-$id-$photonic_zenfolio_position' title='$prompt_title'>
-					<form class='photonic-password-form photonic-zenfolio-form' action='$form_url'>
-						<input type='password' name='photonic-zenfolio-password' />
-						<input type='hidden' name='photonic-zenfolio-realm' value='{$photoset->AccessDescriptor->RealmId}' />
-						<input type='hidden' name='action' value='photonic_verify_password' />
-						<input type='submit' name='photonic-zenfolio-submit' value='$prompt_submit' />
-					</form>
-				</div>";
-			}*/
-			$ret .= "<li class='photonic-zenfolio-image photonic-zenfolio-set-thumb ".$col_class."' id='photonic-zenfolio-set-".$id.'-'.$photonic_zenfolio_position."'>".$anchor.$text.$password_prompt."</li>";
-			$counter++;
-		}
-
-		if ($ret == '<ul>') {
-			$ret = '';
-		}
-		else {
-			$ret .= '</ul>';
-		}
-
-		if (is_archive()) {
-			global $photonic_archive_thumbs;
-			if (!empty($photonic_archive_thumbs) && $counter < $photonic_archive_thumbs) {
-				$this->is_more_required = false;
-			}
-		}
-
+		global $photonic_zenfolio_sets_per_row_constraint, $photonic_zenfolio_sets_constrain_by_count, $photonic_picasa_photos_pop_constrain_by_padding,
+			$photonic_zenfolio_set_title_display, $photonic_zenfolio_hide_set_photos_count_display;
+		$row_constraints = array('constraint-type' => $photonic_zenfolio_sets_per_row_constraint, 'padding' => $photonic_picasa_photos_pop_constrain_by_padding, 'count' => $photonic_zenfolio_sets_constrain_by_count);
+		$objects = $this->build_level_2_objects($response, $thumb_size);
+		$ret = $this->generate_level_2_gallery($objects, $row_constraints, $columns, 'photosets', 'set', $photonic_zenfolio_set_title_display, $photonic_zenfolio_hide_set_photos_count_display);
 		return $ret;
 	}
 
@@ -670,8 +575,7 @@ class Photonic_Zenfolio_Processor extends Photonic_Processor {
 			$hidden = array('thumbnail' => !empty($photonic_zenfolio_hide_set_thumbnail), 'title' => !empty($photonic_zenfolio_hide_set_title), 'counter' => !empty($photonic_zenfolio_hide_set_photo_count));
 			$counters = array('photos' => $response->ImageCount);
 
-			global $photonic;
-			$ret .= $photonic->printer->process_object_header('zenfolio', $header, 'set', $hidden, $counters, empty($photonic_zenfolio_link_set_page), $display);
+			$ret .= $this->process_object_header($header, 'set', $hidden, $counters, empty($photonic_zenfolio_link_set_page), $display);
 			$ret .= $this->process_photos($response->Photos, $columns, $display, $thumb_size);
 		}
 		return $ret;
@@ -782,8 +686,7 @@ class Photonic_Zenfolio_Processor extends Photonic_Processor {
 				'photos' => empty($photonic_zenfolio_hide_group_photo_count)? $image_count : 0,
 			);
 
-			global $photonic;
-			$ret .= $photonic->printer->process_object_header('zenfolio', $header, 'set', $hidden, $counters, empty($photonic_zenfolio_link_group_page), $display);
+			$ret .= $this->process_object_header('zenfolio', $header, 'set', $hidden, $counters, empty($photonic_zenfolio_link_group_page), $display);
 		}
 
 		$ret .= $this->process_sets($photosets, $columns, $thumb_size);
@@ -799,7 +702,7 @@ class Photonic_Zenfolio_Processor extends Photonic_Processor {
 	 * Displays a popup photoset. This is invoked upon clicking on a photoset thumbnail on the main page.
 	 */
 	function display_set() {
-		$panel = $_POST['panel'];
+		$panel = $_POST['panel_id'];
 		$panel = substr($panel, 28);
 		$set = substr($panel, 0, strpos($panel, '-'));
 		$thumb_size = $_POST['thumb_size'];
