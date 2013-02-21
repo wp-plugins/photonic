@@ -136,9 +136,12 @@ class Photonic_SmugMug_Processor extends Photonic_OAuth1_Processor {
 					if ($body->stat == 'ok') {
 						$albums = $body->Albums;
 						if (is_array($albums) && count($albums) > 0) {
-							$ret .= "<div class='photonic-smug-stream photonic-stream' id='photonic-smug-stream-{$this->gallery_index}'>";
-							$ret .= $this->process_albums($albums, $columns);
-							$ret .= "</div>";
+							$album_text = $this->process_albums($albums, $columns);
+							if (!empty($album_text)) {
+								$ret .= "<div class='photonic-smug-stream photonic-stream' id='photonic-smug-stream-{$this->gallery_index}'>";
+								$ret .= $album_text;
+								$ret .= "</div>";
+							}
 						}
 					}
 				}
@@ -199,10 +202,13 @@ class Photonic_SmugMug_Processor extends Photonic_OAuth1_Processor {
 							foreach ($categories as $category) {
 								if (isset($category->Albums)) {
 									$albums = $category->Albums;
-									$ret .= "<li>";
-									$ret .= "<div class='photonic-smug-category'><span class='photonic-header-title photonic-category-title'>{$category->Name}</span></div>";
-									$ret .= $this->process_albums($albums, $columns);
-									$ret .= "</li>";
+									$album_text = $this->process_albums($albums, $columns);
+									if (!empty($album_text)) {
+										$ret .= "<li>";
+										$ret .= "<div class='photonic-smug-category'><span class='photonic-header-title photonic-category-title'>{$category->Name}</span></div>";
+										$ret .= $album_text;
+										$ret .= "</li>";
+									}
 								}
 
 								if (isset($category->SubCategories)) {
@@ -241,7 +247,7 @@ class Photonic_SmugMug_Processor extends Photonic_OAuth1_Processor {
 	 * @return string
 	 */
 	function process_albums($albums, $columns) {
-		global $photonic_smug_albums_album_per_row_constraint, $photonic_smug_albums_album_constrain_by_count, $photonic_smug_albums_album_constrain_by_padding, $photonic_smug_thumb_size, $photonic_smug_albums_album_title_display, $photonic_smug_hide_albums_album_photos_count_display;
+		global $photonic_smug_albums_album_per_row_constraint, $photonic_smug_albums_album_constrain_by_count, $photonic_smug_albums_album_constrain_by_padding, $photonic_smug_albums_album_title_display, $photonic_smug_hide_albums_album_photos_count_display;
 		$objects = $this->build_level_2_objects($albums);
 		$row_constraints = array('constraint-type' => $photonic_smug_albums_album_per_row_constraint, 'padding' => $photonic_smug_albums_album_constrain_by_padding, 'count' => $photonic_smug_albums_album_constrain_by_count);
 		$ret = $this->generate_level_2_gallery($objects, $row_constraints, $columns, 'albums', 'album', $photonic_smug_albums_album_title_display, $photonic_smug_hide_albums_album_photos_count_display);
@@ -319,11 +325,14 @@ class Photonic_SmugMug_Processor extends Photonic_OAuth1_Processor {
 	}
 
 	function build_level_2_objects($albums) {
-		global $photonic_smug_thumb_size;
+		global $photonic_smug_thumb_size, $photonic_smug_hide_password_protected_thumbnail;
 		$objects = array();
 		if (is_array($albums) && count($albums) > 0) {
 			$rand = rand(1000, 9999);
 			foreach ($albums as $album) {
+				if (!empty($photonic_smug_hide_password_protected_thumbnail) && isset($album->Passworded) && $album->Passworded && !isset($album->Password)) {
+					continue;
+				}
 				if ($album->ImageCount != 0) {
 					$object = array();
 					$object['id_1'] = $album->id.'-'.$album->Key;

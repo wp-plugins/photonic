@@ -596,7 +596,7 @@ $fields = array(
 
 	'zenfolio' => array(
 		'name' => __('Zenfolio', 'photonic'),
-		'prelude' => __('You have to define your Instagram Client ID under Photonic &rarr; Settings &rarr; Instagram &rarr; Instagram Settings', 'photonic'),
+		'prelude' => '',
 		'fields' => array(
 			array(
 				'id' => 'view',
@@ -674,18 +674,6 @@ $fields = array(
 				'name' => __('Login name', 'photonic'),
 				'type' => 'text',
 				'hint' => __('Mandatory if Display = Hierarchy', 'photonic'),
-			),
-
-			array(
-				'id' => 'columns',
-				'name' => __('Number of columns', 'photonic'),
-				'type' => 'text',
-			),
-
-			array(
-				'id' => 'limit',
-				'name' => __('Number of results to show', 'photonic'),
-				'type' => 'text',
 			),
 
 			array(

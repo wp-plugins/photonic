@@ -345,8 +345,8 @@ abstract class Photonic_Processor {
 		return $ret;
 	}
 
-	function generate_level_1_gallery($photos, $title_position, $row_constraints = array(),
-		$columns = 'auto', $display = 'in-page', $sizes = array(), $show_lightbox = true, $type = 'photo') {
+	function generate_level_1_gallery($photos, $title_position, $row_constraints = array(), $columns = 'auto',
+		$display = 'in-page', $sizes = array(), $show_lightbox = true, $type = 'photo', $pagination = array()) {
 		$col_class = '';
 		if (Photonic::check_integer($columns)) {
 			$col_class = 'photonic-gallery-'.$columns.'c';
@@ -359,21 +359,6 @@ abstract class Photonic_Processor {
 			$col_class = 'photonic-gallery-'.$row_constraints['count'].'c';
 		}
 
-/*		$a_class = '';
-		$a_rel = '';
-		if ($this->library != 'none' && $show_lightbox) {
-			$a_class = 'launch-gallery-'.$this->library." ".$this->library;
-			if ($display == 'popup') {
-				$a_class .= ' '.$col_class;
-			}
-			$a_class = "class='$a_class'";
-
-			$a_rel = 'lightbox-photonic-'.$this->provider.'-stream-'.$this->gallery_index;
-			if ($this->library == 'prettyphoto') {
-				$a_rel = 'photonic-prettyPhoto['.$a_rel.']';
-			}
-			$a_rel = "rel='$a_rel'";
-		}*/
 		$link_attributes = $this->get_lightbox_attributes($display, $col_class, $show_lightbox);
 
 		$ul_class = "class='title-display-$title_position'";
@@ -392,7 +377,7 @@ abstract class Photonic_Processor {
 		}
 
 		$counter = 0;
-		global $photonic_gallery_panel_items;
+		global $photonic_gallery_panel_items, $photonic_slideshow_library;
 		foreach ($photos as $photo) {
 			$counter++;
 			$thumb = $photo['thumbnail'];
@@ -417,14 +402,13 @@ abstract class Photonic_Processor {
 			if (!empty($sizes['thumb-width'])) $style[] = 'width:'.$sizes['thumb-width'].'px';
 			if (!empty($sizes['thumb-height'])) $style[] = 'height:'.$sizes['thumb-height'].'px';
 			if (!empty($style)) $style = 'style="'.implode(';', $style).'"'; else $style = '';
-			$title_link_start = $this->link_lightbox_title ? esc_attr("<a href='$url' $target>") : '';
-			$title_link_end = $this->link_lightbox_title ? esc_attr("</a>") : '';
+			$title_link_start = ($this->link_lightbox_title && $photonic_slideshow_library != 'thickbox') ? esc_attr("<a href='$url' $target>") : '';
+			$title_link_end = ($this->link_lightbox_title && $photonic_slideshow_library != 'thickbox') ? esc_attr("</a>") : '';
 			if ($display == 'in-page') {
-				//$ret .= '<a href="'.$orig.'" '.$a_class.' '.$a_rel.' title="'.$title.'" '.$target.'><img alt="'.$alt.'" src="'.$thumb.'" '.$style.'/></a>'.$shown_title;
-				$ret .= '<a href="'.$orig.'" '.$link_attributes.' title="'.$title_link_start.$title.$title_link_end.'" '.$target.'><img alt="'.$alt.'" src="'.$thumb.'" '.$style.'/></a>'.$shown_title;
+				$ret .= '<a '.$link_attributes.' href="'.$orig.'" title="'.$title_link_start.$title.$title_link_end.'" '.$target.'><img alt="'.$alt.'" src="'.$thumb.'" '.$style.'/></a>'.$shown_title;
 			}
 			else {
-				$ret .= '<a href="'.$orig.'" '.$link_attributes.' title="'.$title_link_start.$title.$title_link_end.'" '.$target.'><img alt="'.$alt.'" src="'.$thumb.'" '.$style.'/>'.$shown_title.'</a>';
+				$ret .= '<a '.$link_attributes.' href="'.$orig.'" title="'.$title_link_start.$title.$title_link_end.'" '.$target.'><img alt="'.$alt.'" src="'.$thumb.'" '.$style.'/>'.$shown_title.'</a>';
 			}
 /*			if (!empty($object['passworded'])) {
 				$prompt_title = esc_attr(__('Enter Password', 'photonic'));
@@ -450,6 +434,15 @@ abstract class Photonic_Processor {
 				$ret .= "</li>";
 			}
 			$ret .= "\n</ul>\n";
+
+			if (!empty($pagination) && !empty($pagination['paginate'])) {
+				// Show "Load more" button
+				if (!empty($pagination['current_page']) && !empty($pagination['per_page'])) {
+					if (!empty($pagination['left'])) {
+						//
+					}
+				}
+			}
 		}
 		else {
 			$ret = '';
@@ -496,12 +489,12 @@ abstract class Photonic_Processor {
 					$text .= '<span class="photonic-'.$singular_type.'-photo-count">'.sprintf(__('%s photos', 'photonic'), $object['counter']).'</span>';
 				}
 			}
-			$ret .= "<li class='photonic-{$this->provider}-image photonic-{$this->provider}-$singular_type-thumb $col_class' id='photonic-{$this->provider}-$singular_type-$id'>{$anchor}{$text}</li>";
+			$ret .= "\n\t<li class='photonic-{$this->provider}-image photonic-{$this->provider}-$singular_type-thumb $col_class' id='photonic-{$this->provider}-$singular_type-$id'>{$anchor}{$text}</li>";
 			$counter++;
 		}
 
-		if ($ret != '<ul>') {
-			$ret .= '</ul>';
+		if ($ret != "<ul $ul_class>") {
+			$ret .= "\n</ul>\n";
 		}
 		else {
 			$ret = '';

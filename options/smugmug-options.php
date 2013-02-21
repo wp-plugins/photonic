@@ -94,6 +94,13 @@ $photonic_smugmug_options = array(
 		"type" => "checkbox",
 		"std" => ""),
 
+	array("name" => "Hide thumbnails for Password-protected albums",
+		"desc" => "This will hide the thumbnail of password-protected albums (Password-protected albums are not currently supported, so it is advisable to hide the thumbnails).",
+		"id" => "smug_hide_password_protected_thumbnail",
+		"grouping" => "smug-albums",
+		"type" => "checkbox",
+		"std" => ""),
+
 	array("name" => "Constrain Albums Per Row",
 		"desc" => "How do you want the control the number of album thumbnails per row? This can be overridden by adding the '<code>columns</code>' parameter to the '<code>gallery</code>' shortcode.",
 		"id" => "smug_albums_album_per_row_constraint",
