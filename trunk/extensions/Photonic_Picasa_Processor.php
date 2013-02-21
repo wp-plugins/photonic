@@ -272,7 +272,21 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 			$object = array();
 			$object['thumbnail'] = $media_photo->thumbnail->attributes()->url;
 			$object['main_image'] = $media_photo->content->attributes()->url;
-			$object['main_page'] = $object['main_image'];
+			if (isset($entry->link)) {
+				foreach ($entry->link as $link) {
+					$attributes = $link->attributes();
+					if (isset($attributes['type']) && $attributes['type'] == 'text/html' && isset($attributes['href']) && isset($attributes['rel'])) {
+						if ((stripos($attributes['rel'], 'http://schemas.google.com/photos') === 0 || stripos($attributes['rel'], 'http://schemas.google.com/photos') === 0) && stripos($attributes['rel'], '#canonical')) {
+							$object['main_page'] = $attributes['href'];
+							break;
+						}
+					}
+				}
+			}
+			if (!isset($object['main_page'])) {
+				$object['main_page'] = $object['main_image'];
+			}
+
 			if ($photonic_picasa_use_desc == 'desc' || ($photonic_picasa_use_desc == 'desc-title' && !empty($entry->summary))) {
 				$object['title'] = esc_attr($entry->summary);
 			}
@@ -298,7 +312,20 @@ class Photonic_Picasa_Processor extends Photonic_OAuth2_Processor {
 			$object['id_1'] = "{$gphoto_photo->user}";
 			$object['id_2'] = "{$gphoto_photo->id}";
 			$object['thumbnail'] = $media_photo->thumbnail->attributes()->url;
-			$object['main_page'] = $media_photo->content->attributes()->url;
+			if (isset($entry->link)) {
+				foreach ($entry->link as $link) {
+					$attributes = $link->attributes();
+					if (isset($attributes['type']) && $attributes['type'] == 'text/html' && isset($attributes['href']) && isset($attributes['rel'])) {
+						if (((stripos($attributes['rel'], 'http://schemas.google.com/photos') === 0 || stripos($attributes['rel'], 'http://schemas.google.com/photos') === 0) && stripos($attributes['rel'], '#canonical')) || $attributes['rel'] == 'alternate') {
+							$object['main_page'] = $attributes['href'];
+							break;
+						}
+					}
+				}
+			}
+			if (!isset($object['main_page'])) {
+				$object['main_page'] = $media_photo->content->attributes()->url;
+			}
 			if ($photonic_picasa_use_desc == 'desc' || ($photonic_picasa_use_desc == 'desc-title' && !empty($entry->summary))) {
 				$object['title'] = esc_attr($entry->summary);
 			}

@@ -248,3 +248,6 @@ li.slideshow-grid li { display: inline-block; }
 
 .photonic-jq .ui-icon { display: block; text-indent: -99999px; overflow: hidden; background-repeat: no-repeat; width: 16px; height: 16px }
 .photonic-jq .ui-icon-close, .photonic-jq .ui-icon-closethick { background: url(../scripts/fancybox/fancy_close.png) no-repeat; width: 30px; height: 30px; }
+
+#TB_overlay { z-index: 1050 !important; }
+#TB_window { z-index: 1060 !important; }

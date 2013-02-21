@@ -56,6 +56,8 @@ class Photonic_Flickr_Processor extends Photonic_OAuth1_Processor {
 			'per_page' => 100,
 			'display' => 'in-page',
 			'panel_id' => '',
+			'page' => 1,
+			'paginate' => false,
 		), $attr);
 		extract($attr);
 
@@ -228,6 +230,10 @@ class Photonic_Flickr_Processor extends Photonic_OAuth1_Processor {
 		}
 		else if (isset($per_page)) {
 			$query .= '&per_page='.$per_page;
+		}
+
+		if (!empty($page)) {
+			$query .= '&page='.$page;
 		}
 
 		$login_required = false;

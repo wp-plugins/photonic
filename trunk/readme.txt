@@ -3,7 +3,7 @@ Contributors: sayontan
 Donate link: http://aquoid.com/news/plugins/photonic/
 Tags: gallery, flickr, picasa, 500px, smugmug, zenfolio, instagram, fancybox, colorbox, prettyphoto, slideshow, jquery, shortcode
 Requires at least: WP 3.3
-Tested up to: WP 3.5
+Tested up to: WP 3.5.1
 Stable tag: trunk
 License: GPLv3 or later
 
@@ -15,6 +15,10 @@ Photonic lets you use the WordPress <code>gallery</code> shortcode and super-cha
 several new parameters to enhance the content and look-and-feel of your galleries. It supports Flickr photos, Photosets, Galleries and Collections,
 along with Picasa photos and albums, SmugMug albums and images, 500px photos and collections, Zenfolio photos, Photosets and Groups, and Instagram photos and users.
 You can also enable authentication for your site visitors that will let them see private and protected photos from each provider.
+
+In case you happen to be using a theme or plugin that already overrides the <code>gallery</code>, Photonic provides you with the
+option to use your own shortcode for Photonic galleries. This lets your plugins coexist. Bear in mind that if you deactivate Photonic
+you will have to remove all instances of this custom shortcode, something that is not required if you stick to the <code>gallery</code> shortcode.
 
 = Flickr Support =
 
@@ -136,6 +140,13 @@ Yes, but only for the plugin front-end. The admin panel is not translated at thi
 in the third-party JS scripts are not translated.
 
 == Changelog ==
+
+= 1.43 =
+
+*	Added Thickbox support
+*	Fixed an incompatibility between Photonic and themes from Themify.
+*	Added capability to exclude passworded galleries from displaying for SmugMug.
+*	Added support for alternative shortcode - specifying this will mean Photonic will not use the gallery shortcode
 
 = 1.42 =
 

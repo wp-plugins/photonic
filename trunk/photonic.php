@@ -3,7 +3,7 @@
  * Plugin Name: Photonic Gallery for Flickr, Picasa, SmugMug, 500px, Zenfolio and Instagram
  * Plugin URI: http://aquoid.com/news/plugins/photonic/
  * Description: Extends the native gallery shortcode to support Flickr, Picasa, SmugMug, 500px, Zenfolio and Instagram. JS libraries like Fancybox, Colorbox and PrettyPhoto are supported. The plugin also helps convert a regular WP gallery into a slideshow.
- * Version: 1.42
+ * Version: 1.43
  * Author: Sayontan Sinha
  * Author URI: http://mynethome.net/blog
  * License: GNU General Public License (GPL), v3 (or newer)
@@ -21,7 +21,7 @@ class Photonic {
 	function Photonic() {
 		global $photonic_options, $photonic_setup_options, $photonic_is_ie6;
 		if (!defined('PHOTONIC_VERSION')) {
-			define('PHOTONIC_VERSION', '1.42');
+			define('PHOTONIC_VERSION', '1.43');
 		}
 
 		if (!defined('PHOTONIC_PATH')) {
@@ -61,7 +61,12 @@ class Photonic {
 		}
 
 		// Gallery
-		add_filter('post_gallery', array(&$this, 'modify_gallery'), 20, 2);
+		if (!empty($photonic_alternative_shortcode)) {
+			add_shortcode($photonic_alternative_shortcode, array(&$this, 'modify_gallery'));
+		}
+		else {
+			add_filter('post_gallery', array(&$this, 'modify_gallery'), 20, 2);
+		}
 		add_action('wp_enqueue_scripts', array(&$this, 'add_scripts'), 20);
 		add_action('wp_head', array(&$this, 'print_scripts'), 20);
 		add_action('wp_loaded', array(&$this, 'check_authentication'), 20);
@@ -190,6 +195,9 @@ class Photonic {
 		else if ($photonic_slideshow_library == 'prettyphoto') {
 			wp_enqueue_script('photonic-slideshow', plugins_url('include/scripts/jquery.prettyPhoto-min.js', __FILE__), array('jquery'), $this->version);
 		}
+		else if ($photonic_slideshow_library == 'thickbox') {
+			wp_enqueue_script('thickbox');
+		}
 		else if ($photonic_slideshow_library == 'custom') {
 			$counter = 1;
 			$dependencies = array('jquery');
@@ -281,6 +289,9 @@ class Photonic {
 			else {
 				wp_enqueue_style("photonic-slideshow", plugins_url('include/scripts/prettyphoto/css/prettyPhoto.css', __FILE__), array(), $this->version);
 			}
+		}
+		else if ($photonic_slideshow_library == 'thickbox') {
+			wp_enqueue_style('thickbox');
 		}
 		else if ($photonic_slideshow_library == 'custom') {
 			$counter = 1;
@@ -405,7 +416,12 @@ class Photonic {
 	 * @return string
 	 */
 	function modify_gallery($content, $attr = array()) {
-		global $post, $photonic_flickr_gallery, $photonic_picasa_gallery, $photonic_native_gallery, $photonic_500px_gallery, $photonic_smugmug_gallery, $photonic_default_gallery_type, $photonic_nested_shortcodes, $photonic_instagram_gallery, $photonic_zenfolio_gallery;
+		global $post, $photonic_flickr_gallery, $photonic_picasa_gallery, $photonic_native_gallery, $photonic_500px_gallery, $photonic_smugmug_gallery, $photonic_default_gallery_type, $photonic_nested_shortcodes, $photonic_instagram_gallery, $photonic_zenfolio_gallery, $photonic_alternative_shortcode;
+
+		// If an alternative shortcode is used, then $content has the shortcode attributes
+		if (!empty($photonic_alternative_shortcode)) {
+			$attr = $content;
+		}
 		if ($attr == null) {
 			$attr = array();
 		}
@@ -424,7 +440,6 @@ class Photonic {
 		extract($attr);
 
 		$type = strtolower($type);
-
 		switch ($type) {
 			case 'flickr':
 				if (!isset($photonic_flickr_gallery)) {
@@ -1294,10 +1309,32 @@ class Photonic {
 		}
 		die();
 	}
+
+	function after_setup_theme() {
+		$current_filters = $GLOBALS['wp_filter'];
+		$filter_what = array('the_content', 'the_excerpt', 'widget_text');
+		$remove_hooks = apply_filters('photonic_remove_filter_hooks', array('themify_addlightboxrel_replace'));
+		if (is_array($current_filters)) {
+			foreach ($filter_what as $filter_name) {
+				if (isset($current_filters[$filter_name]) && is_array($current_filters[$filter_name])) {
+					foreach ($current_filters[$filter_name] as $priority => $hooks) {
+						if (is_array($hooks)) {
+							foreach ($remove_hooks as $hook) {
+								if (isset($hooks[$hook])) {
+									remove_filter($filter_name, $hook, $priority);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 add_action('init', 'photonic_init');
 function photonic_init() {
 	global $photonic;
 	$photonic = new Photonic();
+//	$photonic->after_setup_theme();
 }

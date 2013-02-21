@@ -7,6 +7,15 @@ $photonic_generic_options = array(
 		"category" => "generic-settings",
 		"type" => "section",),
 
+	array("name" => "Custom Shortcode",
+		"desc" => "By default Photonic uses the <code>gallery</code> shortcode, so that your galleries stay safe if you stop using Photonic.
+			But your theme or other plugins might be using the same shortcode too. In such a case define an explicit shortcode,
+			and only this shortcode will show Photonic galleries",
+		"id" => "alternative_shortcode",
+		"grouping" => "generic-settings",
+		"type" => "text",
+		"std" => ""),
+
 	array("name" => "Inbuilt Lightbox libraries",
 		"desc" => "Photonic lets you choose from the following JS libraries for Lightbox effects:",
 		"id" => "slideshow_library",
@@ -16,7 +25,7 @@ $photonic_generic_options = array(
 			"fancybox" => "<a href='http://fancybox.net/'>FancyBox</a> &ndash; ~16KB: Released under MIT and GPL licenses.",
 			"colorbox" => "<a href='http://colorpowered.com/colorbox/'>Colorbox</a> &ndash; ~10KB: Released under the MIT license",
 			"prettyphoto" => "<a href='http://www.no-margin-for-errors.com/projects/prettyphoto-jquery-lightbox-clone/'>PrettyPhoto</a> &ndash; ~23KB: Released under the GPL v2.0 license",
-//			"thickbox" => "Thickbox &ndash; ~12KB: Released under the MIT license",
+			"thickbox" => "Thickbox &ndash; ~12KB: Released under the MIT license",
 			"none" => "None",
 			"custom" => "Non-bundled (You have to provide the JS and CSS links)",
 		),
