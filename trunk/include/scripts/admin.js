@@ -9,7 +9,7 @@ $j(document).ready(function() {
 			duration: "fast"
 		}
 	});
-	tabs.tabs('select', '#' + Photonic_Admin_JS.category);
+	tabs.tabs('option', 'active', '#' + Photonic_Admin_JS.category);
 
 	$j('.photonic-border-options input[type="text"], .photonic-border-options select').change(function(event) {
 		var thisId = event.currentTarget.id;

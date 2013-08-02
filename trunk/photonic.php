@@ -3,7 +3,7 @@
  * Plugin Name: Photonic Gallery for Flickr, Picasa, SmugMug, 500px, Zenfolio and Instagram
  * Plugin URI: http://aquoid.com/news/plugins/photonic/
  * Description: Extends the native gallery shortcode to support Flickr, Picasa, SmugMug, 500px, Zenfolio and Instagram. JS libraries like Fancybox, Colorbox and PrettyPhoto are supported. The plugin also helps convert a regular WP gallery into a slideshow.
- * Version: 1.43
+ * Version: 1.44
  * Author: Sayontan Sinha
  * Author URI: http://mynethome.net/blog
  * License: GNU General Public License (GPL), v3 (or newer)
