@@ -3,7 +3,7 @@ Contributors: sayontan
 Donate link: http://aquoid.com/news/plugins/photonic/
 Tags: gallery, flickr, picasa, 500px, smugmug, zenfolio, instagram, fancybox, colorbox, prettyphoto, slideshow, jquery, shortcode
 Requires at least: WP 3.3
-Tested up to: WP 3.6
+Tested up to: WP 3.9
 Stable tag: trunk
 License: GPLv3 or later
 
@@ -140,6 +140,10 @@ Yes, but only for the plugin front-end. The admin panel is not translated at thi
 in the third-party JS scripts are not translated.
 
 == Changelog ==
+
+= 1.45 =
+
+*	Flickr API updated to use https instead of http, as per Flickr's transition plans.
 
 = 1.44 =
 
