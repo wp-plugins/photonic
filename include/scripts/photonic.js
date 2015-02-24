@@ -157,6 +157,7 @@ $j(document).ready(function() {
 				overlayShow		:	true,
 				overlayColor	:	'#000',
 				overlayOpacity	: 0.8,
+				type			: 'image',
 				titleShow		: Photonic_JS.fbox_show_title,
 				titleFormat		: photonicFormatFancyBoxTitle,
 				titlePosition	: Photonic_JS.fbox_title_position
@@ -196,6 +197,7 @@ $j(document).ready(function() {
 			opacity: 0.8,
 			maxWidth: '95%',
 			maxHeight: '95%',
+			photo: true,
 			title: photonicLightBoxTitle(this),
 			slideshow: Photonic_JS.slideshow_mode,
 			slideshowSpeed: Photonic_JS.slideshow_interval

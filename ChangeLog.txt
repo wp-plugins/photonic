@@ -1,3 +1,7 @@
+Version 1.46 - 23rd Feb 2015
+============================
+1.	500px API updated to accommodate the new URL formats.
+
 Version 1.45 - 16th Jun 2014
 ============================
 1.	Flickr API updated to use https instead of http, as per Flickr's transition plans.

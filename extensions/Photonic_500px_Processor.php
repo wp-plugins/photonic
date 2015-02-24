@@ -80,7 +80,8 @@ class Photonic_500px_Processor extends Photonic_OAuth1_Processor {
 		}
 
 		$query_url = $base_query.'?consumer_key='.$photonic_500px_api_key;
-//		$query_url = $base_query.'?';
+		$query_url .= '&image_size[]='.$thumb_size.'&image_size[]='.$main_size;
+
 		if (isset($feature) && $feature != '') {
 			$feature = esc_html($feature);
 			$query_url .= '&feature='.$feature;
@@ -209,9 +210,9 @@ class Photonic_500px_Processor extends Photonic_OAuth1_Processor {
 					$date_to_string, $number_of_photos_to_go, $number_per_page, $page_number);
 			}
 			else if (isset($content->photo)) {
-				return $this->process_single_photo($content);
+				return $this->process_single_photo($content, $main_size);
 			}
-			else if (isset($content->collections)) {
+			else if (isset($content->collections)) { 
 				if (count($content->collections) == 0) {
 					return 'No collections found!';
 				}
@@ -280,14 +281,17 @@ class Photonic_500px_Processor extends Photonic_OAuth1_Processor {
 		foreach ($dpx_objects as $dpx_object) {
 			$object = array();
 			if ($type == 'photos') {
-				$image = $dpx_object->image_url;
-				$first = substr($image, 0, strrpos($image, '/'));
-				$last = substr($image, strrpos($image, '/'));
-				$extension = substr($last, stripos($last, '.'));
+				$images = $dpx_object->images;
+				foreach ($images as $image) {
+					if ($image->size == $thumb_size) {
+						$object['thumbnail'] = $image->https_url;
+					}
+					else {
+						$object['main_image'] = $image->https_url;
+					}
+				}
 
-				$object['thumbnail'] = "$first/$thumb_size$extension";
-				$object['main_image'] = "$first/$main_size$extension";
-				$object['main_page'] = "http://500px.com/photo/".$dpx_object->id;
+				$object['main_page'] = "https://500px.com/photo/".$dpx_object->id;
 				$object['title'] = esc_attr($dpx_object->name);
 				$object['alt_title'] = $object['title'];
 			}
@@ -295,7 +299,7 @@ class Photonic_500px_Processor extends Photonic_OAuth1_Processor {
 				if (isset($dpx_object->domain)) {
 					$url = parse_url($dpx_object->domain);
 					if (!isset($url['scheme'])) {
-						$url = 'http://'.$url['path'];
+						$url = 'https://'.$url['path'];
 					}
 					else {
 						$url = $url['scheme'].'://'.$url['path'];
@@ -305,7 +309,7 @@ class Photonic_500px_Processor extends Photonic_OAuth1_Processor {
 				if (isset($dpx_object->userpic_url)) {
 					$pic_url = parse_url($dpx_object->userpic_url);
 					if (!isset($pic_url['scheme'])) {
-						$pic_url = 'http://500px.com'.$pic_url['path'];
+						$pic_url = 'https://500px.com'.$pic_url['path'];
 					}
 					else {
 						$pic_url = $dpx_object->userpic_url;
@@ -379,14 +383,22 @@ class Photonic_500px_Processor extends Photonic_OAuth1_Processor {
 		return $selected_photos;
 	}
 
-	function process_single_photo($content) {
+	function process_single_photo($content, $main_size = '4') {
 		if (isset($content->photo)) {
 			$photo = $content->photo;
 			$ret = '';
 			if (isset($photo->name) && !empty($photo->name)) {
 				$ret .= '<h3 class="photonic-single-photo-header photonic-single-500px-photo-header">'.$photo->name.'</h3>';
 			}
-			$img = '<img src="'.$photo->image_url.'" alt="'.esc_attr($photo->name).'">';
+			$images = $photo->images;
+			$image_url = $photo->image_url;
+			foreach ($images as $image) {
+				if ($image->size == $main_size) {
+					$image_url = $image->https_url;
+					break;
+				}
+			}
+			$img = '<img src="'.$image_url.'" alt="'.esc_attr($photo->name).'">';
 			if (isset($photo->description) && !empty($photo->description)) {
 				$ret .= '<div class="wp-caption">';
 				$ret .= $img;

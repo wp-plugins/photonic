@@ -572,6 +572,10 @@ $fields = array(
 					'1' => __('75 &times; 75 px', 'photonic'),
 					'2' => __('140 &times; 140 px', 'photonic'),
 					'3' => __('280 &times; 280 px', 'photonic'),
+					'100' => __('100 &times; 100 px', 'photonic'),
+					'200' => __('200 &times; 200 px', 'photonic'),
+					'440' => __('440 &times; 440 px', 'photonic'),
+					'600' => __('600 &times; 600 px', 'photonic'),
 				),
 			),
 
@@ -581,7 +585,11 @@ $fields = array(
 				'type' => 'select',
 				'options' => array(
 					'3' => __('280 &times; 280 px', 'photonic'),
-					'4' => __('Full size', 'photonic'),
+					'4' => __('900px on the longest edge', 'photonic'),
+					'5' => __('1170px on the longest edge', 'photonic'),
+					'1080' => __('1080px on the longest edge', 'photonic'),
+					'1600' => __('1600px on the longest edge', 'photonic'),
+					'2048' => __('2048px on the longest edge', 'photonic'),
 				),
 			),
 
