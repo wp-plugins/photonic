@@ -1,3 +1,8 @@
+Version 1.47 - 16th Mar 2015
+============================
+1.	Fixed a problem with the Flickr helpers.
+2.	Fixed miscellaneous issues with SmugMug.
+
 Version 1.46 - 23rd Feb 2015
 ============================
 1.	500px API updated to accommodate the new URL formats.

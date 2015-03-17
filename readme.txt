@@ -141,6 +141,11 @@ in the third-party JS scripts are not translated.
 
 == Changelog ==
 
+= 1.47 =
+
+*	Fixed a problem with the Flickr helpers.
+*	Fixed miscellaneous issues with SmugMug.
+
 = 1.46 =
 
 *	500px API updated to accommodate the new URL formats.

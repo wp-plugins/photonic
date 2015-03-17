@@ -52,7 +52,7 @@ class Photonic_SmugMug_Processor extends Photonic_OAuth1_Processor {
 		switch ($view) {
 			case 'albums':
 				$chained_calls[] = 'smugmug.albums.get';
-				$args['Extras'] = 'URL,ImageCount,Passworded,Password,NiceName';
+				$args['Extras'] = 'URL,ImageCount,Passworded,Password,NiceName,Highlight,'.$photonic_smug_thumb_size.'URL';
 				break;
 
 			case 'album':
@@ -63,12 +63,12 @@ class Photonic_SmugMug_Processor extends Photonic_OAuth1_Processor {
 				if (isset($album_id) && trim($album_id) != '' && isset($album_key) && trim($album_key) != '') {
 					$args['AlbumID'] = $album_id;
 					$args['AlbumKey'] = $album_key;
-					$args['Extras'] = "{$photonic_smug_thumb_size}URL,{$photonic_smug_main_size}URL,Caption,URL,Title,Passworded,Password";
+					$args['Extras'] = "{$photonic_smug_thumb_size}URL,{$photonic_smug_main_size}URL,Caption,URL,Title,Passworded,Password,Highlight";
 				}
 				else if (isset($album) && trim($album) != '') {
 					$args['AlbumID'] = substr($album, 0, stripos($album, '_'));
 					$args['AlbumKey'] = substr($album, stripos($album, '_') + 1);
-					$args['Extras'] = "{$photonic_smug_thumb_size}URL,{$photonic_smug_main_size}URL,Caption,URL,Title,Passworded,Password";
+					$args['Extras'] = "{$photonic_smug_thumb_size}URL,{$photonic_smug_main_size}URL,Caption,URL,Title,Passworded,Password,Highlight";
 				}
 
 				if (isset($password) && trim($password) != '') {
@@ -79,7 +79,7 @@ class Photonic_SmugMug_Processor extends Photonic_OAuth1_Processor {
 			case 'tree':
 			default:
 				$chained_calls[] = 'smugmug.users.getTree';
-				$args['Extras'] = "URL,ImageCount,Passworded";
+				$args['Extras'] = 'URL,ImageCount,Passworded,Highlight,'.$photonic_smug_thumb_size.'URL';
 				break;
 		}
 
@@ -154,6 +154,9 @@ class Photonic_SmugMug_Processor extends Photonic_OAuth1_Processor {
 							$passworded = true;
 						}
 						$header_object = array();
+
+						$highlight = $album->Highlight;
+
 						$rand = rand(1000, 9999);
 						$header_object['thumb_url'] = "https://secure.smugmug.com/photos/random.mg?AlbumID={$album->id}&AlbumKey={$album->Key}&Size=75x75&rand=$rand";
 						$header_object['title'] = $album->Title;
@@ -295,7 +298,7 @@ class Photonic_SmugMug_Processor extends Photonic_OAuth1_Processor {
 				else {
 					$ret .= "<div class='photonic-smug-stream photonic-stream' id='photonic-smug-stream-{$this->gallery_index}'>";
 					$row_constraints = array('constraint-type' => $photonic_smug_photos_per_row_constraint, 'padding' => $photonic_smug_photos_constrain_by_padding, 'count' => $photonic_smug_photos_constrain_by_count);
-					$ret .= $this->generate_level_1_gallery($photo_objects, $photonic_smug_photo_title_display, $row_constraints, $columns, 'popup');
+					$ret .= $this->generate_level_1_gallery($photo_objects, $photonic_smug_photo_title_display, $row_constraints, $columns, 'in-page');
 				}
 				$ret .= "</div>";
 				return $ret;
@@ -326,6 +329,7 @@ class Photonic_SmugMug_Processor extends Photonic_OAuth1_Processor {
 
 	function build_level_2_objects($albums) {
 		global $photonic_smug_thumb_size, $photonic_smug_hide_password_protected_thumbnail;
+		
 		$objects = array();
 		if (is_array($albums) && count($albums) > 0) {
 			$rand = rand(1000, 9999);
@@ -333,10 +337,13 @@ class Photonic_SmugMug_Processor extends Photonic_OAuth1_Processor {
 				if (!empty($photonic_smug_hide_password_protected_thumbnail) && isset($album->Passworded) && $album->Passworded && !isset($album->Password)) {
 					continue;
 				}
+				$highlight = $album->Highlight;
+				$thumbURL = $highlight->{$photonic_smug_thumb_size.'URL'};
+				
 				if ($album->ImageCount != 0) {
 					$object = array();
 					$object['id_1'] = $album->id.'-'.$album->Key;
-					$object['thumbnail'] = "https://secure.smugmug.com/photos/random.mg?AlbumID={$album->id}&AlbumKey={$album->Key}&Size=$photonic_smug_thumb_size&rand=$rand";
+					$object['thumbnail'] = $thumbURL;
 					$object['main_page'] = $album->URL;
 					$object['title'] = esc_attr($album->Title);
 					$object['counter'] = $album->ImageCount;

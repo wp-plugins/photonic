@@ -1186,14 +1186,14 @@ class Photonic_Options_Manager {
 				case 'photonic-flickr-user-find':
 					$flickr_api_key = $photonic_options['flickr_api_key'];
 					$user = isset($_POST['photonic-flickr-user']) ? $_POST['photonic-flickr-user'] : '';
-					$url = 'http://api.flickr.com/services/rest/?format=json&nojsoncallback=1&api_key='.$flickr_api_key.'&method=flickr.urls.lookupUser&url='.$user;
+					$url = 'https://api.flickr.com/services/rest/?format=json&nojsoncallback=1&api_key='.$flickr_api_key.'&method=flickr.urls.lookupUser&url='.$user;
 					$this->execute_query('flickr', $url, 'flickr.urls.lookupUser');
 					break;
 
 				case 'photonic-flickr-group-find':
 					$flickr_api_key = $photonic_options['flickr_api_key'];
 					$group = isset($_POST['photonic-flickr-group']) ? $_POST['photonic-flickr-group'] : '';
-					$url = 'http://api.flickr.com/services/rest/?format=json&nojsoncallback=1&api_key='.$flickr_api_key.'&method=flickr.urls.lookupGroup&url='.$group;
+					$url = 'https://api.flickr.com/services/rest/?format=json&nojsoncallback=1&api_key='.$flickr_api_key.'&method=flickr.urls.lookupGroup&url='.$group;
 					$this->execute_query('flickr', $url, 'flickr.urls.lookupGroup');
 					break;
 
