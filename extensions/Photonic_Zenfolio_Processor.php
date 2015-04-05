@@ -24,8 +24,8 @@ class Photonic_Zenfolio_Processor extends Photonic_Processor {
 		}
 
 		//$this->service_url = $protocol.'://api.zenfolio.com/api/1.6/zfapi.asmx';
-		$this->service_url = 'http://api.zenfolio.com/api/1.6/zfapi.asmx';
-		$this->secure_url = 'https://www.zenfolio.com/api/1.6/zfapi.asmx';
+		$this->service_url = 'http://api.zenfolio.com/api/1.8/zfapi.asmx';
+		$this->secure_url = 'https://www.zenfolio.com/api/1.8/zfapi.asmx';
 		$this->unlocked_realms = array();
 	}
 
@@ -243,7 +243,7 @@ class Photonic_Zenfolio_Processor extends Photonic_Processor {
 
 		$this->gallery_index++;
 		$response = $this->make_call($method, $params);
-
+		
 		if (isset($_COOKIE['photonic-zf-keyring'])) {
 			$realms = $this->make_call('KeyringGetUnlockedRealms', array('keyring' => $_COOKIE['photonic-zf-keyring']));
 			if (!empty($realms) && !empty($realms->result)) {
@@ -291,7 +291,7 @@ class Photonic_Zenfolio_Processor extends Photonic_Processor {
 
 		$headers = array();
 		$headers[] = 'Host: www.zenfolio.com';
-		$headers[] = 'X-Zenfolio-User-Agent: '.$this->user_agent;
+		$headers[] = 'User-Agent: '.$this->user_agent;
 		if($this->token) {
 			$headers[] = 'X-Zenfolio-Token: '.$this->token;
 		}

@@ -3,7 +3,7 @@
  * Plugin Name: Photonic Gallery for Flickr, Picasa, SmugMug, 500px, Zenfolio and Instagram
  * Plugin URI: http://aquoid.com/news/plugins/photonic/
  * Description: Extends the native gallery shortcode to support Flickr, Picasa, SmugMug, 500px, Zenfolio and Instagram. JS libraries like Fancybox, Colorbox and PrettyPhoto are supported. The plugin also helps convert a regular WP gallery into a slideshow.
- * Version: 1.47
+ * Version: 1.48
  * Author: Sayontan Sinha
  * Author URI: http://mynethome.net/blog
  * License: GNU General Public License (GPL), v3 (or newer)
@@ -21,7 +21,7 @@ class Photonic {
 	function Photonic() {
 		global $photonic_options, $photonic_setup_options, $photonic_is_ie6;
 		if (!defined('PHOTONIC_VERSION')) {
-			define('PHOTONIC_VERSION', '1.47');
+			define('PHOTONIC_VERSION', '1.48');
 		}
 
 		if (!defined('PHOTONIC_PATH')) {
@@ -135,13 +135,7 @@ class Photonic {
 			wp_enqueue_script('jquery-ui-draggable');
 			wp_enqueue_script('jquery-ui-tabs');
 			wp_enqueue_script('photonic-jscolor', plugins_url('include/scripts/jscolor/jscolor.js', __FILE__));
-
-			if ($wp_version < 3.3) {
-				wp_enqueue_script('photonic-jquery-ui-custom', plugins_url('include/scripts/jquery-ui/jquery-ui-1.8.12.custom.js', __FILE__), array('jquery-ui-core', 'jquery-ui-widget', 'jquery-ui-mouse', 'jquery-ui-position'), $this->version);
-			}
-			else {
-				wp_enqueue_script('jquery-ui-slider');
-			}
+			wp_enqueue_script('jquery-ui-slider');
 
 			wp_enqueue_script('photonic-admin-js', plugins_url('include/scripts/admin.js', __FILE__), array('jquery'), $this->version);
 
