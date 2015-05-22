@@ -1,3 +1,11 @@
+Version 1.49 - 22nd May 2015
+============================
+1.	Security patch - updated PrettyPhoto to latest version
+
+Version 1.48 - 5th Apr 2015
+============================
+1.	Fixed Zenfolio API issues.
+
 Version 1.47 - 16th Mar 2015
 ============================
 1.	Fixed a problem with the Flickr helpers.
